@@ -8,7 +8,12 @@ vision critic on a REAL screenshot** — or it does not ship. No screen graduate
   lotus, dark blob swarm, minimal HUD. Floor for mood, lighting, composition, frog-feel.
 - **Secondary: `docs/refs/VISUAL_REF_01.png`** — rugged pixel variant. If a screen reads
   cleaner/cuter than REF_02, pull it back toward REF_01's grit. REF_02 wins ties.
-- (Ian: drop the two PNGs from chat into `docs/refs/` — critic uses rubric + proxies until then.)
+- Both refs LANDED 2026-07-07 (critic now grades against the real REF_02, not the rubric proxy).
+- **Bonus: `docs/refs/REFERENCE_PACK.png`** — Ian's "MYSTIC SWAMP reference pack" sheet: frog
+  animation frames (idle/tongue/blink/jump), enemy frames (idle/move/hit/defeated), color
+  palette swatches, environment tiles, UI elements, effects, five sword sprites, 34x34 icon
+  set, font sample. Use it as the drawing reference for sprites, icons, and GOAL_PAPERDOLL
+  weapon art.
 
 ## Rubric (/50, screenshot-graded)
 1. **Lighting & atmosphere /10** — bioluminescent glow IS the light source; drifting fog;
