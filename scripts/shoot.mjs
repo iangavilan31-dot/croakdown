@@ -18,7 +18,7 @@ page.on('pageerror', (e) => errors.push(String(e)));
 const state = () => page.evaluate(() => {
   const g = window.__game;
   return {
-    phase: g.phase, wave: g.wave, essence: g.essence,
+    phase: g.phase, paused: g.paused, wave: g.wave, essence: g.essence,
     enemies: g.enemies.length, towers: g.towers.length,
     frogs: g.frogs.map(f => ({ hp: Math.round(f.hp), state: f.state, level: f.level, x: Math.round(f.x), y: Math.round(f.y) })),
     heart: Math.round(g.heartHp), boss: g.bossRef ? { kind: g.bossRef.def.kind, hp: Math.round(g.bossRef.hp), phase: g.bossRef.phase } : null,
@@ -73,8 +73,18 @@ await tap('Space', 600);       // confirm danger 0 -> run (build phase)
 log('run start', await state());
 await shot('04-build');
 
+// pause + settings (VISUAL_BAR must-pass screens)
+await tap('Escape', 450);
+await shot('pause');
+await tap('ArrowDown', 250);
+await tap('Enter', 400);
+await shot('settings');
+await tap('Escape', 250);      // settings -> pause menu
+await tap('Escape', 400);      // pause -> resume build
+log('after pause', await state());
+
 // grow a tower at the nearest node (diegetic channel: walk + hold E)
-await moveTo(448, 600);
+await moveTo(602, 568);
 await hold('KeyE', 1600);
 let s = await state();
 log('after grow', s);
@@ -141,7 +151,7 @@ if (process.argv.includes('--full')) {
     while (s.phase === 'levelup') { await tap('Digit1', 400); s = await state(); }
     if (s.phase === 'shop') { await tap('Digit1', 300); await tap('Enter', 500); s = await state(); }
     // SPEND: grow at empty nodes / attune owned towers until the wallet is thin
-    const nodes = [[448, 600], [832, 600], [384, 240], [896, 240], [256, 440], [1024, 440], [640, 176], [640, 656]];
+    const nodes = [[602, 568], [870, 488], [320, 496], [986, 352], [192, 360], [845, 192], [307, 208], [602, 112]];
     for (const [nx, ny] of nodes) {
       s = await state();
       if (s.phase !== 'build' || s.essence < 25) break;

@@ -6,18 +6,31 @@ let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let duckBus: GainNode | null = null;
 let duckT = 0;
+let sfxVol = 0.5;
 
 export function initAudio() {
   if (ctx) return;
   ctx = new AudioContext({ latencyHint: 'interactive' });
   master = ctx.createGain();
-  master.gain.value = 0.5;
+  master.gain.value = sfxVol;
   duckBus = ctx.createGain();
   duckBus.connect(master);
   master.connect(ctx.destination);
 }
 
 export function resumeAudio() { ctx?.resume(); }
+
+// ---------- player volume (settings screen) ----------
+export function getSfxVolume() { return sfxVol; }
+export function setSfxVolume(v: number) {
+  sfxVol = Math.max(0, Math.min(1, Math.round(v * 10) / 10));
+  if (master) master.gain.value = sfxVol;
+}
+export function getMusicVolume() { return bgmVol; }
+export function setMusicVolume(v: number) {
+  bgmVol = Math.max(0, Math.min(1, Math.round(v * 10) / 10));
+  if (currentBgm) currentBgm.volume = bgmVol;
+}
 
 export function updateAudio(dt: number) {
   if (duckT > 0 && duckBus && ctx) {

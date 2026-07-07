@@ -4,7 +4,8 @@ import { newGame, startRun, updateWave, updateBuild, enterBuild, Game, applyStat
 import { draw, loadAtlas } from './render';
 import { sampleInput, padAnyPressed, padConnected } from './input';
 import { juice, decayJuice, updateParticles, updateFloaters } from './juice';
-import { initAudio, resumeAudio, updateAudio, sfx, playBgm } from './audio';
+import { initAudio, resumeAudio, updateAudio, sfx, playBgm, getMusicVolume, setMusicVolume, getSfxVolume, setSfxVolume } from './audio';
+import { loadSettings, saveSettings } from './settings';
 import { rerollCost } from './sim';
 import { FROGS } from './data';
 
@@ -24,6 +25,7 @@ const g: Game = newGame();
 (window as any).__game = g; // QA hook: headless probes read phase/wave/state
 
 loadAtlas();
+loadSettings();
 
 let audioStarted = false;
 function ensureAudio() {
@@ -48,6 +50,17 @@ function frame(now: number) {
 
   const inputs = sampleInput(g.p2Mode);
   const keysHit = shopKeys.splice(0);
+
+  // pause: Escape freezes the sim during a run (shop keeps Escape = GO)
+  let justPaused = false;
+  if (!g.paused && (g.phase === 'build' || g.phase === 'wave') && keysHit.includes('Escape')) {
+    g.paused = true; g.pauseView = 'menu'; g.pauseSel = 0; justPaused = true; sfx('pick');
+  }
+  if (g.paused) {
+    if (!justPaused) pauseFrame(keysHit);
+    draw(ctx, g, canvas.width, canvas.height);
+    return;
+  }
 
   // hitstop: freeze the sim, keep drawing (juice reads real time for shake decay)
   if (juice.hitstopFrames > 0) {
@@ -197,4 +210,37 @@ function frame(now: number) {
 
   draw(ctx, g, canvas.width, canvas.height);
 }
+
+function pauseFrame(keysHit: string[]) {
+  const up = keysHit.includes('KeyW') || keysHit.includes('ArrowUp');
+  const down = keysHit.includes('KeyS') || keysHit.includes('ArrowDown');
+  const left = keysHit.includes('KeyA') || keysHit.includes('ArrowLeft');
+  const right = keysHit.includes('KeyD') || keysHit.includes('ArrowRight');
+  const confirm = keysHit.includes('Enter') || keysHit.includes('Space');
+  const back = keysHit.includes('Escape');
+
+  if (g.pauseView === 'menu') {
+    if (up) { g.pauseSel = (g.pauseSel + 2) % 3; sfx('cycle'); }
+    if (down) { g.pauseSel = (g.pauseSel + 1) % 3; sfx('cycle'); }
+    if (back) { g.paused = false; sfx('ready'); return; }
+    if (confirm) {
+      if (g.pauseSel === 0) { g.paused = false; sfx('ready'); }
+      else if (g.pauseSel === 1) { g.pauseView = 'settings'; g.settingsSel = 0; sfx('pick'); }
+      else { const fresh = newGame(); Object.assign(g, fresh); (window as any).__game = g; sfx('pick'); }
+    }
+    return;
+  }
+  // settings view
+  if (up) { g.settingsSel = (g.settingsSel + 2) % 3; sfx('cycle'); }
+  if (down) { g.settingsSel = (g.settingsSel + 1) % 3; sfx('cycle'); }
+  const step = right ? 1 : left ? -1 : 0;
+  if (step) {
+    if (g.settingsSel === 0) { setMusicVolume(getMusicVolume() + step * 0.1); sfx('cycle'); }
+    if (g.settingsSel === 1) { setSfxVolume(getSfxVolume() + step * 0.1); sfx('pip'); }
+    if (g.settingsSel === 2) { juice.shakeSlider = Math.max(0, Math.min(1.5, juice.shakeSlider + step * 0.25)); sfx('cycle'); }
+    saveSettings();
+  }
+  if (back || confirm) { g.pauseView = 'menu'; sfx('pick'); }
+}
+
 requestAnimationFrame(frame);

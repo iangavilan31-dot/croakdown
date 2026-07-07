@@ -117,6 +117,9 @@ export interface Game {
   forecast: { mouth: number; kinds: EnemyKind[] }[];
   worldDusk: number;               // 0 = build (day/dusk), 1 = wave (night) — lerped
   screenFlashHint: string;         // one short tag under title moments; '' = none
+  paused: boolean;                 // Escape during build/wave; sim frozen, overlay drawn
+  pauseView: 'menu' | 'settings';
+  pauseSel: number; settingsSel: number;
 }
 
 const ePool = new Pool<Enemy>(() => ({
@@ -148,6 +151,7 @@ export function newGame(): Game {
     titleT: 0, victoryT: 0, gameoverT: 0,
     runStats: { kills: 0, symbiosis: 0, towersGrown: 0, essenceEarned: 0 },
     buildReadyT: 0, forecast: [], worldDusk: 0, screenFlashHint: '',
+    paused: false, pauseView: 'menu', pauseSel: 0, settingsSel: 0,
   };
 }
 

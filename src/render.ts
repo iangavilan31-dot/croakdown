@@ -5,6 +5,7 @@
 import { Game, Frog, Enemy, Tower, ARENA_W, ARENA_H, HEART, loadout } from './game';
 import { TOWERS, FROGS, ROOT_NODES, SPAWN_MOUTHS, ENEMIES, BOSS_CARDS, EnemyKind, TowerKind } from './data';
 import { juice, particles, decals, floaters, shakeOffset } from './juice';
+import { getMusicVolume, getSfxVolume } from './audio';
 import { rerollCost } from './sim';
 
 export const VIEW_W = ARENA_W;
@@ -231,6 +232,7 @@ export function draw(ctx: CanvasRenderingContext2D, g: Game, canvasW: number, ca
   if (g.phase === 'ceremony') drawCeremony(ctx, g);
   if (g.phase === 'gameover') drawEnd(ctx, g, false);
   if (g.phase === 'victory') drawEnd(ctx, g, true);
+  if (g.paused) drawPause(ctx, g);
 
   ctx.restore();
 }
@@ -1037,6 +1039,135 @@ function drawCeremony(ctx: CanvasRenderingContext2D, g: Game) {
       ctx.restore();
     }
   }
+}
+
+// pause — the swamp holds its breath. Sim clock is frozen, so the overlay breathes on
+// real time: hush vignette, drifting fog, fireflies, a sleeping lotus bud above the words.
+function drawPause(ctx: CanvasRenderingContext2D, g: Game) {
+  const t = performance.now() / 1000;
+  const cx = ARENA_W / 2, cy = ARENA_H / 2;
+
+  ctx.fillStyle = 'rgba(4, 8, 6, 0.58)';
+  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  const vig = ctx.createRadialGradient(cx, cy, 200, cx, cy, 820);
+  vig.addColorStop(0, 'rgba(2, 5, 4, 0)');
+  vig.addColorStop(1, 'rgba(2, 5, 4, 0.88)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+
+  // low fog banks drifting through the dark
+  for (let i = 0; i < 3; i++) {
+    const fx = cx + Math.sin(t * 0.11 + i * 2.4) * (320 + i * 90);
+    const fy = cy + 180 + i * 70 + Math.cos(t * 0.07 + i) * 24;
+    const fog = ctx.createRadialGradient(fx, fy, 0, fx, fy, 260 + i * 60);
+    fog.addColorStop(0, 'rgba(140, 180, 165, 0.05)');
+    fog.addColorStop(1, 'rgba(140, 180, 165, 0)');
+    ctx.fillStyle = fog;
+    ctx.beginPath(); ctx.ellipse(fx, fy, 260 + i * 60, 90 + i * 20, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  // fireflies (title language)
+  for (let i = 0; i < 14; i++) {
+    const fx = (Math.sin(i * 132.7 + t * (0.14 + (i % 5) * 0.05)) * 0.5 + 0.5) * ARENA_W;
+    const fy = (Math.cos(i * 87.3 + t * (0.1 + (i % 3) * 0.04)) * 0.5 + 0.5) * ARENA_H;
+    const tw = (Math.sin(t * 2.4 + i * 2) + 1) / 2;
+    dot(ctx, fx, fy, 1.6 + tw * 1.4, `rgba(220, 255, 170, ${0.18 + tw * 0.4})`);
+  }
+
+  // sleeping lotus bud: folded petals, breathing gold core
+  const breathe = (Math.sin(t * 1.4) + 1) / 2;
+  const bx = cx, by = cy - 168;
+  const glow = ctx.createRadialGradient(bx, by, 4, bx, by, 90 + breathe * 26);
+  glow.addColorStop(0, `rgba(255, 235, 180, ${0.28 + breathe * 0.14})`);
+  glow.addColorStop(1, 'rgba(255, 235, 180, 0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath(); ctx.arc(bx, by, 90 + breathe * 26, 0, Math.PI * 2); ctx.fill();
+  for (let i = -2; i <= 2; i++) {
+    const lean = i * 0.34;
+    ctx.save();
+    ctx.translate(bx, by + 26);
+    ctx.rotate(lean);
+    const grad = ctx.createLinearGradient(0, 0, 0, -52);
+    grad.addColorStop(0, 'rgba(255, 200, 215, 0.9)');
+    grad.addColorStop(1, `rgba(255, 235, 180, ${0.65 + breathe * 0.2})`);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(0, -26, 11 - Math.abs(i) * 2, 27 - Math.abs(i) * 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  // its lily pad
+  ctx.fillStyle = 'rgba(74, 110, 78, 0.85)';
+  ctx.beginPath(); ctx.ellipse(bx, by + 54, 40, 12, 0, 0, Math.PI * 2); ctx.fill();
+
+  ctx.textAlign = 'center';
+  if (g.pauseView === 'menu') {
+    ctx.fillStyle = '#f2f7f1';
+    ctx.font = '900 72px Outfit, system-ui, sans-serif';
+    ctx.fillText('PAUSED', cx, cy - 30);
+    const items = ['RESUME', 'SETTINGS', 'QUIT'];
+    for (let i = 0; i < items.length; i++) {
+      const iy = cy + 48 + i * 56;
+      const sel = g.pauseSel === i;
+      if (sel) {
+        const sg = ctx.createRadialGradient(cx, iy - 9, 4, cx, iy - 9, 130);
+        sg.addColorStop(0, 'rgba(255, 217, 138, 0.16)');
+        sg.addColorStop(1, 'rgba(255, 217, 138, 0)');
+        ctx.fillStyle = sg;
+        ctx.beginPath(); ctx.arc(cx, iy - 9, 130, 0, Math.PI * 2); ctx.fill();
+        // lily-pad marker
+        ctx.fillStyle = 'rgba(126, 176, 110, 0.95)';
+        ctx.beginPath(); ctx.ellipse(cx - 108, iy - 9, 14, 8, 0, 0.35, Math.PI * 2 + 0.05); ctx.fill();
+      }
+      ctx.fillStyle = sel ? '#ffd98a' : 'rgba(240, 248, 246, 0.5)';
+      ctx.font = `800 ${sel ? 30 : 27}px Outfit, system-ui, sans-serif`;
+      ctx.fillText(items[i], cx, iy);
+    }
+    ctx.fillStyle = 'rgba(240, 248, 246, 0.32)';
+    ctx.font = '600 14px Outfit, system-ui, sans-serif';
+    ctx.fillText('esc', cx, ARENA_H - 44);
+    return;
+  }
+
+  // settings view
+  ctx.fillStyle = '#f2f7f1';
+  ctx.font = '900 46px Outfit, system-ui, sans-serif';
+  ctx.fillText('SETTINGS', cx, cy - 52);
+  const rows: { label: string; pips: number }[] = [
+    { label: 'MUSIC', pips: Math.round(getMusicVolume() * 10) },
+    { label: 'SOUND', pips: Math.round(getSfxVolume() * 10) },
+    { label: 'SHAKE', pips: Math.round((juice.shakeSlider / 1.5) * 10) },
+  ];
+  for (let i = 0; i < rows.length; i++) {
+    const ry = cy + 16 + i * 62;
+    const sel = g.settingsSel === i;
+    if (sel) {
+      ctx.fillStyle = 'rgba(126, 176, 110, 0.95)';
+      ctx.beginPath(); ctx.ellipse(cx - 268, ry - 8, 13, 7.5, 0, 0.35, Math.PI * 2 + 0.05); ctx.fill();
+    }
+    ctx.fillStyle = sel ? '#ffd98a' : 'rgba(240, 248, 246, 0.55)';
+    ctx.font = '800 26px Outfit, system-ui, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(rows[i].label, cx - 240, ry);
+    for (let p = 0; p < 10; p++) {
+      const px = cx - 20 + p * 28, py = ry - 9;
+      if (p < rows[i].pips) {
+        const pg = ctx.createRadialGradient(px, py, 1, px, py, 12);
+        pg.addColorStop(0, 'rgba(255, 217, 138, 0.95)');
+        pg.addColorStop(1, 'rgba(255, 217, 138, 0)');
+        ctx.fillStyle = pg;
+        ctx.beginPath(); ctx.arc(px, py, 12, 0, Math.PI * 2); ctx.fill();
+        dot(ctx, px, py, 6.5, sel ? '#ffd98a' : 'rgba(255, 217, 138, 0.75)');
+      } else {
+        ctx.strokeStyle = 'rgba(240, 248, 246, 0.22)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(px, py, 6.5, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+    ctx.textAlign = 'center';
+  }
+  ctx.fillStyle = 'rgba(240, 248, 246, 0.32)';
+  ctx.font = '600 14px Outfit, system-ui, sans-serif';
+  ctx.fillText('a d  ·  esc', cx, ARENA_H - 44);
 }
 
 function drawTitle(ctx: CanvasRenderingContext2D, g: Game) {
