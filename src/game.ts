@@ -158,7 +158,7 @@ export function makeFrog(def: FrogDef, idx: number): Frog {
   const stats = baseStats(def);
   return {
     def, idx,
-    x: HEART.x + (idx === 0 ? -70 : 70), y: HEART.y + 60, vx: 0, vy: 0,
+    x: HEART.x + (idx === 0 ? -90 : 90), y: HEART.y + 150, vx: 0, vy: 0,
     hp: stats.hp, maxHp: stats.hp, state: 'alive', reviveProgress: 0,
     dashT: 0, dashCdT: 0, dashDirX: 0, dashDirY: 1, iframes: 0, atkCd: 0, facing: 1,
     stats, items: [], level: 1, xp: 0, pendingPicks: 0,
@@ -192,14 +192,14 @@ export function enterBuild(g: Game, first = false) {
     const mouths = pickMouths(g, Math.min(4, 2 + Math.floor(g.wave / 6)));
     for (const m of mouths) g.forecast.push({ mouth: m, kinds: kinds.slice(0, 3) });
   }
-  if (!first) applyWaveEndRespawn(g.frogs.map(f => ({
-    get state() { return f.state === 'downed' ? 'downed' as const : 'alive' as const },
-    set state(_s) { f.state = 'alive'; },
-    get hp() { return f.hp }, set hp(v: number) { f.hp = v },
-    maxHp: f.maxHp,
-    get reviveProgress() { return f.reviveProgress }, set reviveProgress(v: number) { f.reviveProgress = v },
-  })));
-  for (const f of g.frogs) if (f.state === 'downed') { f.state = 'alive'; f.hp = Math.max(1, Math.round(f.maxHp * 0.5)); }
+  // wave-end safety net: downed frogs return at 50% HP if anyone survived (research co-op spec)
+  if (!first && g.frogs.some(f => f.state === 'alive')) {
+    for (const f of g.frogs) if (f.state === 'downed') {
+      f.state = 'alive';
+      f.hp = Math.max(1, Math.round(f.maxHp * 0.5));
+      f.reviveProgress = 0;
+    }
+  }
 }
 
 function pickMouths(g: Game, n: number): number[] {

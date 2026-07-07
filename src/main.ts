@@ -1,6 +1,6 @@
 // CROAKDOWN boot + loop. Phase routing, hitstop clock, BGM state, input dispatch.
 
-import { newGame, startRun, updateWave, updateBuild, Game, applyStatPick, afterCeremony, openShop, buyCard, rollShop, resetLoadout } from './game';
+import { newGame, startRun, updateWave, updateBuild, enterBuild, Game, applyStatPick, afterCeremony, openShop, buyCard, rollShop, resetLoadout } from './game';
 import { draw, loadAtlas } from './render';
 import { sampleInput, padAnyPressed, padConnected } from './input';
 import { juice, decayJuice, updateParticles, updateFloaters } from './juice';
@@ -145,7 +145,7 @@ function frame(now: number) {
           if (g.essence >= cost) { g.essence -= cost; g.rerolls++; g.shopCards = g.shopCards.filter(c => c.locked && !c.sold); rollShop(g); sfx('cycle'); }
           else sfx('deny');
         }
-        if (k === 'Enter' || k === 'Escape') { g.phase = 'build'; sfx('ready'); }
+        if (k === 'Enter' || k === 'Escape') { enterBuild(g); sfx('ready'); }
       }
       break;
     }
