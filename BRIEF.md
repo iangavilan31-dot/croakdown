@@ -18,8 +18,11 @@ against the MUST-BEAT bar in `GYAT.md`. Under the bar = doesn't ship.
 every major decision.**
 
 ## 2. House identity (non-negotiable)
-UI chrome (menus, shop, cards): chunky white Outfit-style type, light blue #A5D8E8 accents,
-frosted glass, ink text on light. **BANNED (rejected 3×):** neon cyan holo HUD, scanlines,
+UI chrome (menus, shop, cards): chunky Outfit-style type, but the chrome lives IN the painted
+night-swamp per docs/VISUAL_BAR.md (the newer, harder gate): dark swamp-glass panels
+(deep green-black translucent), cream text on dark, warm gold accents, hot pink reserved for
+danger. The old white-frosted/ink-on-light chrome scored 2-3/10 on the VISUAL_BAR cohesion
+axis (2026-07-07 verdicts) and was retired. **BANNED (rejected 3×):** neon cyan holo HUD, scanlines,
 mono microtype, cursive gold slop, generic AI-template feel. In-game world palette is its own:
 swamp-mystic — deep greens, bog purples, black water, glowing spore teal/amber. Spider-punk
 collage/halftone energy lives in EXACTLY ONE place: boss intro cards.

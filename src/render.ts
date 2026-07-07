@@ -713,18 +713,28 @@ function drawFloaters(ctx: CanvasRenderingContext2D) {
 }
 
 // ---------- HUD (≤5 elements, no text labels) ----------
+function heart(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, fill: string) {
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(x, y + s * 0.32);
+  ctx.bezierCurveTo(x, y - s * 0.3, x - s, y - s * 0.3, x - s, y + s * 0.12);
+  ctx.bezierCurveTo(x - s, y + s * 0.62, x - s * 0.42, y + s * 0.84, x, y + s * 1.08);
+  ctx.bezierCurveTo(x + s * 0.42, y + s * 0.84, x + s, y + s * 0.62, x + s, y + s * 0.12);
+  ctx.bezierCurveTo(x + s, y - s * 0.3, x, y - s * 0.3, x, y + s * 0.32);
+  ctx.fill();
+}
+
 function drawHud(ctx: CanvasRenderingContext2D, g: Game) {
-  // frog HP pips (top-left, per player)
+  // frog HP hearts (top-left, per player — pixel-heart language from the refs)
   for (const f of g.frogs) {
     const bx = 24, by = 22 + f.idx * 34;
     dot(ctx, bx, by, 9, P_RIM[f.idx]);
     const pips = 10;
     for (let i = 0; i < pips; i++) {
       const filled = f.hp / f.maxHp > i / pips;
-      ctx.fillStyle = filled ? '#e8f0e0' : 'rgba(255,255,255,0.15)';
-      ctx.beginPath();
-      ctx.roundRect(bx + 16 + i * 15, by - 6, 11, 12, 3);
-      ctx.fill();
+      const hx = bx + 24 + i * 19, hy = by - 5;
+      heart(ctx, hx, hy, 8, filled ? '#ff6b8a' : 'rgba(255,255,255,0.12)');
+      if (filled) dot(ctx, hx - 2.5, hy - 1, 1.8, 'rgba(255,255,255,0.55)');
     }
   }
   // essence (top-right): glowing orb + count (the ONE number allowed)
@@ -740,7 +750,7 @@ function drawHud(ctx: CanvasRenderingContext2D, g: Game) {
     const isBoss = i === 8 || i === 10 || i === 15 || i === 20;
     const done = i < g.wave || (i === g.wave && g.phase !== 'wave');
     const active = i === g.wave && g.phase === 'wave';
-    ctx.fillStyle = active ? UI_BLUE : done ? 'rgba(165, 216, 232, 0.55)' : 'rgba(255,255,255,0.14)';
+    ctx.fillStyle = active ? '#ffd98a' : done ? 'rgba(232, 220, 180, 0.55)' : 'rgba(255,255,255,0.14)';
     ctx.beginPath();
     if (isBoss) { ctx.arc(px, 22, active ? 7 : 5.5, 0, Math.PI * 2); }
     else ctx.arc(px, 22, active ? 5 : 3.2, 0, Math.PI * 2);
@@ -859,15 +869,36 @@ function drawBossCard(ctx: CanvasRenderingContext2D, g: Game) {
   ctx.restore();
 }
 
-// ---------- overlays (house identity: frosted glass, Outfit, #A5D8E8, ink) ----------
-function frosted(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r = 18) {
-  ctx.fillStyle = 'rgba(6, 12, 10, 0.55)';
+// ---------- overlays (VISUAL_BAR chrome: swamp-glass panels living in the painted night) ----------
+// the hush: dim the world, deepen the edges, let a few fireflies drift through the menu
+function hushBackdrop(ctx: CanvasRenderingContext2D) {
+  ctx.fillStyle = 'rgba(4, 9, 7, 0.6)';
   ctx.fillRect(0, 0, ARENA_W, ARENA_H);
-  ctx.fillStyle = 'rgba(240, 248, 246, 0.92)';
+  const vig = ctx.createRadialGradient(ARENA_W / 2, ARENA_H / 2, 240, ARENA_W / 2, ARENA_H / 2, 840);
+  vig.addColorStop(0, 'rgba(2, 5, 4, 0)');
+  vig.addColorStop(1, 'rgba(2, 5, 4, 0.8)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  const t = performance.now() / 1000;
+  for (let i = 0; i < 10; i++) {
+    const fx = (Math.sin(i * 132.7 + t * (0.12 + (i % 5) * 0.04)) * 0.5 + 0.5) * ARENA_W;
+    const fy = (Math.cos(i * 87.3 + t * (0.09 + (i % 3) * 0.03)) * 0.5 + 0.5) * ARENA_H;
+    const tw = (Math.sin(t * 2.2 + i * 2) + 1) / 2;
+    dot(ctx, fx, fy, 1.5 + tw * 1.3, `rgba(220, 255, 170, ${0.15 + tw * 0.35})`);
+  }
+}
+
+function swampPanel(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r = 18) {
+  ctx.fillStyle = 'rgba(8, 18, 14, 0.88)';
   ctx.beginPath(); ctx.roundRect(x, y, w, h, r); ctx.fill();
-  ctx.strokeStyle = 'rgba(165, 216, 232, 0.8)';
+  ctx.strokeStyle = 'rgba(232, 184, 74, 0.55)';
   ctx.lineWidth = 2;
   ctx.stroke();
+}
+
+function frosted(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r = 18) {
+  hushBackdrop(ctx);
+  swampPanel(ctx, x, y, w, h, r);
 }
 
 function drawShop(ctx: CanvasRenderingContext2D, g: Game) {
@@ -877,15 +908,20 @@ function drawShop(ctx: CanvasRenderingContext2D, g: Game) {
   for (let pi = 0; pi < px.length; pi++) {
     const x0 = px[pi], y0 = 120, h = 520;
     if (pi === 0) frosted(ctx, x0, y0, panelW, h);
-    else {
-      ctx.fillStyle = 'rgba(240, 248, 246, 0.92)';
-      ctx.beginPath(); ctx.roundRect(x0, y0, panelW, h, 18); ctx.fill();
-      ctx.strokeStyle = 'rgba(165, 216, 232, 0.8)'; ctx.lineWidth = 2; ctx.stroke();
+    else swampPanel(ctx, x0, y0, panelW, h);
+    // the shopkeeper: your frog, perched mellow on the panel edge
+    const keeper = g.frogs[pi] ?? g.frogs[0];
+    if (keeper) {
+      drawSpriteOr(ctx, `frog_${keeper.def.id}`, x0 + 64, y0 - 26, 84, () => {
+        ctx.save(); ctx.translate(x0 + 64, y0 - 26); ctx.scale(1.6, 1.6); ctx.translate(-(x0 + 64), -(y0 - 26));
+        drawFrogBody(ctx, keeper, x0 + 64, y0 - 26, g.time, false);
+        ctx.restore();
+      });
     }
     // player chip
     dot(ctx, x0 + 28, y0 + 30, 9, P_RIM[pi]);
     // shared essence
-    ctx.fillStyle = INK;
+    ctx.fillStyle = '#f2f7f1';
     ctx.font = '800 30px Outfit, system-ui, sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText(String(g.essence), x0 + panelW - 60, y0 + 40);
@@ -895,61 +931,81 @@ function drawShop(ctx: CanvasRenderingContext2D, g: Game) {
     for (let ci = 0; ci < g.shopCards.length; ci++) {
       const c = g.shopCards[ci];
       const cx = x0 + 24 + ci * (cardW + 4), cy = y0 + 66, ch = 300;
-      ctx.fillStyle = c.sold ? 'rgba(180, 190, 185, 0.4)' : '#ffffff';
+      ctx.fillStyle = c.sold ? 'rgba(14, 24, 19, 0.5)' : 'rgba(18, 34, 27, 0.94)';
       ctx.beginPath(); ctx.roundRect(cx, cy, cardW - 8, ch, 12); ctx.fill();
       const tier = c.item?.tier ?? 1;
-      ctx.strokeStyle = c.sold ? 'rgba(0,0,0,0.1)' : TIER_COLORS[tier - 1];
+      // tier-1 near-white rim reads harsh on dark — mute it; higher tiers keep their color
+      ctx.strokeStyle = c.sold ? 'rgba(255,255,255,0.06)' : tier === 1 ? 'rgba(232, 228, 216, 0.35)' : TIER_COLORS[tier - 1];
       ctx.lineWidth = 3.5;
       ctx.stroke();
       if (c.sold) continue;
-      // icon (procedural until art pass)
-      const iconY = cy + 74;
+      const iconY = cy + 74, iconX = cx + (cardW - 8) / 2;
       if (c.tower) {
-        ctx.strokeStyle = '#3a5c3a'; ctx.lineWidth = 5;
-        ctx.beginPath(); ctx.moveTo(cx + cardW / 2 - 4, iconY + 30); ctx.lineTo(cx + cardW / 2 - 4, iconY - 10); ctx.stroke();
-        dot(ctx, cx + cardW / 2 - 4, iconY - 16, 16, TOWERS[c.tower].tint);
+        const tk = c.tower;
+        // real painted tower sprite from the art pass (t1 = shop preview)
+        drawSpriteOr(ctx, `tower_${tk}_t1`, iconX, iconY, 92, () => {
+          ctx.strokeStyle = '#3a5c3a'; ctx.lineWidth = 5;
+          ctx.beginPath(); ctx.moveTo(iconX, iconY + 30); ctx.lineTo(iconX, iconY - 10); ctx.stroke();
+          dot(ctx, iconX, iconY - 16, 16, TOWERS[tk].tint);
+        });
       } else if (c.item) {
-        dot(ctx, cx + cardW / 2 - 4, iconY, 22, TIER_COLORS[tier - 1]);
-        dot(ctx, cx + cardW / 2 - 4, iconY, 10, 'rgba(255,255,255,0.6)');
+        // no item art yet: a swamp-charm glow orb, tier-tinted, instead of a flat disc
+        const oc = tier === 1 ? '#ffe9b8' : TIER_COLORS[tier - 1];
+        const og = ctx.createRadialGradient(iconX, iconY, 2, iconX, iconY, 34);
+        og.addColorStop(0, oc);
+        og.addColorStop(0.45, `${oc}88`);
+        og.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = og;
+        ctx.beginPath(); ctx.arc(iconX, iconY, 34, 0, Math.PI * 2); ctx.fill();
+        dot(ctx, iconX, iconY, 12, oc);
+        dot(ctx, iconX - 4, iconY - 4, 4, 'rgba(255,255,255,0.8)');
+        // tiny fireflies orbiting the charm
+        for (let s = 0; s < 3; s++) {
+          const a = (performance.now() / 1400 + s * 2.1) % (Math.PI * 2);
+          dot(ctx, iconX + Math.cos(a) * 26, iconY + Math.sin(a) * 18, 1.8, 'rgba(220, 255, 170, 0.7)');
+        }
       }
       // name + ONE tag (the text law)
-      ctx.fillStyle = INK;
+      ctx.fillStyle = '#f2f7f1';
       ctx.font = '800 15px Outfit, system-ui, sans-serif';
       ctx.textAlign = 'center';
       const name = c.tower ? TOWERS[c.tower].name : c.item!.name;
       ctx.fillText(name, cx + (cardW - 8) / 2, cy + 150, cardW - 20);
       ctx.font = '500 12px Outfit, system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(26, 36, 32, 0.65)';
+      ctx.fillStyle = 'rgba(242, 247, 241, 0.6)';
       const tag = c.tower ? TOWERS[c.tower].tag : c.item!.tag;
       ctx.fillText(tag, cx + (cardW - 8) / 2, cy + 170, cardW - 16);
       // price chip
       const afford = g.essence >= c.price;
-      ctx.fillStyle = afford ? '#e8f6ee' : '#f6e8e8';
+      ctx.fillStyle = afford ? 'rgba(232, 184, 74, 0.18)' : 'rgba(224, 120, 138, 0.14)';
       ctx.beginPath(); ctx.roundRect(cx + (cardW - 8) / 2 - 34, cy + ch - 52, 68, 30, 15); ctx.fill();
-      ctx.fillStyle = afford ? '#1f7a4d' : '#a04848';
+      ctx.fillStyle = afford ? '#ffd98a' : '#e0788a';
       ctx.font = '800 17px Outfit, system-ui, sans-serif';
       ctx.fillText(String(c.price), cx + (cardW - 8) / 2, cy + ch - 30);
       // lock pip
-      dot(ctx, cx + cardW - 26, cy + 18, 6, c.locked ? '#e8a04a' : 'rgba(0,0,0,0.12)');
+      dot(ctx, cx + cardW - 26, cy + 18, 6, c.locked ? '#e8a04a' : 'rgba(255,255,255,0.12)');
       // keyboard hint number
-      ctx.fillStyle = 'rgba(26,36,32,0.35)';
+      ctx.fillStyle = 'rgba(242,247,241,0.3)';
       ctx.font = '700 13px Outfit, system-ui, sans-serif';
       ctx.fillText(String(ci + 1), cx + 16, cy + 22);
     }
     // reroll + go
     const rr = rerollCost(g.wave, g.rerolls);
-    ctx.fillStyle = g.essence >= rr ? UI_BLUE : 'rgba(165, 216, 232, 0.4)';
+    const canRR = g.essence >= rr;
+    ctx.fillStyle = 'rgba(18, 34, 27, 0.9)';
     ctx.beginPath(); ctx.roundRect(x0 + 24, y0 + h - 110, 170, 48, 24); ctx.fill();
-    ctx.fillStyle = INK;
+    ctx.strokeStyle = canRR ? 'rgba(232, 184, 74, 0.6)' : 'rgba(232, 184, 74, 0.18)';
+    ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = canRR ? '#ffd98a' : 'rgba(255, 217, 138, 0.35)';
     ctx.font = '800 18px Outfit, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(`R  ·  ${rr}`, x0 + 109, y0 + h - 80);
-    ctx.fillStyle = '#1a2420';
+    ctx.fillStyle = '#ffd98a';
     ctx.beginPath(); ctx.roundRect(x0 + panelW - 194, y0 + h - 110, 170, 48, 24); ctx.fill();
-    ctx.fillStyle = '#f0f8f6';
+    ctx.fillStyle = INK;
     ctx.fillText('GO', x0 + panelW - 109, y0 + h - 80);
     // hints (small, bottom, opt-in glance)
-    ctx.fillStyle = 'rgba(26,36,32,0.4)';
+    ctx.fillStyle = 'rgba(242,247,241,0.35)';
     ctx.font = '500 13px Outfit, system-ui, sans-serif';
     ctx.fillText('1-4 buy · L lock · R reroll · Enter go', x0 + panelW / 2, y0 + h - 26);
     break; // v1: one shared panel (both players buy from it); per-player split when P2 UI lands
@@ -967,18 +1023,18 @@ function drawLevelup(ctx: CanvasRenderingContext2D, g: Game) {
   for (let i = 0; i < choices.length; i++) {
     const c = choices[i];
     const cx = x0 + 30 + i * (cw + 10), cy = y0 + 64;
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = 'rgba(18, 34, 27, 0.94)';
     ctx.beginPath(); ctx.roundRect(cx, cy, cw, 190, 12); ctx.fill();
-    ctx.strokeStyle = UI_BLUE; ctx.lineWidth = 3; ctx.stroke();
+    ctx.strokeStyle = 'rgba(232, 184, 74, 0.5)'; ctx.lineWidth = 3; ctx.stroke();
     dot(ctx, cx + cw / 2, cy + 62, 26, ['#e07a5f', '#81b29a', '#f2cc8f', '#9a8ab8', '#96f0be', '#7da35a', '#e8b84a'][i * 2 % 7]);
-    ctx.fillStyle = INK;
+    ctx.fillStyle = '#f2f7f1';
     ctx.font = '800 22px Outfit, system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(c.name, cx + cw / 2, cy + 122);
     ctx.font = '500 14px Outfit, system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(26,36,32,0.65)';
+    ctx.fillStyle = 'rgba(242,247,241,0.6)';
     ctx.fillText(c.tag, cx + cw / 2, cy + 148);
-    ctx.fillStyle = 'rgba(26,36,32,0.35)';
+    ctx.fillStyle = 'rgba(242,247,241,0.3)';
     ctx.font = '700 14px Outfit, system-ui, sans-serif';
     ctx.fillText(String(i + 1), cx + 18, cy + 24);
   }
@@ -1047,11 +1103,11 @@ function drawPause(ctx: CanvasRenderingContext2D, g: Game) {
   const t = performance.now() / 1000;
   const cx = ARENA_W / 2, cy = ARENA_H / 2;
 
-  ctx.fillStyle = 'rgba(4, 8, 6, 0.58)';
+  ctx.fillStyle = 'rgba(4, 8, 6, 0.74)';
   ctx.fillRect(0, 0, ARENA_W, ARENA_H);
   const vig = ctx.createRadialGradient(cx, cy, 200, cx, cy, 820);
   vig.addColorStop(0, 'rgba(2, 5, 4, 0)');
-  vig.addColorStop(1, 'rgba(2, 5, 4, 0.88)');
+  vig.addColorStop(1, 'rgba(2, 5, 4, 0.92)');
   ctx.fillStyle = vig;
   ctx.fillRect(0, 0, ARENA_W, ARENA_H);
 
@@ -1176,6 +1232,26 @@ function drawTitle(ctx: CanvasRenderingContext2D, g: Game) {
     ctx.drawImage(vista, 0, 0, ARENA_W, ARENA_H);
     ctx.fillStyle = 'rgba(6, 12, 9, 0.28)';
     ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+    // readability lift over the painted vista: the lotus BLOOMS, the frog gets a
+    // backlight halo so its silhouette separates from the reeds, edges fall to night
+    const t = g.time;
+    const bloom = (Math.sin(t * 1.1) + 1) / 2;
+    const lg = ctx.createRadialGradient(465, 545, 10, 465, 545, 220 + bloom * 40);
+    lg.addColorStop(0, `rgba(255, 226, 150, ${0.32 + bloom * 0.12})`);
+    lg.addColorStop(1, 'rgba(255, 226, 150, 0)');
+    ctx.fillStyle = lg;
+    ctx.beginPath(); ctx.arc(465, 545, 220 + bloom * 40, 0, Math.PI * 2); ctx.fill();
+    const fg = ctx.createRadialGradient(875, 530, 60, 875, 530, 300);
+    fg.addColorStop(0, 'rgba(150, 190, 150, 0.16)');
+    fg.addColorStop(0.55, 'rgba(150, 190, 150, 0.07)');
+    fg.addColorStop(1, 'rgba(150, 190, 150, 0)');
+    ctx.fillStyle = fg;
+    ctx.beginPath(); ctx.arc(875, 530, 300, 0, Math.PI * 2); ctx.fill();
+    const vig = ctx.createRadialGradient(ARENA_W / 2, ARENA_H / 2, 300, ARENA_W / 2, ARENA_H / 2, 860);
+    vig.addColorStop(0, 'rgba(2, 5, 4, 0)');
+    vig.addColorStop(1, 'rgba(2, 5, 4, 0.72)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, ARENA_W, ARENA_H);
   } else {
     if (!arenaCanvas) arenaCanvas = buildArena();
     ctx.drawImage(arenaCanvas, 0, 0);
@@ -1211,8 +1287,7 @@ function drawTitle(ctx: CanvasRenderingContext2D, g: Game) {
 function drawFrogPick(ctx: CanvasRenderingContext2D, g: Game) {
   if (!arenaCanvas) arenaCanvas = buildArena();
   ctx.drawImage(arenaCanvas, 0, 0);
-  ctx.fillStyle = 'rgba(6, 12, 9, 0.55)';
-  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  hushBackdrop(ctx);
   const stage = g.frogPickStage; // 0 = P1 frog, 1 = players/P2, 2 = danger
   ctx.fillStyle = '#f2f7f1';
   ctx.font = '900 44px Outfit, system-ui, sans-serif';
@@ -1231,7 +1306,14 @@ function drawFrogPick(ctx: CanvasRenderingContext2D, g: Game) {
       const cx = ARENA_W / 2 + (i - (FROGS.length - 1) / 2) * 300;
       const cy = 420;
       const sel = g.frogPickSel[pi] === i;
-      ctx.fillStyle = sel ? 'rgba(240, 248, 246, 0.95)' : 'rgba(240, 248, 246, 0.25)';
+      if (sel) {
+        const sg = ctx.createRadialGradient(cx, cy, 40, cx, cy, 240);
+        sg.addColorStop(0, 'rgba(255, 217, 138, 0.14)');
+        sg.addColorStop(1, 'rgba(255, 217, 138, 0)');
+        ctx.fillStyle = sg;
+        ctx.beginPath(); ctx.arc(cx, cy, 240, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.fillStyle = sel ? 'rgba(18, 34, 27, 0.95)' : 'rgba(10, 22, 17, 0.55)';
       ctx.beginPath(); ctx.roundRect(cx - 120, cy - 130, 240, 280, 20); ctx.fill();
       if (sel) { ctx.strokeStyle = P_RIM[pi]; ctx.lineWidth = 4; ctx.stroke(); }
       // big frog portrait
@@ -1243,11 +1325,11 @@ function drawFrogPick(ctx: CanvasRenderingContext2D, g: Game) {
         ctx.restore();
       });
       ctx.restore();
-      ctx.fillStyle = sel ? INK : 'rgba(242,247,241,0.9)';
+      ctx.fillStyle = sel ? '#ffd98a' : 'rgba(242,247,241,0.9)';
       ctx.font = '800 24px Outfit, system-ui, sans-serif';
       ctx.fillText(fd.name, cx, cy + 92);
       ctx.font = '500 15px Outfit, system-ui, sans-serif';
-      ctx.fillStyle = sel ? 'rgba(26,36,32,0.65)' : 'rgba(242,247,241,0.6)';
+      ctx.fillStyle = sel ? 'rgba(242,247,241,0.75)' : 'rgba(242,247,241,0.6)';
       ctx.fillText(fd.tag, cx, cy + 118);
     }
   } else {
@@ -1255,7 +1337,7 @@ function drawFrogPick(ctx: CanvasRenderingContext2D, g: Game) {
     for (let i = 0; i <= 3; i++) {
       const cx = ARENA_W / 2 + (i - 1.5) * 110;
       const sel = g.frogPickDanger === i;
-      ctx.fillStyle = sel ? '#e8a04a' : 'rgba(240, 248, 246, 0.25)';
+      ctx.fillStyle = sel ? '#e8a04a' : 'rgba(240, 248, 246, 0.15)';
       ctx.beginPath(); ctx.arc(cx, 380, sel ? 34 : 26, 0, Math.PI * 2); ctx.fill();
       // skull pips for danger
       for (let s = 0; s < i; s++) dot(ctx, cx - (i - 1) * 8 + s * 16, 380, 5, sel ? INK : 'rgba(255,255,255,0.5)');
