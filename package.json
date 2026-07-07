@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite --port 5126 --strictPort",
     "build": "vite build",
-    "test": "node test/sim.test.mjs",
+    "test": "node test/combat.test.mjs",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview --port 5126 --strictPort"
   },

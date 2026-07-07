@@ -1,13 +1,15 @@
-// CROAKDOWN boot + loop. Phase routing, hitstop clock, BGM state, input dispatch.
+// CROAKDOWN boot — fixed 60Hz sim (accumulator), rAF render with interpolation.
+// Phase 1 combat prototype: straight into the pond. Esc pauses (frozen-sim flag),
+// R restarts after death. QA hook: window.__world.
 
-import { newGame, startRun, updateWave, updateBuild, enterBuild, Game, applyStatPick, afterCeremony, openShop, buyCard, rollShop, resetLoadout } from './game';
-import { draw, loadAtlas } from './render';
-import { sampleInput, padAnyPressed, padConnected } from './input';
-import { juice, decayJuice, updateParticles, updateFloaters } from './juice';
-import { initAudio, resumeAudio, updateAudio, sfx, playBgm, getMusicVolume, setMusicVolume, getSfxVolume, setSfxVolume } from './audio';
-import { loadSettings, saveSettings } from './settings';
-import { rerollCost } from './sim';
-import { FROGS } from './data';
+import { createWorld, tickWorld } from './sim/world';
+import type { SimInput, World } from './sim/types';
+import { sampleInput } from './engine/input';
+import { draw, toWorld } from './render/render';
+import { drawPerf, perfEnabled, recordRender, recordSim } from './render/perf';
+import { consumeEvents, decayFeel, feel, updateParticles } from './feel/feel';
+import { initAudio, resumeAudio, updateAudio, playBgm, setSfxVolume } from './engine/audio';
+import { DT } from './data/constants';
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
@@ -21,11 +23,17 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-const g: Game = newGame();
-(window as any).__game = g; // QA hook: headless probes read phase/wave/state
+let world: World = createWorld((Math.random() * 1e9) | 0);
+let paused = false;
+(window as any).__world = world;
+(window as any).__feel = feel;
 
-loadAtlas();
-loadSettings();
+// settings (persisted key survives from the TD era)
+try {
+  const s = JSON.parse(localStorage.getItem('croakdown.settings.v1') ?? '{}');
+  if (typeof s.sfx === 'number') setSfxVolume(s.sfx);
+  if (typeof s.shake === 'number') feel.shakeSlider = Math.max(0, Math.min(1.5, s.shake));
+} catch { /* defaults */ }
 
 let audioStarted = false;
 function ensureAudio() {
@@ -33,214 +41,68 @@ function ensureAudio() {
   audioStarted = true;
   initAudio();
   resumeAudio();
+  playBgm('wave');
 }
-window.addEventListener('pointerdown', ensureAudio, { once: false });
-window.addEventListener('keydown', ensureAudio, { once: false });
-
-// shop keyboard handling needs raw keys (edge events are consumed by sampleInput)
-const shopKeys: string[] = [];
-window.addEventListener('keydown', (e) => { shopKeys.push(e.code); });
+window.addEventListener('pointerdown', ensureAudio);
+window.addEventListener('keydown', ensureAudio);
 
 let last = performance.now();
+let accum = 0;
+let time = 0;
 
 function frame(now: number) {
   requestAnimationFrame(frame);
-  let dt = Math.min(0.05, (now - last) / 1000);
+  const dt = Math.min(0.1, (now - last) / 1000);
   last = now;
+  time += dt;
 
-  const inputs = sampleInput(g.p2Mode);
-  const keysHit = shopKeys.splice(0);
+  const inp = sampleInput(toWorld);
 
-  // pause: Escape freezes the sim during a run (shop keeps Escape = GO)
-  let justPaused = false;
-  if (!g.paused && (g.phase === 'build' || g.phase === 'wave') && keysHit.includes('Escape')) {
-    g.paused = true; g.pauseView = 'menu'; g.pauseSel = 0; justPaused = true; sfx('pick');
-  }
-  if (g.paused) {
-    if (!justPaused) pauseFrame(keysHit);
-    draw(ctx, g, canvas.width, canvas.height);
-    return;
+  if (inp.pauseEdge && !world.gameOver) paused = !paused;
+  if (world.gameOver && inp.restartEdge) {
+    world = createWorld((Math.random() * 1e9) | 0);
+    (window as any).__world = world;
   }
 
-  // hitstop: freeze the sim, keep drawing (juice reads real time for shake decay)
-  if (juice.hitstopFrames > 0) {
-    juice.hitstopFrames--;
-    draw(ctx, g, canvas.width, canvas.height);
-    return;
+  const simInput: SimInput = {
+    mx: inp.mx, my: inp.my,
+    aimX: inp.aimX, aimY: inp.aimY,
+    attackEdge: inp.attackEdge, attackHeld: inp.attackHeld,
+    tongueEdge: inp.tongueEdge, dashEdge: inp.dashEdge,
+  };
+  // right-stick aim gives a direction, not a point — project from the frog
+  if (inp.aimStick) {
+    simInput.aimX = world.frog.x + inp.aimX * 240;
+    simInput.aimY = world.frog.y + inp.aimY * 240;
   }
 
-  g.time += dt;
-  decayJuice(dt);
-  updateParticles(dt);
-  updateFloaters(dt);
-  updateAudio(dt);
-  g.heartFlash = Math.max(0, g.heartFlash - dt);
+  if (!paused) {
+    const t0 = performance.now();
+    accum += dt;
+    let ticks = 0;
+    while (accum >= DT && ticks < 4) {  // spiral-of-death guard
+      tickWorld(world, simInput);
+      accum -= DT;
+      ticks++;
+      // edges must not repeat across catch-up ticks
+      simInput.attackEdge = false;
+      simInput.tongueEdge = false;
+      simInput.dashEdge = false;
+    }
+    if (ticks === 4) accum = 0;
+    recordSim(performance.now() - t0);
 
-  // world dusk lerp (build=0, wave=1) — feat #3 world-state transition
-  const targetDusk = g.phase === 'wave' ? 1 : 0;
-  g.worldDusk += (targetDusk - g.worldDusk) * Math.min(1, dt * 2.5);
-
-  switch (g.phase) {
-    case 'title': {
-      playBgm('menu');
-      g.titleT += dt;
-      if (inputs[0].confirm || inputs[1].confirm || keysHit.includes('Enter')) {
-        g.phase = 'frogpick';
-        g.frogPickStage = 0;
-        sfx('pick');
-      }
-      break;
-    }
-    case 'frogpick': {
-      const stage = g.frogPickStage;
-      const move = (pi: number, dir: number) => {
-        const n = FROGS.length;
-        g.frogPickSel[pi] = (g.frogPickSel[pi] + dir + n) % n;
-        sfx('cycle');
-      };
-      if (stage === 0) {
-        if (keysHit.includes('KeyA') || keysHit.includes('ArrowLeft')) move(0, -1);
-        if (keysHit.includes('KeyD') || keysHit.includes('ArrowRight')) move(0, 1);
-        if (inputs[0].confirm) { g.frogPickStage = 1; sfx('pick'); }
-      } else if (stage === 1) {
-        // P2 join: gamepad button, or Enter for keyboard P2; Space skips (solo)
-        if (padAnyPressed()) { g.players = 2; g.p2Mode = 'pad'; }
-        if (keysHit.includes('Enter')) { g.players = 2; g.p2Mode = 'keys'; }
-        if (g.players === 2) {
-          if (keysHit.includes('ArrowLeft')) move(1, -1);
-          if (keysHit.includes('ArrowRight')) move(1, 1);
-          if (inputs[1].confirm || keysHit.includes('NumpadEnter')) { g.frogPickStage = 2; sfx('pick'); }
-        }
-        if (keysHit.includes('Space')) { g.players = g.players === 2 ? 2 : 1; g.frogPickStage = 2; sfx('pick'); }
-      } else {
-        if (keysHit.includes('KeyA') || keysHit.includes('ArrowLeft')) { g.frogPickDanger = Math.max(0, g.frogPickDanger - 1); sfx('cycle'); }
-        if (keysHit.includes('KeyD') || keysHit.includes('ArrowRight')) { g.frogPickDanger = Math.min(3, g.frogPickDanger + 1); sfx('cycle'); }
-        if (inputs[0].confirm) {
-          resetLoadout();
-          startRun(g);
-          sfx('waveStart');
-        }
-      }
-      break;
-    }
-    case 'build': {
-      playBgm('build');
-      updateBuild(g, dt, inputs);
-      break;
-    }
-    case 'wave': {
-      playBgm(g.bossRef ? (g.wave >= 20 ? 'boss3' : g.wave >= 15 ? 'boss2' : 'boss1') : 'wave');
-      if (g.bossIntroT > 0) {
-        // boss card freeze: world holds its breath (sim paused, card renders)
-        g.bossIntroT -= dt;
-        if (g.bossIntroT <= 0) g.bossIntroKind = null;
-        break;
-      }
-      updateWave(g, dt, inputs);
-      break;
-    }
-    case 'levelup': {
-      const choices = g.levelupChoices[0];
-      if (!choices) { openShop(g); break; }
-      let pick = -1;
-      if (keysHit.includes('Digit1')) pick = 0;
-      if (keysHit.includes('Digit2')) pick = 1;
-      if (keysHit.includes('Digit3')) pick = 2;
-      if (pick >= 0 && choices[pick]) {
-        applyStatPick(g, choices[pick] as any);
-        g.levelupChoices.shift();
-        if (!g.levelupChoices.length) openShop(g);
-      }
-      break;
-    }
-    case 'shop': {
-      playBgm('build');
-      for (const k of keysHit) {
-        if (k === 'Digit1') buyCard(g, 0, 0);
-        if (k === 'Digit2') buyCard(g, 1, 0);
-        if (k === 'Digit3') buyCard(g, 2, 0);
-        if (k === 'Digit4') buyCard(g, 3, 0);
-        if (k === 'KeyL') { const c = g.shopCards[0]; if (c) { c.locked = !c.locked; sfx('cycle'); } }
-        if (k === 'KeyR') {
-          const cost = rerollCost(g.wave, g.rerolls);
-          if (g.essence >= cost) { g.essence -= cost; g.rerolls++; g.shopCards = g.shopCards.filter(c => c.locked && !c.sold); rollShop(g); sfx('cycle'); }
-          else sfx('deny');
-        }
-        if (k === 'Enter' || k === 'Escape') { enterBuild(g); sfx('ready'); }
-      }
-      break;
-    }
-    case 'ceremony': {
-      playBgm('ceremony');
-      g.ceremonyT += dt;
-      if (g.ceremonyT > 2.4 && !g.ceremonyRevealed) {
-        g.ceremonyRevealed = true;
-        sfx('lotusReveal');
-        // the ceremony item is FREE (boss reward) — apply to frog 0's stats via shop path
-        if (g.ceremonyItem) {
-          const f = g.frogs[0];
-          f.items.push(g.ceremonyItem.id);
-          // reuse item application
-          const m = g.ceremonyItem.mod;
-          if (m.dmg) f.stats.dmg += m.dmg;
-          if (m.hp) { f.stats.hp += m.hp; f.maxHp += m.hp; f.hp += m.hp; }
-          if (m.speed) f.stats.speed += m.speed;
-          if (m.rate) f.stats.rate += m.rate;
-          if (m.magnet) f.stats.magnet += m.magnet;
-          if (m.towerDps) f.stats.towerDps += m.towerDps;
-          if (m.essenceGain) f.stats.essenceGain += m.essenceGain;
-        }
-      } else if (g.ceremonyT < 0.1) sfx('lotus');
-      if (g.ceremonyT > 4.2 || (g.ceremonyRevealed && (inputs[0].confirm || keysHit.includes('Enter')))) {
-        afterCeremony(g);
-      }
-      break;
-    }
-    case 'gameover': case 'victory': {
-      if (g.phase === 'gameover') g.gameoverT += dt; else g.victoryT += dt;
-      const t = g.phase === 'gameover' ? g.gameoverT : g.victoryT;
-      if (t > 1.2 && (inputs[0].confirm || keysHit.includes('Enter'))) {
-        const fresh = newGame();
-        Object.assign(g, fresh);
-        (window as any).__game = g;
-      }
-      break;
-    }
+    consumeEvents(world);
+    updateParticles(dt);
+    decayFeel(dt);
+    updateAudio(dt);
   }
 
-  draw(ctx, g, canvas.width, canvas.height);
-}
-
-function pauseFrame(keysHit: string[]) {
-  const up = keysHit.includes('KeyW') || keysHit.includes('ArrowUp');
-  const down = keysHit.includes('KeyS') || keysHit.includes('ArrowDown');
-  const left = keysHit.includes('KeyA') || keysHit.includes('ArrowLeft');
-  const right = keysHit.includes('KeyD') || keysHit.includes('ArrowRight');
-  const confirm = keysHit.includes('Enter') || keysHit.includes('Space');
-  const back = keysHit.includes('Escape');
-
-  if (g.pauseView === 'menu') {
-    if (up) { g.pauseSel = (g.pauseSel + 2) % 3; sfx('cycle'); }
-    if (down) { g.pauseSel = (g.pauseSel + 1) % 3; sfx('cycle'); }
-    if (back) { g.paused = false; sfx('ready'); return; }
-    if (confirm) {
-      if (g.pauseSel === 0) { g.paused = false; sfx('ready'); }
-      else if (g.pauseSel === 1) { g.pauseView = 'settings'; g.settingsSel = 0; sfx('pick'); }
-      else { const fresh = newGame(); Object.assign(g, fresh); (window as any).__game = g; sfx('pick'); }
-    }
-    return;
-  }
-  // settings view
-  if (up) { g.settingsSel = (g.settingsSel + 2) % 3; sfx('cycle'); }
-  if (down) { g.settingsSel = (g.settingsSel + 1) % 3; sfx('cycle'); }
-  const step = right ? 1 : left ? -1 : 0;
-  if (step) {
-    if (g.settingsSel === 0) { setMusicVolume(getMusicVolume() + step * 0.1); sfx('cycle'); }
-    if (g.settingsSel === 1) { setSfxVolume(getSfxVolume() + step * 0.1); sfx('pip'); }
-    if (g.settingsSel === 2) { juice.shakeSlider = Math.max(0, Math.min(1.5, juice.shakeSlider + step * 0.25)); sfx('cycle'); }
-    saveSettings();
-  }
-  if (back || confirm) { g.pauseView = 'menu'; sfx('pick'); }
+  const alpha = paused ? 1 : Math.min(1, accum / DT);
+  const r0 = performance.now();
+  draw(ctx, world, canvas.width, canvas.height, alpha, time, paused);
+  recordRender(performance.now() - r0);
+  if (perfEnabled) drawPerf(ctx, world, canvas.width);
 }
 
 requestAnimationFrame(frame);

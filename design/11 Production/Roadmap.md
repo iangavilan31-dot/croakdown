@@ -8,19 +8,20 @@
 
 Complete interconnected vault, no placeholder pages, every system implementable without guessing. Maintenance is perpetual: decisions land here the session they're made.
 
-## Phase 1 — Combat Prototype (next)
+## Phase 1 — Combat Prototype 🔨 IN PROGRESS (core built 2026-07-07)
 
 **One frog. One stick. One family. A graybox pond.** Nothing else.
 
-- Sim/render split + pools + spatial hash + input service + HitEvent pipeline ([[Technical Architecture]])
-- Frog: hop locomotion, dash-hop, idle life ([[Movement and Controls]])
-- [[Sword Line]] tier-1 stick: full attack anatomy, buffer, cancels, chain, heavy
-- [[Sludge Family]]: Blobbit + Gloopa + Spikeblob with full reaction tiers, mass/impulse/launch/tumble/wall-splat/enemy-collision physics ([[Combat System]])
-- FULL juice stack from day one ([[Game Feel Standards]]) — placeholder art, REAL feel; blood + permanence in
-- [[Giant Tongue]] tier-1 (pull-into-swing must exist in the prototype — it's identity)
-- Headless test suite + `?perf` overlay + worst-case perf test ([[Performance Budget]])
-- TD module deletion per the salvage map; melee praise-mining research pass ([[Design Philosophy]])
-- **GATE: the Swing Test** — see [[Quality Gates]]. If the pond isn't fun, we iterate HERE. Indefinitely.
+- ✅ Sim/render split + pools + spatial hash + input service + HitEvent one-event pipeline ([[Technical Architecture]]) — `src/engine`, `src/sim`
+- ✅ Frog: hop locomotion, dash-hop w/ i-frames, idle life (blink, eye-track, weight) ([[Movement and Controls]])
+- ✅ [[Sword Line]] tier-1 stick: full attack anatomy, 150 ms buffer, dash/chain cancels, 3-hit chain, tap/hold-heavy
+- ✅ [[Sludge Family]]: Blobbit + Gloopa + Spikeblob with reaction tiers + mass/impulse/launch/tumble/**bowling**/wall-splat/crowd-separation physics ([[Combat System]])
+- ✅ FULL juice stack from day one ([[Game Feel Standards]]) — placeholder art, REAL feel; blood + bone + gel **permanence** accumulating; trauma shake; hitstop
+- ✅ [[Giant Tongue]] tier-1 pull-into-swing (identity verb, in the prototype)
+- ✅ Headless suite (23 tests: frame data, buffer/cancel/chain, physics, determinism, 7200-tick soak, cap) + `?perf` overlay ([[Performance Budget]])
+- ✅ TD module deletion per the salvage map; visible-Playwright QA driver rewritten for melee (`scripts/shoot.mjs`)
+- ⏳ **Remaining for the gate**: melee praise-mining research pass; a real play-session feel-tuning loop (the numbers are first-draft `TUNE`); the 3-blind-critic pass on captured clips; Ian's hands-on "again" verdict
+- **GATE: the Swing Test** — see [[Quality Gates]]. Core is proven (perf sim 0.01ms/render 0.18ms, combat + permanence + telegraphs working on a visible page). **Not yet passed**: needs feel-tuning + the critic/Ian verdicts. We iterate HERE until the pond is undeniably fun.
 
 ## Phase 2 — Vertical Slice
 

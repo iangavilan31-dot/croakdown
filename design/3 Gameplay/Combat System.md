@@ -23,7 +23,7 @@ Frame data is authored per attack in `data/weapons.ts` as `{windup, active, foll
 - **Input buffer: 150 ms** `LOCKED` — any attack/dash pressed during a non-cancelable phase queues and fires on the first legal frame. Mashing always feels responded-to
 - **Cancel rules**: recovery cancels into dash (always) and into next chain attack (after `cancelFrom` frame). Active frames never cancel — commitment is the price of weight
 - **Chain combos**: primary weapons chain 3 hits (light-light-finisher). Finisher has bigger numbers, bigger knockback, longer recovery. Chain window 0.6 s `TUNE` after recovery starts; dropped chain resets to hit 1
-- **Hold = heavy**: holding the attack input past 250 ms charges the weapon's heavy variant (own frame data, super-armor on some weapons). Release fires; releasing early fires the light
+- **Hold = heavy** `IMPLEMENTED (Phase 1)`: press begins a shared windup (instant, visible anticipation — taps feel immediate); **releasing before the windup completes commits the light, holding through it upgrades into the heavy** (own frame data, super-armor). This disambiguation is the whole trick: mashing/tapping = instant light chain (correct for a horde survivor), a deliberate hold = the greatsword heavy — one button, zero latency on taps. Verified in `test/combat.test.mjs` ("hold-heavy" + "tap stays light"). Hits resolve on the same tick the windup ends (no handoff frame)
 
 ## Aiming & targeting
 
