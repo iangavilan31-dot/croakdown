@@ -140,8 +140,14 @@ if (process.argv.includes('--full')) {
     if (s.phase === 'ceremony') { await shot('ceremony'); await sleep(4500); s = await state(); }
     while (s.phase === 'levelup') { await tap('Digit1', 400); s = await state(); }
     if (s.phase === 'shop') { await tap('Digit1', 300); await tap('Enter', 500); s = await state(); }
-    // grow/upgrade something when rich
-    if (s.essence > 30) { await moveTo(448, 600); await hold('KeyE', 1600); }
+    // SPEND: grow at empty nodes / attune owned towers until the wallet is thin
+    const nodes = [[448, 600], [832, 600], [384, 240], [896, 240], [256, 440], [1024, 440], [640, 176], [640, 656]];
+    for (const [nx, ny] of nodes) {
+      s = await state();
+      if (s.phase !== 'build' || s.essence < 25) break;
+      await moveTo(nx, ny, 3000);
+      await hold('KeyE', 2000);
+    }
   }
   await shot('11-full-end');
 }

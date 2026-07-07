@@ -142,12 +142,18 @@ export function playBgm(name: BgmName) {
   const cached = bgmCache.get(name);
   if (cached === 'missing') return;
   if (cached) { startTrack(cached); return; }
-  const a = new Audio(BGM_FILES[name]);
-  a.loop = name !== 'ceremony';
-  a.volume = 0;
-  a.addEventListener('canplaythrough', () => { bgmCache.set(name, a); if (currentName === name) startTrack(a); }, { once: true });
-  a.addEventListener('error', () => bgmCache.set(name, 'missing'), { once: true }); // silent until music pass
-  a.load();
+  const tryLoad = (url: string, next?: string) => {
+    const a = new Audio(url);
+    a.loop = name !== 'ceremony';
+    a.volume = 0;
+    a.addEventListener('canplaythrough', () => { bgmCache.set(name, a); if (currentName === name) startTrack(a); }, { once: true });
+    a.addEventListener('error', () => {
+      if (next) tryLoad(next);
+      else bgmCache.set(name, 'missing'); // silent until the music pass lands
+    }, { once: true });
+    a.load();
+  };
+  tryLoad(BGM_FILES[name], BGM_FILES[name].replace('.mp3', '.wav'));
 }
 
 function startTrack(a: HTMLAudioElement) {
