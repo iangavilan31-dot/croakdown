@@ -18,14 +18,44 @@ One place for everything. Never repeat any of this elsewhere — link to it.
 - Path `creative\croakdown` · port **5126** strict · git repo (main) · vault page `entities/croakdown.md`
 - Seatbelt memory: `ObsidianPKM\claude-refs\projects\croakdown\` (DECISIONS / BUGS / SESSION_LOG live there)
 
-## Research (Phase 1)
-- Report: _pending — lands at `ObsidianPKM\research\embodied-tower-defense-2026-07-07.md`_
-- 6 surfaces: fight/build tension · juice canon · shared-screen co-op patterns · pacing/economy math ·
-  hybrid failure modes + web perf ceilings · competitor presentation teardown
+## Research (Phase 1 — DONE, skeptic-gated)
+- **Report:** `ObsidianPKM\research\embodied-tower-defense-2026-07-07.md` (6 researchers + independent
+  skeptic pass; all load-bearing claims verified live, corrections + demotions applied)
+- Headlines: budget ATTENTION not damage · enemy targeting = the master dial · the body pays for
+  the economy · no menus mid-combat · separate "stronger" (stat curve) from "WEIRDER" (enemy-type
+  schedule) · Brotato's own local co-op = the precedent (pooled wallet, next-wave respawn) ·
+  tune for 2P baseline, scale down solo (Robot Entertainment) · cap ~100-150 live enemies, pool
+  everything · Thronefall has NO co-op (false premise killed)
 
-## MUST-BEAT bar (Phase 2)
-_Pending competitor teardown — will be a scored table (Brotato / BTD6 / Thronefall / Vampire
-Survivors on layout·motion·polish·clarity·spectacle) + the explicit feats CROAKDOWN must exceed._
+## MUST-BEAT bar (Phase 2 — researched teardown, GUARDED mode)
+
+Competitor grades (1–10 per axis):
+
+| Axis | Brotato | BTD6 | Thronefall | Vampire Survivors |
+|---|---|---|---|---|
+| Layout | 8 | 7 | **9** | 6 |
+| Motion | 6 | 7 | 8 | 8 |
+| Polish | 7 | **9** | 8 | 5 |
+| Clarity | **9** | 7 | 8 | 5 |
+| Spectacle | 5 | 7 | 6 | **9** |
+| **Total** | 35 | 37 | **39** | 33 |
+
+**The 9 presentation feats CROAKDOWN must match or exceed:**
+1. **Diegetic purchasing** (Thronefall) — cost/spend/refund as one physical verb (coins fly on hold, fly back on release), zero purchase text
+2. **World-space threat forecast** (Thronefall) — next wave shown AT the spawn points, no briefing panel
+3. **Wave transition as world-state change** (Thronefall) — light + music + environment announce phases, never a banner
+4. **One authored reward ceremony** (VS chest) — a full-pause jackpot moment players name as their favorite
+5. **Spectacle that stays readable** (VS) — hundreds of entities, power readable from screen density; illegible chaos banned
+6. **Deadline as a boss** (VS Reaper) — the timer physically arrives
+7. **One-glance item grammar** (Brotato) — icon + tier color + price + green/red deltas, decision <2s/item; menu→run <30s
+8. **Phase-telegraphing boss bar** (BTD6 skulls) — spatial dread, zero warning text
+9. **UI that dodges the action** (BTD6) — contextual panels slide in opposite the selected object
+
+**Cross-cutting law:** information lives in the world (position, silhouette, color, motion, music);
+text only in opt-in hover/hard-pause surfaces. Fits Ian's text-hate exactly.
+
+Full teardown receipts: scratchpad `research-06-competitor-teardown.md` (this session) →
+final home in the vault research report.
 
 ## Brief (Phase 4)
 - `BRIEF.md` — _pending_
