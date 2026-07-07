@@ -26,7 +26,7 @@ export interface EnemyDef {
 }
 
 export const ENEMIES: Record<EnemyKind, EnemyDef> = {
-  sludgeling:   { kind: 'sludgeling', hp: 12, hpPerWave: 5, dmg: 4, dmgPerWave: 0.6, speed: 55, radius: 12, aggro: 'heart', essence: 2, debutWave: 1, tint: '#7ba05e' },
+  sludgeling:   { kind: 'sludgeling', hp: 12, hpPerWave: 5, dmg: 4, dmgPerWave: 0.6, speed: 48, radius: 12, aggro: 'heart', essence: 2, debutWave: 1, tint: '#7ba05e' },
   bogrunner:    { kind: 'bogrunner', hp: 8, hpPerWave: 3.5, dmg: 3, dmgPerWave: 0.5, speed: 95, radius: 10, aggro: 'frog', essence: 2, debutWave: 2, tint: '#9a7ab0' },
   spitter:      { kind: 'spitter', hp: 14, hpPerWave: 5, dmg: 5, dmgPerWave: 0.8, speed: 45, radius: 12, aggro: 'heart', essence: 3, ranged: { range: 220, cooldown: 2.2, projSpeed: 160 }, debutWave: 3, tint: '#adc25e' },
   shellback:    { kind: 'shellback', hp: 40, hpPerWave: 12, dmg: 7, dmgPerWave: 1, speed: 38, radius: 15, aggro: 'heart', essence: 5, armorFront: true, debutWave: 6, tint: '#6a9a9a' },
@@ -59,7 +59,7 @@ export interface TowerDef {
 }
 
 export const TOWERS: Record<TowerKind, TowerDef> = {
-  snaplily:   { kind: 'snaplily', name: 'SNAPLILY', tag: 'bites what comes close', cost: [12, 18, 30], dps: [8, 16, 30], range: [90, 100, 115], fireRate: [1.1, 1.3, 1.6], projSpeed: 0, hp: 60, tier1Unlocked: true, tint: '#7da35a' },
+  snaplily:   { kind: 'snaplily', name: 'SNAPLILY', tag: 'bites what comes close', cost: [12, 18, 30], dps: [11, 20, 34], range: [90, 100, 115], fireRate: [1.1, 1.3, 1.6], projSpeed: 0, hp: 60, tier1Unlocked: true, tint: '#7da35a' },
   sporeshroom:{ kind: 'sporeshroom', name: 'SPORESHROOM', tag: 'lobs bursting spores', cost: [16, 24, 40], dps: [6, 13, 26], range: [180, 200, 230], fireRate: [0.6, 0.7, 0.85], projSpeed: 150, hp: 45, special: 'aoe', tier1Unlocked: true, tint: '#a37da3' },
   thornvine:  { kind: 'thornvine', name: 'THORNVINE', tag: 'lashes through lines', cost: [18, 26, 44], dps: [7, 15, 29], range: [140, 155, 175], fireRate: [0.9, 1.05, 1.25], projSpeed: 260, hp: 55, special: 'pierce', tint: '#5a8a6e' },
   willowisp:  { kind: 'willowisp', name: 'WILL-O-WISP', tag: 'chills the murk', cost: [14, 22, 36], dps: [3, 6, 12], range: [120, 135, 150], fireRate: [1.4, 1.6, 1.9], projSpeed: 200, hp: 40, special: 'slow', tint: '#7ab8c4' },
@@ -69,10 +69,10 @@ export const TOWERS: Record<TowerKind, TowerDef> = {
 
 // ---------- frog heroes ----------
 export interface FrogDef {
-  id: 'warden' | 'sporeback';
+  id: 'warden' | 'sporeback' | 'ribbit';
   name: string; tag: string;
   hp: number; speed: number; dashCd: number;
-  weapon: { dmg: number; rate: number; range: number; projSpeed: number; kind: 'tongue' | 'spit' };
+  weapon: { dmg: number; rate: number; range: number; projSpeed: number; kind: 'tongue' | 'spit' | 'sword'; arc?: number };
   buildDiscount?: number;   // sporeback grows cheaper
   rim: string;              // team-color rim fallback (P-color overrides in co-op)
   tint: string;
@@ -81,6 +81,8 @@ export interface FrogDef {
 export const FROGS: FrogDef[] = [
   { id: 'warden', name: 'THE WARDEN', tag: 'tongue like a whipcrack', hp: 60, speed: 170, dashCd: 1.4, weapon: { dmg: 7, rate: 2.4, range: 150, projSpeed: 0, kind: 'tongue' }, rim: '#e8b84a', tint: '#5a8a4a' },
   { id: 'sporeback', name: 'SPOREBACK', tag: 'grows things cheaper', hp: 75, speed: 150, dashCd: 1.7, weapon: { dmg: 5, rate: 1.8, range: 230, projSpeed: 240, kind: 'spit' }, buildDiscount: 0.8, rim: '#4ac4b8', tint: '#6e5a8a' },
+  // the greatsword fantasy: a sword bigger than the frog, heavy arcs, blood everywhere
+  { id: 'ribbit', name: 'RIBBIT THE RED', tag: 'the sword is bigger than him', hp: 90, speed: 140, dashCd: 1.6, weapon: { dmg: 19, rate: 0.85, range: 105, projSpeed: 0, kind: 'sword', arc: Math.PI * 0.85 }, rim: '#e06050', tint: '#8a5040' },
 ];
 
 // ---------- items (shop; stat mutations) ----------
@@ -144,6 +146,14 @@ export function waveTable(): WaveDef[] {
   }
   return W;
 }
+
+// ---------- boss intro cards (spider-punk ritual — the ONE collage-punk surface) ----------
+export const BOSS_CARDS: Partial<Record<EnemyKind, { name: string; tag: string }>> = {
+  elder_sludge: { name: 'ELDER SLUDGE', tag: "the bog's first hunger" },
+  drowned_stag: { name: 'THE DROWNED STAG', tag: 'what the water kept' },
+  mother_of_moths: { name: 'MOTHER OF MOTHS', tag: 'her dust is a lullaby' },
+  rotting_king: { name: 'THE ROTTING KING', tag: 'the swamp remembers' },
+};
 
 // ---------- arena root nodes (fixed sockets, BRIEF §7.1) ----------
 export interface RootNode { x: number; y: number } // fractions of arena size

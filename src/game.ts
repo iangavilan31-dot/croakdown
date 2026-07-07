@@ -104,6 +104,7 @@ export interface Game {
   levelupFrog: number;
   ceremonyT: number; ceremonyItem: ItemDef | null; ceremonyRevealed: boolean;
   bossRef: Enemy | null;
+  bossIntroT: number; bossIntroKind: EnemyKind | null;
   frogPickSel: number[]; frogPickDanger: number; frogPickStage: number;
   titleT: number;
   victoryT: number; gameoverT: number;
@@ -137,7 +138,7 @@ export function newGame(): Game {
     shopCards: [], rerolls: 0, shopPanel: 0,
     levelupChoices: [], levelupFrog: 0,
     ceremonyT: 0, ceremonyItem: null, ceremonyRevealed: false,
-    bossRef: null,
+    bossRef: null, bossIntroT: 0, bossIntroKind: null,
     frogPickSel: [0, 1], frogPickDanger: 0, frogPickStage: 0,
     titleT: 0, victoryT: 0, gameoverT: 0,
     runStats: { kills: 0, symbiosis: 0, towersGrown: 0, essenceEarned: 0 },
@@ -172,9 +173,9 @@ export function startRun(g: Game) {
   if (g.players === 2) g.frogs.push(makeFrog(FROGS[g.frogPickSel[1]], 1));
   g.danger = g.frogPickDanger;
   g.enemies.length = 0; g.towers.length = 0; g.projectiles.length = 0; g.orbs.length = 0;
-  g.essence = 18;
+  g.essence = 24;
   g.wave = 0;
-  g.heartMax = g.heartHp = 200 + g.danger * 20;
+  g.heartMax = g.heartHp = 300 + g.danger * 30;
   g.runStats = { kills: 0, symbiosis: 0, towersGrown: 0, essenceEarned: 0 };
   enterBuild(g, true);
 }
@@ -371,7 +372,14 @@ function spawnEnemy(g: Game, kind: EnemyKind, elite = false): Enemy | null {
   e.telegraph = 0.9; // ground glyph before activation (~1s, tuned by feel)
   e.isElite = elite;
   g.enemies.push(e);
-  if (def.boss) { g.bossRef = e; sfx('bossIntro'); addTrauma(0.5); }
+  if (def.boss) {
+    g.bossRef = e;
+    // freeze-frame intro card (BRIEF boss ritual; spider-punk surface)
+    g.bossIntroT = 2.2;
+    g.bossIntroKind = def.kind;
+    sfx('bossIntro');
+    addTrauma(0.5);
+  }
   return e;
 }
 
@@ -400,8 +408,10 @@ function killEnemy(g: Game, e: Enemy) {
   e.alive = false;
   g.runStats.kills++;
   addTrauma(e.def.boss ? 0.6 : e.isElite ? 0.25 : 0.06);
-  addDecal(e.x, e.y, e.def.boss ? 'scorch' : g.rng() < 0.5 ? 'bones' : 'stain');
+  addDecal(e.x, e.y, e.def.boss ? 'scorch' : g.rng() < 0.4 ? 'bones' : g.rng() < 0.6 ? 'blood' : 'stain');
   spawnParticles(e.x, e.y, e.def.boss ? 40 : 10, { color: e.def.tint, speed: e.def.boss ? 220 : 120, maxLife: 0.6, size: 4 });
+  // everything bleeds a little; big things bleed a lot (Ian's gore correction)
+  spawnParticles(e.x, e.y, e.def.boss ? 26 : e.isElite ? 12 : 5, { color: '#8c1622', speed: e.def.boss ? 200 : 110, maxLife: 0.5, gravity: 140, size: 3 });
   sfx(e.def.boss ? 'bossDie' : 'kill');
   // symbiosis: mixed frog+tower damage within 1.2s → bonus (golden burst, no text)
   const mixed = g.time - e.hitByFrog < 1.2 && g.time - e.hitByTower < 1.2;
@@ -462,7 +472,9 @@ export function damageFrog(g: Game, f: Frog, dmg: number) {
 }
 
 export function damageHeart(g: Game, dmg: number) {
-  g.heartHp -= dmg;
+  // gnawing the Heartbloom is slower than fighting frogs — leaks are a tax the frog can
+  // still answer, not an instant loss (the scalpel role needs time to work)
+  g.heartHp -= Math.max(1, Math.ceil(dmg * 0.5));
   g.heartFlash = 0.15;
   addTrauma(0.3);
   sfx('heartHit');
@@ -579,6 +591,28 @@ export function updateFrogs(g: Game, dt: number, inputs: import('./input').Playe
             damageEnemy(g, target, f.stats.dmg, 'frog', f.x, f.y);
             spawnParticles(target.x, target.y, 4, { color: '#ffb0c0', speed: 80, maxLife: 0.25 });
             sfx('tongue');
+          } else if (f.def.weapon.kind === 'sword') {
+            // heavy greatsword arc: hits EVERYTHING in the crescent toward the target
+            const swingA = Math.atan2(target.y - f.y, target.x - f.x);
+            const halfArc = (f.def.weapon.arc ?? Math.PI * 0.8) / 2;
+            hash.query(f.x, f.y, f.stats.range, queryBuf);
+            let connected = 0;
+            for (const e of queryBuf) {
+              if (!e.alive || e.telegraph > 0) continue;
+              const d = dist(f.x, f.y, e.x, e.y);
+              if (d > f.stats.range + e.def.radius) continue;
+              let da = Math.atan2(e.y - f.y, e.x - f.x) - swingA;
+              while (da > Math.PI) da -= Math.PI * 2;
+              while (da < -Math.PI) da += Math.PI * 2;
+              if (Math.abs(da) <= halfArc) {
+                damageEnemy(g, e, f.stats.dmg, 'frog', f.x, f.y);
+                // blood gushes away from the swing
+                spawnParticles(e.x, e.y, 7, { color: '#a01c28', speed: 170, maxLife: 0.55, angle: swingA, spread: 1.1, gravity: 120 });
+                connected++;
+              }
+            }
+            if (connected > 0) { addTrauma(0.10 + connected * 0.02); addHitstop(3 + Math.min(4, connected)); }
+            sfx('bite'); // heavy chop layer until the sword SFX pass
           } else {
             fireProjectile(g, f.x, f.y, target.x, target.y, f.stats.dmg, 'frog', f.idx, f.def.weapon.projSpeed, 0, 0, false, '#bde06a');
             sfx('spit');

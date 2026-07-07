@@ -70,7 +70,7 @@ export function updateParticles(dt: number) {
 }
 
 // ---------- permanence decals (bones, torn lilies, scorch) ----------
-export interface Decal { x: number; y: number; kind: 'bones' | 'lily' | 'scorch' | 'stain'; rot: number; scale: number; age: number }
+export interface Decal { x: number; y: number; kind: 'bones' | 'lily' | 'scorch' | 'stain' | 'blood'; rot: number; scale: number; age: number }
 const DECAL_CAP = 200;
 export const decals: Decal[] = [];
 export function addDecal(x: number, y: number, kind: Decal['kind']) {

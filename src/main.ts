@@ -6,6 +6,7 @@ import { sampleInput, padAnyPressed, padConnected } from './input';
 import { juice, decayJuice, updateParticles, updateFloaters } from './juice';
 import { initAudio, resumeAudio, updateAudio, sfx, playBgm } from './audio';
 import { rerollCost } from './sim';
+import { FROGS } from './data';
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
@@ -80,7 +81,8 @@ function frame(now: number) {
     case 'frogpick': {
       const stage = g.frogPickStage;
       const move = (pi: number, dir: number) => {
-        g.frogPickSel[pi] = (g.frogPickSel[pi] + dir + 2) % 2;
+        const n = FROGS.length;
+        g.frogPickSel[pi] = (g.frogPickSel[pi] + dir + n) % n;
         sfx('cycle');
       };
       if (stage === 0) {
@@ -115,6 +117,12 @@ function frame(now: number) {
     }
     case 'wave': {
       playBgm(g.bossRef ? (g.wave >= 20 ? 'boss3' : g.wave >= 15 ? 'boss2' : 'boss1') : 'wave');
+      if (g.bossIntroT > 0) {
+        // boss card freeze: world holds its breath (sim paused, card renders)
+        g.bossIntroT -= dt;
+        if (g.bossIntroT <= 0) g.bossIntroKind = null;
+        break;
+      }
       updateWave(g, dt, inputs);
       break;
     }

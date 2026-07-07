@@ -11,8 +11,26 @@ One place for everything. Never repeat any of this elsewhere — link to it.
   3+ bosses, gpt-image-1 art pass + real soundtrack, 3 blind adversarial critics **≥ 8.5/10**
   against the MUST-BEAT bar below. Under the bar = doesn't ship.
 - **Locked forks** — embodied-TD core (frog fights in arena + plants living towers) ·
-  swamp-mystic chunky 2D (Ollama-pfp/Brotato energy; spider-punk = boss cards only) ·
-  shared-screen 2P first, online-ready design, netcode after v1 clears the bar · mystic, not weed.
+  shared-screen 2P first, online-ready design, netcode after v1 clears the bar · mystic, not weed
+  (no weed jokes/mechanics — smoky ATMOSPHERE is in).
+
+### Goal-lock addendum (Ian live-corrected, 2026-07-07 mid-build — overrides the art fork above)
+- **ART IS A MAIN COMPONENT.** Ian supplied a reference mockup (smug toad on a lily pad,
+  pink tongue-whip splattering a blob-critter, glowing golden lotus, dark glossy water, lurking
+  glowing-eyed blobs, cattails, smoky haze, hearts+wave-skull+essence HUD). He then supplied a
+  **PIXEL version of the same mockup and approved it as final** ("this is okay if it's easier" —
+  and pixel is genuinely better at game scale: crisp 50px sprites, seam-free compositing, crowd
+  readability). **Style locked: high-quality PIXEL art in the mockup's mood** — smoky,
+  cute-but-eerie, NOT kid-friendly; grotesque enemy designs welcome ("eye coming out of his
+  head"). Plan: pixel arena backdrop + dark glowing-eyed critter sprites + ripple rings/fog to
+  sell integration; nearest-neighbor scaling in the renderer. gpt-image-1 generator. Old
+  cute-style art killed + deleted (~$0.30).
+- **Greatsword fantasy:** a frog hero with a sword BIGGER than the frog, hanging low, heavy
+  slashes, blood gushing. Ian: "that's kinda fun, especially if I'm a frog."
+- **Blood/gore feedback:** blood splatter on kills, blood-stain permanence decals.
+- **Secrets + gimmicks:** the game must hide things worth discovering.
+- **Praise-mining law:** researcher scouring 2023-2026 Reddit/Steam/forums for ~50 beloved small
+  details in this genre; incorporate what fits. "That's how I want you to think of a lot of stuff."
 
 ## Infrastructure
 - Path `creative\croakdown` · port **5126** strict · git repo (main) · vault page `entities/croakdown.md`

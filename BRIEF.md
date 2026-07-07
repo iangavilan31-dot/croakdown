@@ -146,11 +146,15 @@ in a mystic swamp. Embodied TD:
 5. All spectacle must stay READABLE (feat #5): silhouette-first enemy design, palette
    discipline (enemies cool/dark, players+essence warm/glowing), VFX layer cap by design.
 
-### 7.5 Art (gpt-image-1 pass — proven GEEKED pipeline)
-- `tools/gen_art.py` pattern (needs `OPENAI_API_KEY`, budget ~$2–4). One style-lock prompt
-  prefix for EVERY asset: "chunky rounded 2D game sprite, thick dark outline, soft cel
-  shading, swamp-mystic palette (deep green, bog purple, glowing teal/amber spores), Brotato
-  / Ollama-mascot energy, readable silhouette, dark transparent background".
+### 7.5 Art (gpt-image-1 pass — proven GEEKED pipeline) — PIVOTED 2026-07-07 (Ian's correction)
+**Art is a MAIN COMPONENT of this game.** Direction: high-quality **pixel art**, dungeon-swamp,
+smoky/hazy atmosphere, NOT kid-friendly. Enemies are grotesque (extra eyes bursting from heads,
+dripping flesh, wrong anatomy — cool-disgusting, not cartoon-cute). Weapons look COOL and heavy.
+Frogs = charismatic but gritty warriors, not mascots.
+- `tools/gen_art.py` (needs `OPENAI_API_KEY`, budget ~$2–4). Style-lock prefix for EVERY asset:
+  "detailed high-quality 2D pixel art game sprite, dark dungeon-swamp fantasy, smoky haze,
+  grimy texture, deep green + bog purple + acid teal + amber ember palette, readable chunky
+  silhouette, subtle rim light, transparent background" — plus per-class grotesque/gritty modifiers.
 - Asset list: 2 frog heroes (multi-pose), ~10 enemies + 3 bosses (+ boss collage intro
   cards in spider-punk style), 6 tower species × 3 growth tiers, Heartbloom (states),
   arena backdrop + props, ~30 item icons, title art.
@@ -173,6 +177,25 @@ in a mystic swamp. Embodied TD:
   (co-op: partner pips). No text labels.
 - Shop/level-up = the ONLY text-dense surfaces, always hard-paused (Brotato law).
 - Contextual panels slide in on the side OPPOSITE the selected object (feat #9).
+
+### 7.5b Greatsword + gore (Ian's correction, 2026-07-07)
+- Third frog hero: **RIBBIT THE RED** — drags a greatsword bigger than his body; slow heavy
+  arc slashes hit everything in the crescent; kills GUSH blood (particle burst + red stain
+  permanence decals). Screen should feel visceral on every swing connect.
+- Blood system: melee kills spray directional blood; blood stains join the permanence decal
+  set (the arena becomes a battlefield record). All kills bleed a little; heavy kills bleed a lot.
+
+### 7.5c Secrets + gimmicks (Ian's correction)
+- The game hides things. v1 secrets (small, real): (1) a golden fly that rarely crosses the
+  arena — tongue it for a burst of essence + a secret stat; (2) attune-dancing on an empty
+  root node for 6s grows a free wild mushroom (PJM dance homage as a discoverable); (3) a
+  hidden 4th danger pip that only appears after hovering the 3rd for 5s (skull cracks open).
+  More from the praise-mining research as they fit.
+
+### 7.5d Praise-mining law
+A researcher mined 2023-2026 Reddit/Steam/forums for beloved small details in this genre
+(~50 receipts). Incorporate every one that fits; this thinking style applies to all future
+decisions on this project — steal what real players demonstrably love.
 
 ### 7.8 Build order (commit each stage green)
 1. Core sim: loop, pools, spatial hash, input (kbd+pad), fixed arena render

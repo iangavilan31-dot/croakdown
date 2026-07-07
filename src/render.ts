@@ -3,7 +3,7 @@
 // in later via the atlas manifest (drawSprite falls back to vectors until then).
 
 import { Game, Frog, Enemy, Tower, ARENA_W, ARENA_H, HEART, loadout } from './game';
-import { TOWERS, FROGS, ROOT_NODES, SPAWN_MOUTHS, EnemyKind, TowerKind } from './data';
+import { TOWERS, FROGS, ROOT_NODES, SPAWN_MOUTHS, ENEMIES, BOSS_CARDS, EnemyKind, TowerKind } from './data';
 import { juice, particles, decals, floaters, shakeOffset } from './juice';
 import { rerollCost } from './sim';
 
@@ -136,6 +136,28 @@ function buildArena(): HTMLCanvasElement {
   return c;
 }
 
+// gameplay anchors drawn OVER the generated backdrop (root sockets + spawn mouths must
+// stay readable wherever the art pass put its scenery)
+function drawArenaAnchors(ctx: CanvasRenderingContext2D, g: Game) {
+  for (const n of ROOT_NODES) {
+    const nx = n.x * ARENA_W, ny = n.y * ARENA_H;
+    const pulse = 0.5 + Math.sin(g.time * 2 + nx) * 0.15;
+    ctx.fillStyle = 'rgba(30, 44, 30, 0.75)';
+    ctx.beginPath(); ctx.ellipse(nx, ny, 26, 18, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = `rgba(150, 220, 160, ${pulse})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.ellipse(nx, ny, 20, 13, 0, 0, Math.PI * 2); ctx.stroke();
+  }
+  for (const m of SPAWN_MOUTHS) {
+    const mx = m.x * ARENA_W, my = m.y * ARENA_H;
+    ctx.fillStyle = 'rgba(6, 8, 6, 0.85)';
+    ctx.beginPath(); ctx.ellipse(mx, my, 46, 32, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(110, 92, 70, 0.55)';
+    ctx.lineWidth = 3.5;
+    ctx.beginPath(); ctx.ellipse(mx, my, 40, 26, 0, 0, Math.PI * 2); ctx.stroke();
+  }
+}
+
 // grounding drop shadow under every live entity
 function shadow(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
   ctx.fillStyle = 'rgba(6, 10, 8, 0.35)';
@@ -148,6 +170,7 @@ function shadow(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) 
 export function draw(ctx: CanvasRenderingContext2D, g: Game, canvasW: number, canvasH: number) {
   if (!arenaCanvas) arenaCanvas = buildArena();
   ctx.save();
+  ctx.imageSmoothingEnabled = false; // pixel art stays crisp (art-bible law)
   // letterbox-fit the arena
   const scale = Math.min(canvasW / VIEW_W, canvasH / VIEW_H);
   const ox = (canvasW - VIEW_W * scale) / 2, oy = (canvasH - VIEW_H * scale) / 2;
@@ -164,8 +187,14 @@ export function draw(ctx: CanvasRenderingContext2D, g: Game, canvasW: number, ca
   if (g.phase === 'title') { drawTitle(ctx, g); ctx.restore(); return; }
   if (g.phase === 'frogpick') { drawFrogPick(ctx, g); ctx.restore(); return; }
 
-  // world
-  ctx.drawImage(arenaCanvas, 0, 0);
+  // world — pixel backdrop from the art pass when it exists, procedural until then
+  const backdrop = sprite('arena_backdrop');
+  if (backdrop) {
+    ctx.drawImage(backdrop, 0, 0, ARENA_W, ARENA_H);
+    drawArenaAnchors(ctx, g);
+  } else {
+    ctx.drawImage(arenaCanvas, 0, 0);
+  }
   drawWorldTint(ctx, g);
   drawDecals(ctx);
   drawHeart(ctx, g);
@@ -179,6 +208,7 @@ export function draw(ctx: CanvasRenderingContext2D, g: Game, canvasW: number, ca
   drawFloaters(ctx);
   drawHud(ctx, g);
   if (g.bossRef) drawBossBar(ctx, g);
+  if (g.bossIntroT > 0 && g.bossIntroKind) drawBossCard(ctx, g);
 
   // overlays
   if (g.phase === 'shop') drawShop(ctx, g);
@@ -410,6 +440,35 @@ function drawFrogs(ctx: CanvasRenderingContext2D, g: Game) {
       }
       continue;
     }
+    // greatsword swing: heavy crescent slash toward the target
+    if (f.attackAnim > 0 && f.def.weapon.kind === 'sword') {
+      const swingA = Math.atan2(f.attackTY - y, f.attackTX - x);
+      const prog = 1 - f.attackAnim; // 0 → 1 over the swing
+      const halfArc = (f.def.weapon.arc ?? Math.PI * 0.8) / 2;
+      const a0 = swingA - halfArc + prog * halfArc * 2;
+      const range = f.stats.range;
+      ctx.save();
+      // crescent smear
+      ctx.fillStyle = `rgba(232, 224, 210, ${0.5 * f.attackAnim})`;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.arc(x, y, range, a0 - 0.5, a0 + 0.22);
+      ctx.closePath();
+      ctx.fill();
+      // the blade itself — huge, reads bigger than the frog
+      ctx.translate(x, y);
+      ctx.rotate(a0);
+      ctx.fillStyle = '#c8ccd2';
+      ctx.strokeStyle = 'rgba(6, 10, 8, 0.9)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(14, -7); ctx.lineTo(range - 8, -3.5); ctx.lineTo(range + 4, 0); ctx.lineTo(range - 8, 3.5); ctx.lineTo(14, 7);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#6a5038';
+      ctx.fillRect(4, -4, 12, 8); // grip
+      ctx.restore();
+    }
     // tongue/attack animation
     if (f.attackAnim > 0 && f.def.weapon.kind === 'tongue') {
       ctx.strokeStyle = '#ff9fb4';
@@ -443,6 +502,22 @@ function drawFrogBody(ctx: CanvasRenderingContext2D, f: Frog, x: number, y: numb
   const hop = downed ? 0 : Math.abs(Math.sin(t * 8 + f.idx)) * (Math.abs(f.vx) + Math.abs(f.vy) > 1 ? 3 : 1);
   const flash = f.hitFlash > 0;
   if (!downed) shadow(ctx, x, y + 6, 16);
+  // Ribbit's idle greatsword: dragged low behind him, bigger than he is
+  if (f.def.weapon.kind === 'sword' && f.attackAnim <= 0) {
+    ctx.save();
+    ctx.translate(x, y - hop);
+    ctx.rotate(f.facing > 0 ? 0.9 : Math.PI - 0.9);
+    ctx.fillStyle = '#b8bcc4';
+    ctx.strokeStyle = 'rgba(6, 10, 8, 0.9)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(10, -6); ctx.lineTo(58, -3); ctx.lineTo(66, 0); ctx.lineTo(58, 3); ctx.lineTo(10, 6);
+    ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#6a5038';
+    ctx.fillRect(2, -3.5, 9, 7);
+    ctx.restore();
+  }
   drawSpriteOr(ctx, `frog_${f.def.id}`, x, y - hop, 52, () => {
     // team rim
     ctx.strokeStyle = P_RIM[f.idx];
@@ -583,6 +658,14 @@ function drawDecals(ctx: CanvasRenderingContext2D) {
     } else if (d.kind === 'scorch') {
       ctx.fillStyle = 'rgba(20, 16, 12, 0.8)';
       ctx.beginPath(); ctx.ellipse(0, 0, 22, 14, 0, 0, Math.PI * 2); ctx.fill();
+    } else if (d.kind === 'blood') {
+      ctx.fillStyle = 'rgba(120, 18, 30, 0.55)';
+      ctx.beginPath(); ctx.ellipse(0, 0, 11, 7, 0, 0, Math.PI * 2); ctx.fill();
+      for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.ellipse(6 + i * 5, (i % 2 ? 3 : -3) + i, 3.5 - i * 0.6, 2.4 - i * 0.4, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
     } else {
       ctx.fillStyle = 'rgba(40, 55, 40, 0.6)';
       ctx.beginPath(); ctx.ellipse(0, 0, 9, 6, 0, 0, Math.PI * 2); ctx.fill();
@@ -678,6 +761,85 @@ function drawBossBar(ctx: CanvasRenderingContext2D, g: Game) {
     ctx.fillStyle = passed ? 'rgba(0,0,0,0.2)' : '#1a2420';
     ctx.beginPath(); ctx.arc(px - 2, y0 - 13, 1.4, 0, Math.PI * 2); ctx.arc(px + 2, y0 - 13, 1.4, 0, Math.PI * 2); ctx.fill();
   }
+}
+
+// boss intro card — the ONE spider-punk collage surface (BRIEF §2)
+function drawBossCard(ctx: CanvasRenderingContext2D, g: Game) {
+  const kind = g.bossIntroKind!;
+  const card = BOSS_CARDS[kind];
+  const t = 2.2 - g.bossIntroT; // 0 → 2.2
+  const slam = Math.min(1, t * 5); // card slams in fast
+  const out = g.bossIntroT < 0.25 ? g.bossIntroT / 0.25 : 1; // rip out at the end
+  ctx.save();
+  ctx.globalAlpha = out;
+  ctx.fillStyle = `rgba(4, 6, 5, ${0.72 * out})`;
+  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  const cx = ARENA_W / 2, cy = ARENA_H / 2 - 20;
+  ctx.translate(cx, cy);
+  ctx.rotate((1 - slam) * 0.25 - 0.035);
+  ctx.scale(0.8 + slam * 0.2, 0.8 + slam * 0.2);
+  // anarchic starburst
+  ctx.fillStyle = '#e8a04a';
+  ctx.beginPath();
+  for (let i = 0; i < 24; i++) {
+    const a = (i / 24) * Math.PI * 2;
+    const r = i % 2 ? 210 : 330 + Math.sin(i * 7.3) * 40;
+    ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r * 0.7);
+  }
+  ctx.closePath();
+  ctx.fill();
+  // torn-paper slab
+  ctx.fillStyle = '#16201a';
+  ctx.beginPath();
+  const w = 560, h = 300;
+  let seed = 7;
+  const jag = () => { seed = (seed * 16807) % 2147483647; return (seed / 2147483647 - 0.5) * 26; };
+  ctx.moveTo(-w / 2 + jag(), -h / 2 + jag());
+  for (let i = 1; i <= 6; i++) ctx.lineTo(-w / 2 + (w * i) / 6 + jag(), -h / 2 + jag());
+  for (let i = 1; i <= 3; i++) ctx.lineTo(w / 2 + jag(), -h / 2 + (h * i) / 3 + jag());
+  for (let i = 1; i <= 6; i++) ctx.lineTo(w / 2 - (w * i) / 6 + jag(), h / 2 + jag());
+  for (let i = 1; i <= 3; i++) ctx.lineTo(-w / 2 + jag(), h / 2 - (h * i) / 3 + jag());
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#efe8da';
+  ctx.lineWidth = 5;
+  ctx.stroke();
+  // halftone dots
+  ctx.fillStyle = 'rgba(232, 160, 74, 0.28)';
+  for (let yy = -h / 2 + 16; yy < h / 2; yy += 17) for (let xx = -w / 2 + 16; xx < w / 2; xx += 17) {
+    const rr = 1.4 + ((xx + yy * 3) % 29 + 29) % 29 / 29 * 2.4;
+    ctx.beginPath(); ctx.arc(xx, yy, rr, 0, Math.PI * 2); ctx.fill();
+  }
+  // portrait: card art sprite if the art pass landed, else the boss vector, huge
+  const img = sprites.get(`card_${kind}`);
+  if (img) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(-w / 2 + 10, -h / 2 + 10, w - 20, h - 20); ctx.clip();
+    ctx.globalAlpha = 0.85 * out;
+    ctx.drawImage(img, -w / 2, -h / 2 - 60, w, (w / 3) * 2);
+    ctx.restore();
+    ctx.globalAlpha = out;
+  } else {
+    const def = ENEMIES[kind];
+    ctx.save();
+    ctx.scale(2.6, 2.6);
+    drawEnemyVector(ctx, kind, 0, -14, def.radius, 0, 0.1, g.time);
+    ctx.restore();
+  }
+  // name + ONE tag (text law) — chunky ransom energy
+  if (card) {
+    ctx.fillStyle = '#f2f7f1';
+    ctx.font = '900 54px Outfit, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.save();
+    ctx.rotate(-0.02);
+    ctx.fillText(card.name, 0, h / 2 - 44);
+    ctx.restore();
+    ctx.font = '600 20px Outfit, system-ui, sans-serif';
+    ctx.fillStyle = '#e8a04a';
+    ctx.fillText(card.tag, 0, h / 2 - 14);
+  }
+  ctx.restore();
 }
 
 // ---------- overlays (house identity: frosted glass, Outfit, #A5D8E8, ink) ----------
