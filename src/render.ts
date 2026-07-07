@@ -240,7 +240,14 @@ export function draw(ctx: CanvasRenderingContext2D, g: Game, canvasW: number, ca
 // world-state lighting: build = warm dusk, wave = cold night (feat #3, no banners)
 function drawWorldTint(ctx: CanvasRenderingContext2D, g: Game) {
   const d = g.worldDusk; // 0 build → 1 wave
-  ctx.fillStyle = `rgba(${Math.round(60 - d * 45)}, ${Math.round(42 - d * 26)}, ${Math.round(10 + d * 40)}, ${0.10 + d * 0.10})`;
+  // night is deep teal-green (REF_02), never blue-purple; build keeps a warm dusk
+  ctx.fillStyle = `rgba(${Math.round(60 - d * 52)}, ${Math.round(42 - d * 6)}, ${Math.round(10 + d * 20)}, ${0.10 + d * 0.08})`;
+  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  // lighting depth: the heartbloom holds the center, edges fall to night
+  const vig = ctx.createRadialGradient(ARENA_W / 2, ARENA_H / 2, 260, ARENA_W / 2, ARENA_H / 2, 880);
+  vig.addColorStop(0, 'rgba(2, 6, 5, 0)');
+  vig.addColorStop(1, `rgba(2, 6, 5, ${0.28 + d * 0.14})`);
+  ctx.fillStyle = vig;
   ctx.fillRect(0, 0, ARENA_W, ARENA_H);
 }
 
@@ -311,9 +318,9 @@ function drawEnemies(ctx: CanvasRenderingContext2D, g: Game) {
   for (const e of g.enemies) {
     if (!e.alive) continue;
     if (e.telegraph > 0) {
-      // ground glyph telegraph (research: Brotato red X)
+      // ground glyph telegraph — hot pink, the reserved threat accent
       const a = 1 - e.telegraph / 0.9;
-      ctx.strokeStyle = `rgba(255, 80, 60, ${0.35 + a * 0.5})`;
+      ctx.strokeStyle = `rgba(255, 90, 150, ${0.35 + a * 0.5})`;
       ctx.lineWidth = 3.5;
       const r = 12 + a * 6;
       ctx.beginPath();
@@ -331,6 +338,20 @@ function drawEnemies(ctx: CanvasRenderingContext2D, g: Game) {
     drawSpriteOr(ctx, `enemy_${e.def.kind}`, x, y, r * 3.4, () => {
       drawEnemyVector(ctx, e.def.kind, x, y, r, e.hitFlash, wob, g.time);
     });
+    // glowing eyes punch through the murk (readability law: every threat reads instantly)
+    if (r <= 18 && !e.def.boss) {
+      const blink = Math.sin(g.time * 2.6 + e.x * 0.09 + e.y * 0.07) > -0.88 ? 1 : 0.15;
+      const ey = y - r * 0.18;
+      for (const s of [-1, 1]) {
+        const ex = x + s * r * 0.36;
+        const eg = ctx.createRadialGradient(ex, ey, 0.5, ex, ey, 6.5);
+        eg.addColorStop(0, `rgba(255, 120, 150, ${0.85 * blink})`);
+        eg.addColorStop(1, 'rgba(255, 120, 150, 0)');
+        ctx.fillStyle = eg;
+        ctx.beginPath(); ctx.arc(ex, ey, 6.5, 0, Math.PI * 2); ctx.fill();
+        dot(ctx, ex, ey, 2, `rgba(255, 170, 185, ${blink})`);
+      }
+    }
     if (e.isElite) {
       ctx.strokeStyle = '#e8a04a';
       ctx.lineWidth = 2.5;
@@ -535,6 +556,12 @@ function drawFrogBody(ctx: CanvasRenderingContext2D, f: Frog, x: number, y: numb
     ctx.fillRect(2, -3.5, 9, 7);
     ctx.restore();
   }
+  // lantern under-glow: the frog carries a little warmth through the night
+  const fgGlow = ctx.createRadialGradient(x, y - hop, 4, x, y - hop, 44);
+  fgGlow.addColorStop(0, 'rgba(255, 224, 150, 0.16)');
+  fgGlow.addColorStop(1, 'rgba(255, 224, 150, 0)');
+  ctx.fillStyle = fgGlow;
+  ctx.beginPath(); ctx.arc(x, y - hop, 44, 0, Math.PI * 2); ctx.fill();
   drawSpriteOr(ctx, `frog_${f.def.id}`, x, y - hop, 52, () => {
     // team rim
     ctx.strokeStyle = P_RIM[f.idx];
@@ -1184,7 +1211,12 @@ function drawPause(ctx: CanvasRenderingContext2D, g: Game) {
     return;
   }
 
-  // settings view
+  // settings view — a warm pool of light holds the rows
+  const sg2 = ctx.createRadialGradient(cx, cy + 30, 40, cx, cy + 30, 360);
+  sg2.addColorStop(0, 'rgba(255, 226, 150, 0.10)');
+  sg2.addColorStop(1, 'rgba(255, 226, 150, 0)');
+  ctx.fillStyle = sg2;
+  ctx.beginPath(); ctx.arc(cx, cy + 30, 360, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#f2f7f1';
   ctx.font = '900 46px Outfit, system-ui, sans-serif';
   ctx.fillText('SETTINGS', cx, cy - 52);
@@ -1286,7 +1318,9 @@ function drawTitle(ctx: CanvasRenderingContext2D, g: Game) {
 
 function drawFrogPick(ctx: CanvasRenderingContext2D, g: Game) {
   if (!arenaCanvas) arenaCanvas = buildArena();
-  ctx.drawImage(arenaCanvas, 0, 0);
+  const paintedArena = sprite('arena_backdrop');
+  if (paintedArena) ctx.drawImage(paintedArena, 0, 0, ARENA_W, ARENA_H);
+  else ctx.drawImage(arenaCanvas, 0, 0);
   hushBackdrop(ctx);
   const stage = g.frogPickStage; // 0 = P1 frog, 1 = players/P2, 2 = danger
   ctx.fillStyle = '#f2f7f1';
