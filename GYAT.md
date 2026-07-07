@@ -57,8 +57,11 @@ text only in opt-in hover/hard-pause surfaces. Fits Ian's text-hate exactly.
 Full teardown receipts: scratchpad `research-06-competitor-teardown.md` (this session) →
 final home in the vault research report.
 
-## Brief (Phase 4)
-- `BRIEF.md` — _pending_
+## Brief (Phase 4 — DONE)
+- `BRIEF.md` — compiled 2026-07-07, research-fed. Stack locked: raw Canvas 2D + TS + Vite, no engine.
+- **Stop-hook condition (the /goal):** CROAKDOWN is done only when a 2P shared-screen co-op run
+  works end-to-end on :5126 with 20+ waves, 3 bosses, generated art + real soundtrack wired, and
+  `docs/GRADES.md` shows 3 blind critics ≥ 8.5/10 vs the MUST-BEAT bar. Anything less → keep building.
 
 ## Decisions (running)
 - 2026-07-07 · Name CROAKDOWN, port 5126, Vite+TS scaffold; renderer locked in BRIEF.md after perf research.
