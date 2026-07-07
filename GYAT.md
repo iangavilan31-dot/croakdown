@@ -2,7 +2,16 @@
 
 One place for everything. Never repeat any of this elsewhere — link to it.
 
-## Goal-lock (confirmed by Ian, 2026-07-07 — GUARDED mode, one gate, no more questions)
+> ## ⚠ PIVOT (2026-07-07 eve, re-confirmed with the master directive): TOWERS ARE DEAD.
+> CROAKDOWN is a **premium 2P co-op MELEE horde survivor**. Authority chain now:
+> Ian live > `docs/VISION.md` (verbatim pivot intent) > **`design/` — the design bible**
+> (41-page Obsidian vault, junctioned at `ObsidianPKM\Croakdown`, start at
+> `design/00 START HERE.md`) > this file. The TD goal-lock below is RETIRED and kept
+> only as history; the research/MUST-BEAT sections below still bind where they aren't
+> tower-specific. Current phase + next steps: `design/11 Production/Roadmap.md`
+> (Phase 0 bible DONE → Phase 1 combat prototype next, gated by the Swing Test).
+
+## RETIRED goal-lock (TD era — superseded by the pivot above)
 - **GOAL** — a co-op game with *real* production value (art + music that don't feel AI-slop)
   fusing Brotato's feel with tower-defense brains in a swampy-mystic frog world. The outcome:
   a game Ian would genuinely play with a friend and be proud to show.
@@ -100,6 +109,7 @@ final home in the vault research report.
 - none yet
 
 ## Next
-1. Collect 6 research agents → skeptic gate → land vault report
-2. Distill MUST-BEAT bar into this file
-3. Compile BRIEF.md → fire-and-forget build → /lookit + 3 blind critics
+1. ~~Research + bar + brief + TD build~~ done, then superseded by the pivot
+2. **Phase 1 — Combat Prototype** per `design/11 Production/Roadmap.md`: one frog, one
+   stick, sludge family, graybox pond, full juice, HitEvent pipeline, headless tests.
+   Gate = the Swing Test (`design/11 Production/Quality Gates.md`). No content until it passes.

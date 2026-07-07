@@ -1,5 +1,13 @@
 # BRIEF.md — CROAKDOWN autonomous build brief
-_Compiled 2026-07-07 by /gyat (research-fed, skeptic-gated). Goal-lock confirmed by Ian._
+
+> ## ⚠ SUPERSEDED (2026-07-07 eve): the TD design below is DEAD.
+> The pivot (`docs/VISION.md`) + master directive replaced this brief with the design
+> bible at `design/` (start: `design/00 START HERE.md`). Build from the bible, not from
+> §7 below. Still-valid material (juice numbers, co-op spec, shop grammar, perf laws,
+> autonomy/QA contracts §2–§6) has been folded into the bible's pages. Kept for history
+> and salvage reference only.
+
+_Compiled 2026-07-07 by /gyat (research-fed, skeptic-gated). Goal-lock confirmed by Ian — later retired by the pivot._
 
 ## 1. GOAL / NON-GOALS / DONE-BAR
 
