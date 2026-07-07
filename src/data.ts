@@ -157,11 +157,12 @@ export const BOSS_CARDS: Partial<Record<EnemyKind, { name: string; tag: string }
 
 // ---------- arena root nodes (fixed sockets, BRIEF §7.1) ----------
 export interface RootNode { x: number; y: number } // fractions of arena size
+// positions match the 8 painted stumps in public/art/arena_backdrop.png — the stumps ARE the sockets
 export const ROOT_NODES: RootNode[] = [
-  { x: 0.30, y: 0.30 }, { x: 0.70, y: 0.30 },
-  { x: 0.20, y: 0.55 }, { x: 0.80, y: 0.55 },
-  { x: 0.35, y: 0.75 }, { x: 0.65, y: 0.75 },
-  { x: 0.50, y: 0.22 }, { x: 0.50, y: 0.82 },
+  { x: 0.47, y: 0.14 }, { x: 0.24, y: 0.26 },
+  { x: 0.66, y: 0.24 }, { x: 0.15, y: 0.45 },
+  { x: 0.77, y: 0.44 }, { x: 0.25, y: 0.62 },
+  { x: 0.68, y: 0.61 }, { x: 0.47, y: 0.71 },
 ];
 
 // spawn mouths (edges of the arena where enemies enter; forecast glyphs live here)

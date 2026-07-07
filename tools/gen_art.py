@@ -44,9 +44,9 @@ ASSETS: dict[str, tuple[str, str, str]] = {
     "frog_ribbit": (f"battle-scarred red-brown toad knight dragging an enormous rusted greatsword twice its size, low stance, grim heavy-lidded stare, facing right, {STYLE}", "medium", "1024x1024"),
     # basic enemies — dark lurker blobs with glowing eyes (the mockup's critters)
     "enemy_sludgeling": (f"{CRITTER} dripping wet moss clumps, two glowing sickly pink eyes, {STYLE}", "low", "1024x1024"),
-    "enemy_bogrunner": (f"{CRITTER} lean and darting mid-sprint, one big glowing orange eye, spindly legs, {STYLE}", "low", "1024x1024"),
+    "enemy_bogrunner": (f"lean darting swamp imp creature caught mid-sprint, hunched forward, long spindly legs, slick dark purple hide, one large glowing orange eye, {STYLE}", "low", "1024x1024"),
     "enemy_spitter": (f"{CRITTER} bloated with a fleshy tube snout aiming up, glowing green throat sac, {STYLE}", "low", "1024x1024"),
-    "enemy_shellback": (f"{CRITTER} heavy cracked snail-turtle shell armor, eyes glowing through the crack, barnacles, {STYLE}", "low", "1024x1024"),
+    "enemy_shellback": (f"squat armored swamp turtle-beetle, massive cracked stone-like domed shell covering its whole body, tiny glowing teal eyes peeking from under the shell rim, moss and barnacles on the shell, {STYLE}", "low", "1024x1024"),
     "enemy_broodmother": (f"grotesque swollen egg-sac toad matriarch, translucent belly full of glowing young, too many eyes, {STYLE}", "medium", "1024x1024"),
     "enemy_broodling": (f"{CRITTER} tiny pink hatchling with one oversized glowing eye, {STYLE}", "low", "1024x1024"),
     "enemy_dragonfly": (f"eerie dragonfly with tattered ghost-lit wings and a needle body, glowing cyan compound eyes, {STYLE}", "low", "1024x1024"),
@@ -117,7 +117,7 @@ def generate(keys: list[str]) -> None:
                     prompt=prompt,
                     size=size,
                     quality=quality,
-                    background="opaque" if key == "title_vista" or key.startswith("card_") else "transparent",
+                    background="opaque" if key in ("title_vista", "arena_backdrop") or key.startswith("card_") else "transparent",
                     n=1,
                 )
                 dest.write_bytes(base64.b64decode(r.data[0].b64_json))
@@ -133,7 +133,7 @@ def downscale() -> None:
     """Shrink sprites for load time; cards/title stay full-size."""
     from PIL import Image
     for p in OUT.glob("*.png"):
-        if p.stem.startswith(("card_", "title_")):
+        if p.stem.startswith(("card_", "title_", "arena_")):
             continue
         img = Image.open(p)
         if img.width > 320:

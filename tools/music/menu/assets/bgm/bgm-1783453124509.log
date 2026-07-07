@@ -2,3 +2,4 @@ C:\Users\gamer\AppData\Roaming\Python\Python311\site-packages\huggingface_hub\fi
 To support symlinks on Windows, you either need to activate Developer Mode or to run Python as an administrator. In order to activate developer mode, see this article: https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development
   warnings.warn(message)
 [musicgen] seed dur=28.00s tokens=1400
+[musicgen] wrote C:\Projects with Code\creative\croakdown\tools\music\menu\assets\bgm\track.wav samples=960000 sr=32000

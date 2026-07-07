@@ -139,22 +139,23 @@ function buildArena(): HTMLCanvasElement {
 // gameplay anchors drawn OVER the generated backdrop (root sockets + spawn mouths must
 // stay readable wherever the art pass put its scenery)
 function drawArenaAnchors(ctx: CanvasRenderingContext2D, g: Game) {
-  for (const n of ROOT_NODES) {
-    const nx = n.x * ARENA_W, ny = n.y * ARENA_H;
-    const pulse = 0.5 + Math.sin(g.time * 2 + nx) * 0.15;
-    ctx.fillStyle = 'rgba(30, 44, 30, 0.75)';
-    ctx.beginPath(); ctx.ellipse(nx, ny, 26, 18, 0, 0, Math.PI * 2); ctx.fill();
+  // the backdrop's painted stumps are the sockets — just a soft breathing ring on each empty one
+  for (let i = 0; i < ROOT_NODES.length; i++) {
+    if (g.towers.some(t => t.node === i)) continue;
+    const nx = ROOT_NODES[i].x * ARENA_W, ny = ROOT_NODES[i].y * ARENA_H;
+    const pulse = 0.30 + Math.sin(g.time * 2 + nx) * 0.14;
     ctx.strokeStyle = `rgba(150, 220, 160, ${pulse})`;
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.ellipse(nx, ny, 20, 13, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.ellipse(nx, ny, 26, 17, 0, 0, Math.PI * 2); ctx.stroke();
   }
+  // spawn mouths: subtle dark burrows at the edges (gameplay anchor over the painting)
   for (const m of SPAWN_MOUTHS) {
     const mx = m.x * ARENA_W, my = m.y * ARENA_H;
-    ctx.fillStyle = 'rgba(6, 8, 6, 0.85)';
-    ctx.beginPath(); ctx.ellipse(mx, my, 46, 32, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(110, 92, 70, 0.55)';
-    ctx.lineWidth = 3.5;
-    ctx.beginPath(); ctx.ellipse(mx, my, 40, 26, 0, 0, Math.PI * 2); ctx.stroke();
+    const grad = ctx.createRadialGradient(mx, my, 4, mx, my, 44);
+    grad.addColorStop(0, 'rgba(4, 6, 4, 0.85)');
+    grad.addColorStop(1, 'rgba(4, 6, 4, 0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.ellipse(mx, my, 44, 30, 0, 0, Math.PI * 2); ctx.fill();
   }
 }
 
@@ -1039,11 +1040,17 @@ function drawCeremony(ctx: CanvasRenderingContext2D, g: Game) {
 }
 
 function drawTitle(ctx: CanvasRenderingContext2D, g: Game) {
-  // painted swamp vista (procedural until art pass)
-  if (!arenaCanvas) arenaCanvas = buildArena();
-  ctx.drawImage(arenaCanvas, 0, 0);
-  ctx.fillStyle = 'rgba(6, 12, 9, 0.6)';
-  ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  const vista = sprite('title_vista');
+  if (vista) {
+    ctx.drawImage(vista, 0, 0, ARENA_W, ARENA_H);
+    ctx.fillStyle = 'rgba(6, 12, 9, 0.28)';
+    ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  } else {
+    if (!arenaCanvas) arenaCanvas = buildArena();
+    ctx.drawImage(arenaCanvas, 0, 0);
+    ctx.fillStyle = 'rgba(6, 12, 9, 0.6)';
+    ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  }
   // heartbloom glow behind the title
   const glow = ctx.createRadialGradient(ARENA_W / 2, 330, 20, ARENA_W / 2, 330, 420);
   glow.addColorStop(0, 'rgba(255, 190, 200, 0.35)');
