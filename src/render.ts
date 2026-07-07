@@ -48,32 +48,66 @@ function buildArena(): HTMLCanvasElement {
   const c = document.createElement('canvas');
   c.width = ARENA_W; c.height = ARENA_H;
   const x = c.getContext('2d')!;
-  // bog base
+  // bog base — brighter mid-green so entities (dark-outlined) pop against it
   const grad = x.createRadialGradient(ARENA_W / 2, ARENA_H / 2, 100, ARENA_W / 2, ARENA_H / 2, 700);
-  grad.addColorStop(0, '#17251c');
-  grad.addColorStop(0.6, '#101a14');
-  grad.addColorStop(1, '#0a110d');
+  grad.addColorStop(0, '#2a4232');
+  grad.addColorStop(0.6, '#22362a');
+  grad.addColorStop(1, '#16231c');
   x.fillStyle = grad;
   x.fillRect(0, 0, ARENA_W, ARENA_H);
-  // water pools + reeds (deterministic scatter)
   let s = 12345;
   const rnd = () => { s = (s * 16807) % 2147483647; return s / 2147483647; };
-  for (let i = 0; i < 26; i++) {
-    const px = rnd() * ARENA_W, py = rnd() * ARENA_H, r = 25 + rnd() * 70;
-    x.fillStyle = 'rgba(20, 40, 48, 0.5)';
-    x.beginPath(); x.ellipse(px, py, r, r * 0.55, rnd() * Math.PI, 0, Math.PI * 2); x.fill();
-    x.strokeStyle = 'rgba(60, 100, 90, 0.25)';
-    x.lineWidth = 2;
-    x.stroke();
+  // mottled ground texture
+  for (let i = 0; i < 160; i++) {
+    const px = rnd() * ARENA_W, py = rnd() * ARENA_H, r = 8 + rnd() * 30;
+    x.fillStyle = `rgba(${40 + rnd() * 30}, ${64 + rnd() * 30}, ${44 + rnd() * 24}, ${0.12 + rnd() * 0.12})`;
+    x.beginPath(); x.ellipse(px, py, r, r * 0.7, rnd() * Math.PI, 0, Math.PI * 2); x.fill();
   }
-  for (let i = 0; i < 90; i++) {
+  // water pools — visible teal sheen with bright rims
+  for (let i = 0; i < 22; i++) {
+    const px = rnd() * ARENA_W, py = rnd() * ARENA_H, r = 30 + rnd() * 80;
+    const pool = x.createRadialGradient(px, py, 2, px, py, r);
+    pool.addColorStop(0, 'rgba(60, 120, 130, 0.55)');
+    pool.addColorStop(1, 'rgba(30, 66, 74, 0.35)');
+    x.fillStyle = pool;
+    x.beginPath(); x.ellipse(px, py, r, r * 0.5, rnd() * Math.PI * 0.3, 0, Math.PI * 2); x.fill();
+    x.strokeStyle = 'rgba(140, 210, 200, 0.3)';
+    x.lineWidth = 2.5;
+    x.stroke();
+    // glints
+    x.fillStyle = 'rgba(190, 240, 230, 0.25)';
+    x.beginPath(); x.ellipse(px - r * 0.25, py - r * 0.12, r * 0.3, r * 0.08, 0, 0, Math.PI * 2); x.fill();
+  }
+  // lily pads — rim-lit, readable
+  for (let i = 0; i < 16; i++) {
+    const px = rnd() * ARENA_W, py = rnd() * ARENA_H, r = 14 + rnd() * 20;
+    x.fillStyle = 'rgba(74, 120, 74, 0.85)';
+    x.beginPath(); x.ellipse(px, py, r, r * 0.72, rnd() * Math.PI, 0.3, Math.PI * 2 + 0.1); x.fill();
+    x.strokeStyle = 'rgba(150, 200, 140, 0.55)';
+    x.lineWidth = 2.5; x.stroke();
+  }
+  // reeds
+  for (let i = 0; i < 110; i++) {
     const px = rnd() * ARENA_W, py = rnd() * ARENA_H;
-    x.strokeStyle = `rgba(${50 + rnd() * 30}, ${80 + rnd() * 40}, ${50 + rnd() * 20}, 0.5)`;
-    x.lineWidth = 2;
+    x.strokeStyle = `rgba(${86 + rnd() * 40}, ${130 + rnd() * 40}, ${76 + rnd() * 30}, 0.6)`;
+    x.lineWidth = 2.5;
     x.beginPath();
     x.moveTo(px, py);
-    x.quadraticCurveTo(px + (rnd() - 0.5) * 10, py - 10 - rnd() * 14, px + (rnd() - 0.5) * 16, py - 18 - rnd() * 18);
+    x.quadraticCurveTo(px + (rnd() - 0.5) * 10, py - 12 - rnd() * 16, px + (rnd() - 0.5) * 18, py - 22 - rnd() * 20);
     x.stroke();
+  }
+  // glowing spore moss clusters near root nodes (leads the eye to build sites)
+  for (const n of ROOT_NODES) {
+    const nx = n.x * ARENA_W, ny = n.y * ARENA_H;
+    for (let i = 0; i < 7; i++) {
+      const a = rnd() * Math.PI * 2, d = 30 + rnd() * 26;
+      const sx2 = nx + Math.cos(a) * d, sy2 = ny + Math.sin(a) * d * 0.7;
+      const glow = x.createRadialGradient(sx2, sy2, 0, sx2, sy2, 7);
+      glow.addColorStop(0, 'rgba(170, 240, 190, 0.85)');
+      glow.addColorStop(1, 'rgba(170, 240, 190, 0)');
+      x.fillStyle = glow;
+      x.beginPath(); x.arc(sx2, sy2, 7, 0, Math.PI * 2); x.fill();
+    }
   }
   // root nodes: glowing stump sockets
   for (const n of ROOT_NODES) {
@@ -89,11 +123,25 @@ function buildArena(): HTMLCanvasElement {
     const mx = m.x * ARENA_W, my = m.y * ARENA_H;
     x.fillStyle = 'rgba(8, 10, 8, 0.9)';
     x.beginPath(); x.ellipse(mx, my, 48, 34, 0, 0, Math.PI * 2); x.fill();
-    x.strokeStyle = 'rgba(70, 60, 50, 0.6)';
+    x.strokeStyle = 'rgba(110, 92, 70, 0.7)';
     x.lineWidth = 4;
     x.beginPath(); x.ellipse(mx, my, 42, 28, 0, 0, Math.PI * 2); x.stroke();
   }
+  // fog vignette — depth without hiding the field
+  const vig = x.createRadialGradient(ARENA_W / 2, ARENA_H / 2, 380, ARENA_W / 2, ARENA_H / 2, 820);
+  vig.addColorStop(0, 'rgba(8, 14, 10, 0)');
+  vig.addColorStop(1, 'rgba(8, 14, 10, 0.55)');
+  x.fillStyle = vig;
+  x.fillRect(0, 0, ARENA_W, ARENA_H);
   return c;
+}
+
+// grounding drop shadow under every live entity
+function shadow(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  ctx.fillStyle = 'rgba(6, 10, 8, 0.35)';
+  ctx.beginPath();
+  ctx.ellipse(x, y + r * 0.75, r * 0.95, r * 0.4, 0, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 // ---------- main draw ----------
@@ -145,7 +193,7 @@ export function draw(ctx: CanvasRenderingContext2D, g: Game, canvasW: number, ca
 // world-state lighting: build = warm dusk, wave = cold night (feat #3, no banners)
 function drawWorldTint(ctx: CanvasRenderingContext2D, g: Game) {
   const d = g.worldDusk; // 0 build → 1 wave
-  ctx.fillStyle = `rgba(${Math.round(40 - d * 30)}, ${Math.round(28 - d * 16)}, ${Math.round(8 + d * 30)}, ${0.16 + d * 0.1})`;
+  ctx.fillStyle = `rgba(${Math.round(60 - d * 45)}, ${Math.round(42 - d * 26)}, ${Math.round(10 + d * 40)}, ${0.10 + d * 0.10})`;
   ctx.fillRect(0, 0, ARENA_W, ARENA_H);
 }
 
@@ -232,6 +280,7 @@ function drawEnemies(ctx: CanvasRenderingContext2D, g: Game) {
     const sy = e.shakeT > 0 ? (Math.random() - 0.5) * 5 : 0;
     const x = e.x + sx, y = e.y + sy, r = e.def.radius;
     const wob = Math.sin(g.time * 6 + e.x * 0.05) * 0.12;
+    shadow(ctx, e.x, e.y, r);
     drawSpriteOr(ctx, `enemy_${e.def.kind}`, x, y, r * 3.4, () => {
       drawEnemyVector(ctx, e.def.kind, x, y, r, e.hitFlash, wob, g.time);
     });
@@ -393,6 +442,7 @@ function drawFrogs(ctx: CanvasRenderingContext2D, g: Game) {
 function drawFrogBody(ctx: CanvasRenderingContext2D, f: Frog, x: number, y: number, t: number, downed: boolean) {
   const hop = downed ? 0 : Math.abs(Math.sin(t * 8 + f.idx)) * (Math.abs(f.vx) + Math.abs(f.vy) > 1 ? 3 : 1);
   const flash = f.hitFlash > 0;
+  if (!downed) shadow(ctx, x, y + 6, 16);
   drawSpriteOr(ctx, `frog_${f.def.id}`, x, y - hop, 52, () => {
     // team rim
     ctx.strokeStyle = P_RIM[f.idx];
@@ -426,22 +476,47 @@ function drawTowers(ctx: CanvasRenderingContext2D, g: Game) {
     const grow = 1 + t.growAnim * 0.25;
     const tier = t.tier;
     const x = t.x, y = t.y;
-    drawSpriteOr(ctx, `tower_${t.kind}_t${tier}`, x, y, 40 + tier * 14, () => {
-      const h = (14 + tier * 9) * grow;
+    // faint range ring while building (TD readability; hidden mid-wave to save clarity)
+    if (g.phase === 'build' || g.phase === 'shop') {
+      const ownerStats = g.frogs[t.owner]?.stats ?? g.frogs[0]?.stats;
+      const range = def.range[t.tier - 1] * (ownerStats?.towerRange ?? 1);
+      ctx.strokeStyle = 'rgba(170, 240, 190, 0.16)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 8]);
+      ctx.beginPath(); ctx.arc(x, y, range, 0, Math.PI * 2); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    shadow(ctx, x, y + 4, 16 + tier * 4);
+    drawSpriteOr(ctx, `tower_${t.kind}_t${tier}`, x, y - 10, 56 + tier * 18, () => {
+      const h = (24 + tier * 13) * grow;
+      const sway = Math.sin(g.time * 1.5 + t.node) * 5;
+      // leaves at the base
+      for (const s of [-1, 1]) {
+        ctx.fillStyle = 'rgba(66, 106, 66, 0.9)';
+        ctx.beginPath(); ctx.ellipse(x + s * 10, y + 2, 12, 5, s * 0.5, 0, Math.PI * 2); ctx.fill();
+      }
       // stem
       ctx.strokeStyle = t.hitFlash > 0 ? '#fff' : '#3a5c3a';
-      ctx.lineWidth = 5 + tier;
-      ctx.beginPath(); ctx.moveTo(x, y + 6); ctx.quadraticCurveTo(x + Math.sin(g.time * 1.5 + t.node) * 4, y - h / 2, x, y - h); ctx.stroke();
-      // head per species
+      ctx.lineWidth = 7 + tier * 1.5;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x, y + 6); ctx.quadraticCurveTo(x + sway, y - h / 2, x + sway * 0.6, y - h); ctx.stroke();
+      ctx.lineCap = 'butt';
+      const hx = x + sway * 0.6, hy = y - h;
+      // head per species (bigger — towers are characters)
       outlined(ctx, t.hitFlash > 0 ? '#fff' : def.tint, t.hitFlash, () => {
         ctx.beginPath();
-        if (t.kind === 'snaplily') { ctx.ellipse(x, y - h, 11 + tier * 3, 8 + tier * 2, Math.sin(g.time * 2) * 0.2, 0, Math.PI * 2); }
-        else if (t.kind === 'sporeshroom') { ctx.arc(x, y - h, 10 + tier * 3.5, Math.PI, 0); ctx.closePath(); }
-        else if (t.kind === 'bulrush') { ctx.ellipse(x, y - h, 6 + tier * 1.5, 13 + tier * 3, 0, 0, Math.PI * 2); }
-        else { ctx.arc(x, y - h, 9 + tier * 3, 0, Math.PI * 2); }
+        if (t.kind === 'snaplily') { ctx.ellipse(hx, hy, 16 + tier * 5, 12 + tier * 3.5, Math.sin(g.time * 2) * 0.25, 0, Math.PI * 2); }
+        else if (t.kind === 'sporeshroom') { ctx.arc(hx, hy, 15 + tier * 5.5, Math.PI * 0.95, Math.PI * 0.05); ctx.closePath(); }
+        else if (t.kind === 'bulrush') { ctx.ellipse(hx, hy, 9 + tier * 2.5, 19 + tier * 4.5, 0, 0, Math.PI * 2); }
+        else { ctx.arc(hx, hy, 13 + tier * 4.5, 0, Math.PI * 2); }
       });
+      // species accents
+      if (t.kind === 'snaplily') { dot(ctx, hx - 5, hy - 3, 2.8, '#fff'); dot(ctx, hx + 5, hy - 3, 2.8, '#fff'); }
+      if (t.kind === 'sporeshroom') for (let i = 0; i < 3; i++) dot(ctx, hx - 8 + i * 8, hy - 4 - (i % 2) * 5, 2.6, 'rgba(240, 220, 250, 0.8)');
+      if (t.kind === 'willowisp') dot(ctx, hx, hy, 5 + Math.sin(g.time * 5) * 1.5, 'rgba(230, 250, 255, 0.9)');
+      if (t.kind === 'moonbell') dot(ctx, hx, hy + 2, 4, 'rgba(255, 255, 255, 0.8)');
       // tier pips (world-readable, no text)
-      for (let i = 0; i < tier; i++) dot(ctx, x - 8 + i * 8, y + 12, 3, '#cfe8a0');
+      for (let i = 0; i < tier; i++) dot(ctx, x - 8 + i * 8, y + 14, 3.2, '#cfe8a0');
     });
     // hp sliver when damaged
     if (t.hp < t.maxHp) {

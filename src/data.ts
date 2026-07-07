@@ -26,19 +26,19 @@ export interface EnemyDef {
 }
 
 export const ENEMIES: Record<EnemyKind, EnemyDef> = {
-  sludgeling:   { kind: 'sludgeling', hp: 12, hpPerWave: 5, dmg: 4, dmgPerWave: 0.6, speed: 55, radius: 12, aggro: 'heart', essence: 1, debutWave: 1, tint: '#4a6741' },
-  bogrunner:    { kind: 'bogrunner', hp: 8, hpPerWave: 3.5, dmg: 3, dmgPerWave: 0.5, speed: 95, radius: 10, aggro: 'frog', essence: 1, debutWave: 2, tint: '#5d4a66' },
-  spitter:      { kind: 'spitter', hp: 14, hpPerWave: 5, dmg: 5, dmgPerWave: 0.8, speed: 45, radius: 12, aggro: 'heart', essence: 2, ranged: { range: 220, cooldown: 2.2, projSpeed: 160 }, debutWave: 3, tint: '#6b7d3a' },
-  shellback:    { kind: 'shellback', hp: 40, hpPerWave: 12, dmg: 7, dmgPerWave: 1, speed: 38, radius: 15, aggro: 'heart', essence: 3, armorFront: true, debutWave: 6, tint: '#3d5c5c' },
-  broodmother:  { kind: 'broodmother', hp: 60, hpPerWave: 16, dmg: 6, dmgPerWave: 1, speed: 30, radius: 20, aggro: 'heart', essence: 5, spawns: { kind: 'broodling', every: 4, count: 2 }, debutWave: 9, tint: '#7a4a5e' },
-  broodling:    { kind: 'broodling', hp: 5, hpPerWave: 2, dmg: 2, dmgPerWave: 0.4, speed: 110, radius: 7, aggro: 'frog', essence: 0, debutWave: 9, tint: '#96637a' },
-  dragonfly:    { kind: 'dragonfly', hp: 10, hpPerWave: 4, dmg: 4, dmgPerWave: 0.7, speed: 150, radius: 9, aggro: 'frog', essence: 2, debutWave: 13, tint: '#4a7d8c' },
-  rotleech:     { kind: 'rotleech', hp: 30, hpPerWave: 10, dmg: 10, dmgPerWave: 1.4, speed: 60, radius: 12, aggro: 'tower', essence: 3, eatsTowers: true, debutWave: 16, tint: '#8c5a3a' },
-  hunter:       { kind: 'hunter', hp: 26, hpPerWave: 9, dmg: 8, dmgPerWave: 1.1, speed: 80, radius: 13, aggro: 'frog', essence: 3, debutWave: 5, tint: '#5e3d5c' },
-  elder_sludge: { kind: 'elder_sludge', hp: 220, hpPerWave: 40, dmg: 12, dmgPerWave: 1.5, speed: 42, radius: 26, aggro: 'heart', essence: 20, boss: true, debutWave: 8, tint: '#37503a' }, // wave-8 mini-boss
-  drowned_stag: { kind: 'drowned_stag', hp: 900, hpPerWave: 0, dmg: 16, dmgPerWave: 0, speed: 60, radius: 34, aggro: 'frog', essence: 60, boss: true, debutWave: 10, tint: '#42606e' },
-  mother_of_moths: { kind: 'mother_of_moths', hp: 1600, hpPerWave: 0, dmg: 14, dmgPerWave: 0, speed: 48, radius: 38, aggro: 'heart', essence: 90, boss: true, debutWave: 15, tint: '#8a7d9e' },
-  rotting_king: { kind: 'rotting_king', hp: 2800, hpPerWave: 0, dmg: 20, dmgPerWave: 0, speed: 40, radius: 44, aggro: 'heart', essence: 150, boss: true, debutWave: 20, tint: '#5e6e3a' },
+  sludgeling:   { kind: 'sludgeling', hp: 12, hpPerWave: 5, dmg: 4, dmgPerWave: 0.6, speed: 55, radius: 12, aggro: 'heart', essence: 2, debutWave: 1, tint: '#7ba05e' },
+  bogrunner:    { kind: 'bogrunner', hp: 8, hpPerWave: 3.5, dmg: 3, dmgPerWave: 0.5, speed: 95, radius: 10, aggro: 'frog', essence: 2, debutWave: 2, tint: '#9a7ab0' },
+  spitter:      { kind: 'spitter', hp: 14, hpPerWave: 5, dmg: 5, dmgPerWave: 0.8, speed: 45, radius: 12, aggro: 'heart', essence: 3, ranged: { range: 220, cooldown: 2.2, projSpeed: 160 }, debutWave: 3, tint: '#adc25e' },
+  shellback:    { kind: 'shellback', hp: 40, hpPerWave: 12, dmg: 7, dmgPerWave: 1, speed: 38, radius: 15, aggro: 'heart', essence: 5, armorFront: true, debutWave: 6, tint: '#6a9a9a' },
+  broodmother:  { kind: 'broodmother', hp: 60, hpPerWave: 16, dmg: 6, dmgPerWave: 1, speed: 30, radius: 20, aggro: 'heart', essence: 8, spawns: { kind: 'broodling', every: 4, count: 2 }, debutWave: 9, tint: '#c07a96' },
+  broodling:    { kind: 'broodling', hp: 5, hpPerWave: 2, dmg: 2, dmgPerWave: 0.4, speed: 110, radius: 7, aggro: 'frog', essence: 0, debutWave: 9, tint: '#d69ab4' },
+  dragonfly:    { kind: 'dragonfly', hp: 10, hpPerWave: 4, dmg: 4, dmgPerWave: 0.7, speed: 150, radius: 9, aggro: 'frog', essence: 3, debutWave: 13, tint: '#6ec4d8' },
+  rotleech:     { kind: 'rotleech', hp: 30, hpPerWave: 10, dmg: 10, dmgPerWave: 1.4, speed: 60, radius: 12, aggro: 'tower', essence: 5, eatsTowers: true, debutWave: 16, tint: '#d09055' },
+  hunter:       { kind: 'hunter', hp: 26, hpPerWave: 9, dmg: 8, dmgPerWave: 1.1, speed: 80, radius: 13, aggro: 'frog', essence: 5, debutWave: 5, tint: '#a066b0' },
+  elder_sludge: { kind: 'elder_sludge', hp: 220, hpPerWave: 40, dmg: 12, dmgPerWave: 1.5, speed: 42, radius: 26, aggro: 'heart', essence: 30, boss: true, debutWave: 8, tint: '#8ab060' }, // wave-8 mini-boss
+  drowned_stag: { kind: 'drowned_stag', hp: 900, hpPerWave: 0, dmg: 16, dmgPerWave: 0, speed: 60, radius: 34, aggro: 'frog', essence: 80, boss: true, debutWave: 10, tint: '#7aa8c0' },
+  mother_of_moths: { kind: 'mother_of_moths', hp: 1600, hpPerWave: 0, dmg: 14, dmgPerWave: 0, speed: 48, radius: 38, aggro: 'heart', essence: 120, boss: true, debutWave: 15, tint: '#c0b0dc' },
+  rotting_king: { kind: 'rotting_king', hp: 2800, hpPerWave: 0, dmg: 20, dmgPerWave: 0, speed: 40, radius: 44, aggro: 'heart', essence: 200, boss: true, debutWave: 20, tint: '#a8bc60' },
 };
 
 // ---------- towers (living swamp plants; 3 tiers each) ----------
@@ -124,15 +124,16 @@ export function waveTable(): WaveDef[] {
   for (let w = 1; w <= 20; w++) {
     const groups: SpawnGroup[] = [];
     const dur = w >= 20 ? 100 : Math.min(70, 25 + (w - 1) * 5);
-    // baseline pressure: sludgelings all game, bogrunners from 2
-    groups.push({ kind: 'sludgeling', count: 6 + w * 2, countPerWave: 0, delay: 0, interval: dur / (6 + w * 2) });
-    if (w >= 2) groups.push({ kind: 'bogrunner', count: 3 + w, countPerWave: 0, delay: 3, interval: dur / (3 + w) });
-    if (w >= 3) groups.push({ kind: 'spitter', count: Math.floor(1 + w / 2), countPerWave: 0, delay: 6, interval: 9 });
-    if (w >= 5) groups.push({ kind: 'hunter', count: Math.floor(w / 3), countPerWave: 0, delay: 10, interval: 12 });
-    if (w >= 6) groups.push({ kind: 'shellback', count: Math.floor(w / 3), countPerWave: 0, delay: 8, interval: 11 });
-    if (w >= 9) groups.push({ kind: 'broodmother', count: Math.floor(w / 5), countPerWave: 0, delay: 12, interval: 18 });
-    if (w >= 13) groups.push({ kind: 'dragonfly', count: 4 + Math.floor(w / 2), countPerWave: 0, delay: 5, interval: 4 });
-    if (w >= 16) groups.push({ kind: 'rotleech', count: Math.floor(w / 6), countPerWave: 0, delay: 9, interval: 15 });
+    // baseline pressure: sludgelings all game, bogrunners from 2. Waves must FEEL like waves —
+    // constant bodies (VS minimum-on-screen lesson), not a trickle.
+    groups.push({ kind: 'sludgeling', count: 14 + w * 3, countPerWave: 0, delay: 0, interval: dur / (14 + w * 3) });
+    if (w >= 2) groups.push({ kind: 'bogrunner', count: 6 + w * 2, countPerWave: 0, delay: 2, interval: dur / (6 + w * 2) });
+    if (w >= 3) groups.push({ kind: 'spitter', count: 2 + Math.floor(w / 2), countPerWave: 0, delay: 5, interval: 7 });
+    if (w >= 5) groups.push({ kind: 'hunter', count: 1 + Math.floor(w / 3), countPerWave: 0, delay: 8, interval: 10 });
+    if (w >= 6) groups.push({ kind: 'shellback', count: 1 + Math.floor(w / 3), countPerWave: 0, delay: 7, interval: 9 });
+    if (w >= 9) groups.push({ kind: 'broodmother', count: Math.floor(w / 5), countPerWave: 0, delay: 10, interval: 16 });
+    if (w >= 13) groups.push({ kind: 'dragonfly', count: 6 + Math.floor(w / 2), countPerWave: 0, delay: 4, interval: 3 });
+    if (w >= 16) groups.push({ kind: 'rotleech', count: Math.floor(w / 5), countPerWave: 0, delay: 8, interval: 13 });
     const def: WaveDef = { groups };
     if (w === 8) def.boss = 'elder_sludge';
     if (w === 10) def.boss = 'drowned_stag';

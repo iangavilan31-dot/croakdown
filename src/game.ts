@@ -183,6 +183,9 @@ export function startRun(g: Game) {
 export function enterBuild(g: Game, first = false) {
   g.phase = 'build';
   g.buildReadyT = 0;
+  // dawn-mend (Thronefall pattern): the swamp partially heals its heart between waves —
+  // losses tax the run without spiraling it
+  if (!first) g.heartHp = Math.min(g.heartMax, g.heartHp + Math.round((g.heartMax - g.heartHp) * 0.25));
   // forecast next wave at spawn mouths (world-space, feat #2)
   const next = g.waves[g.wave]; // wave index = next wave (0-based into table)
   g.forecast = [];
@@ -483,14 +486,17 @@ export function updateWave(g: Game, dt: number, inputs: import('./input').Player
   const def = g.waves[g.wave - 1];
   g.waveT += dt;
 
-  // spawn director
+  // spawn director — starving screen accelerates spawns (VS minimum-on-screen lesson)
+  const liveCount = g.enemies.reduce((n, e) => n + (e.alive ? 1 : 0), 0);
+  const minOnScreen = 4 + Math.floor(g.wave * 1.2);
+  const spawnDt = liveCount < minOnScreen ? dt * 3 : dt;
   let allSpawned = true;
   for (const cur of g.spawnCursors) {
     const grp = def.groups[cur.g];
     const total = scaleCount(grp.count, grp.countPerWave, g.wave, g.danger, g.players) * (def.elite ? 1.5 : 1);
     if (cur.spawned >= total) continue;
     allSpawned = false;
-    cur.t -= dt;
+    cur.t -= spawnDt;
     if (cur.t <= 0) {
       spawnEnemy(g, grp.kind, def.elite && g.rng() < 0.12);
       cur.spawned++;
