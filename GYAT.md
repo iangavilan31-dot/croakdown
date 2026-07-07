@@ -81,6 +81,17 @@ final home in the vault research report.
   works end-to-end on :5126 with 20+ waves, 3 bosses, generated art + real soundtrack wired, and
   `docs/GRADES.md` shows 3 blind critics ≥ 8.5/10 vs the MUST-BEAT bar. Anything less → keep building.
 
+## VISUAL BAR (Ian's /goal, 2026-07-07 — the shipping gate for every screen)
+- `docs/VISUAL_BAR.md` — every screen ≥ 42/50 vs REF_02 (painterly primary, pixel REF_01 =
+  grit corrector), no axis < 7, graded by `scripts/critique.mjs` (hostile vision critic,
+  Anthropic API). Verdicts logged to vault. Palette law: desaturated greens/teals + ONLY hot
+  pink & warm gold accents. Screens: title/lobby/world-swarm/pause/shop/build/boss-intro/
+  death/victory/settings (pause + settings DON'T EXIST YET — must be built).
+- `docs/GOAL_PAPERDOLL.md` — linked equipment-on-frog goal; spec only, needs own skeptic
+  gate + one-weapon spike BEFORE any gear art.
+- Ian must drop the two chat reference PNGs into `docs/refs/` (VISUAL_REF_01=pixel,
+  VISUAL_REF_02=painterly); critic uses rubric-description fallback until then.
+
 ## Decisions (running)
 - 2026-07-07 · Name CROAKDOWN, port 5126, Vite+TS scaffold; renderer locked in BRIEF.md after perf research.
 - 2026-07-07 · Preview/QA deferred to build phase — stub not worth verifying.
