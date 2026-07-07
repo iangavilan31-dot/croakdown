@@ -204,6 +204,20 @@ export function draw(ctx: CanvasRenderingContext2D, g: Game, canvasW: number, ca
   drawEnemies(ctx, g);
   drawFrogs(ctx, g);
   drawProjectiles(ctx, g);
+  // the golden fly (secret): a streak of gold you have to chase
+  if (g.goldenFly) {
+    const fly = g.goldenFly;
+    for (let i = 1; i <= 4; i++) {
+      ctx.globalAlpha = 0.5 - i * 0.1;
+      dot(ctx, fly.x - i * 9, fly.y - Math.sin((fly.t - i * 0.03) * 3.2) * 3, 4 - i * 0.6, '#ffd75e');
+    }
+    ctx.globalAlpha = 1;
+    dot(ctx, fly.x, fly.y, 5, '#ffe9a0');
+    ctx.fillStyle = 'rgba(255, 235, 160, 0.65)';
+    ctx.beginPath();
+    ctx.ellipse(fly.x - 2, fly.y - 5, 5, 2.4, Math.sin(fly.t * 40) * 0.6, 0, Math.PI * 2);
+    ctx.fill();
+  }
   drawParticles(ctx);
   drawFloaters(ctx);
   drawHud(ctx, g);

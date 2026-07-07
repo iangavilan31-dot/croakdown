@@ -105,6 +105,10 @@ export interface Game {
   ceremonyT: number; ceremonyItem: ItemDef | null; ceremonyRevealed: boolean;
   bossRef: Enemy | null;
   bossIntroT: number; bossIntroKind: EnemyKind | null;
+  // secrets (BRIEF §7.5c): a rare golden fly worth chasing; patient frogs grow wild mushrooms
+  goldenFly: { x: number; y: number; t: number } | null;
+  goldenFliesCaught: number;
+  nodeIdleT: number[];
   frogPickSel: number[]; frogPickDanger: number; frogPickStage: number;
   titleT: number;
   victoryT: number; gameoverT: number;
@@ -139,6 +143,7 @@ export function newGame(): Game {
     levelupChoices: [], levelupFrog: 0,
     ceremonyT: 0, ceremonyItem: null, ceremonyRevealed: false,
     bossRef: null, bossIntroT: 0, bossIntroKind: null,
+    goldenFly: null, goldenFliesCaught: 0, nodeIdleT: ROOT_NODES.map(() => 0),
     frogPickSel: [0, 1], frogPickDanger: 0, frogPickStage: 0,
     titleT: 0, victoryT: 0, gameoverT: 0,
     runStats: { kills: 0, symbiosis: 0, towersGrown: 0, essenceEarned: 0 },
@@ -526,6 +531,7 @@ export function updateWave(g: Game, dt: number, inputs: import('./input').Player
   updateTowers(g, dt);
   updateProjectiles(g, dt);
   updateOrbs(g, dt);
+  updateSecrets(g, dt);
 
   // lose/win checks
   if (isRunLost(g.frogs.map(f => ({ state: f.state === 'alive' ? 'alive' as const : 'downed' as const, hp: f.hp, maxHp: f.maxHp, reviveProgress: 0 })), g.heartHp)) {
@@ -871,10 +877,60 @@ export function nearestEnemy(g: Game, x: number, y: number, range: number): Enem
   return best;
 }
 
+// ---------- secrets ----------
+function updateSecrets(g: Game, dt: number) {
+  // golden fly: rare, fast, worth chasing — catch by touching it
+  if (!g.goldenFly && g.goldenFliesCaught < 2 && g.rng() < dt * 0.02 && g.wave >= 2) {
+    g.goldenFly = { x: -20, y: 150 + g.rng() * (ARENA_H - 300), t: 0 };
+  }
+  if (g.goldenFly) {
+    const fly = g.goldenFly;
+    fly.t += dt;
+    fly.x += 190 * dt;
+    fly.y += Math.sin(fly.t * 3.2) * 90 * dt;
+    if (fly.x > ARENA_W + 20) g.goldenFly = null;
+    else for (const f of g.frogs) {
+      if (f.state === 'alive' && dist(f.x, f.y, fly.x, fly.y) < 30) {
+        g.goldenFliesCaught++;
+        g.goldenFly = null;
+        spawnParticles(fly.x, fly.y, 26, { color: '#ffd75e', speed: 160, maxLife: 0.8, glow: true });
+        addHitstop(8);
+        sfx('lotusReveal');
+        for (let i = 0; i < 14; i++) {
+          const o = oPool.get();
+          o.x = fly.x; o.y = fly.y;
+          const a = g.rng() * Math.PI * 2, s = 60 + g.rng() * 120;
+          o.vx = Math.cos(a) * s; o.vy = Math.sin(a) * s;
+          o.value = 3; o.alive = true; o.t = 0;
+          g.orbs.push(o);
+        }
+        break;
+      }
+    }
+  }
+  // wild mushroom: linger by an empty root node WITHOUT building for 6s — the swamp rewards patience
+  for (let i = 0; i < ROOT_NODES.length; i++) {
+    if (g.towers.some(t => t.node === i)) { g.nodeIdleT[i] = 0; continue; }
+    const nx = ROOT_NODES[i].x * ARENA_W, ny = ROOT_NODES[i].y * ARENA_H;
+    const lingering = g.frogs.find(f => f.state === 'alive' && !f.buildChannel && dist(f.x, f.y, nx, ny) < 44);
+    if (lingering) {
+      g.nodeIdleT[i] += dt;
+      if (g.nodeIdleT[i] >= 6) {
+        g.nodeIdleT[i] = 0;
+        g.towers.push({ kind: 'sporeshroom', node: i, tier: 1, owner: lingering.idx, x: nx, y: ny, hp: TOWERS.sporeshroom.hp, maxHp: TOWERS.sporeshroom.hp, fireCd: 0, hitFlash: 0, growAnim: 1 });
+        g.runStats.towersGrown++;
+        spawnParticles(nx, ny, 22, { color: '#c9a3d9', speed: 130, maxLife: 0.7, glow: true });
+        sfx('grow');
+      }
+    } else g.nodeIdleT[i] = Math.max(0, g.nodeIdleT[i] - dt * 2);
+  }
+}
+
 // ---------- build phase (untimed; ready-check = frogs sit on Heartbloom pad) ----------
 export function updateBuild(g: Game, dt: number, inputs: import('./input').PlayerInput[]) {
   updateFrogs(g, dt, inputs, false);
   updateOrbs(g, dt);
+  updateSecrets(g, dt);
   const alive = g.frogs.filter(f => f.state === 'alive');
   const allOnPad = alive.length > 0 && alive.every(f => dist(f.x, f.y, HEART.x, HEART.y) < HEART.r + 18);
   if (allOnPad) {
