@@ -224,7 +224,27 @@ const fireflies = Array.from({ length: 22 }, () => ({
   ph: Math.random() * Math.PI * 2, sp: 0.3 + Math.random() * 0.5,
   rx: 40 + Math.random() * 120, ry: 30 + Math.random() * 90,
 }));
+// slow-rising bioluminescent spores (drift up, sway, fade at the top, respawn low)
+const spores = Array.from({ length: 30 }, () => ({
+  x: Math.random() * ARENA_W, y: Math.random() * ARENA_H,
+  rise: 8 + Math.random() * 16, sway: 10 + Math.random() * 24,
+  sp: 0.4 + Math.random() * 0.7, ph: Math.random() * Math.PI * 2,
+  r: 1 + Math.random() * 1.6,
+}));
 function drawAtmosphere(ctx: CanvasRenderingContext2D, time: number) {
+  // spores rise slowly, drifting sideways; cycle their vertical position over the arena
+  ctx.fillStyle = '#b6ff7a';
+  ctx.shadowColor = '#8fff5a';
+  for (const s of spores) {
+    const cycle = (time * s.rise + s.ph * 200) % (ARENA_H + 120);
+    const y = ARENA_H + 40 - cycle;                 // travels bottom -> top
+    const x = s.x + Math.sin(time * s.sp + s.ph) * s.sway;
+    const fade = Math.min(1, cycle / 120) * Math.min(1, (ARENA_H + 120 - cycle) / 200);
+    ctx.globalAlpha = fade * 0.55;
+    ctx.shadowBlur = 5;
+    ctx.beginPath(); ctx.arc(x, y, s.r, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.shadowBlur = 0; ctx.globalAlpha = 1;
   // fireflies drift in slow lissajous loops, twinkle warm
   for (const f of fireflies) {
     const x = f.x + Math.cos(time * f.sp + f.ph) * f.rx;
