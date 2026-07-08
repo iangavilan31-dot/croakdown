@@ -270,6 +270,88 @@ function drawAtmosphere(ctx: CanvasRenderingContext2D, time: number) {
   }
 }
 
+// ---------- seeded static pond dressing (lily pads + reed clusters) ----------
+// The painted backdrop repeats tree-stumps; REF_02 is a LILY POND. A stable, seeded, painterly-
+// shaded dressing layer (shaded pads w/ cleft + veins + rim light, swaying reed/cattail clusters)
+// breaks the stump read and pulls the scene toward the reference — on-palette, no art regen.
+function mulberry(seed: number): () => number {
+  return () => {
+    seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const dRng = mulberry(0x0a7ed3);
+const PADS = Array.from({ length: 17 }, () => {
+  let x = 0, y = 0;
+  do { x = 130 + dRng() * (ARENA_W - 260); y = 130 + dRng() * (ARENA_H - 260); }
+  while (Math.hypot(x - ARENA_W / 2, y - ARENA_H / 2) < 300);       // keep the play/lotus center clear
+  return { x, y, r: 26 + dRng() * 38, rot: dRng() * Math.PI, light: dRng() < 0.34, notch: dRng() * Math.PI * 2 };
+});
+const REEDS = Array.from({ length: 8 }, () => ({
+  x: dRng() < 0.5 ? 70 + dRng() * 240 : ARENA_W - 70 - dRng() * 240,
+  y: 150 + dRng() * (ARENA_H - 300), n: 3 + ((dRng() * 4) | 0), h: 58 + dRng() * 66, ph: dRng() * 6.28, cat: dRng() < 0.5,
+}));
+
+function drawPondDressing(ctx: CanvasRenderingContext2D, time: number) {
+  // lily pads
+  for (const p of PADS) {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot);
+    ctx.scale(1, 0.64);                                            // top-down foreshorten
+    // cast shadow on the water
+    ctx.fillStyle = 'rgba(2,10,8,0.32)';
+    ctx.beginPath(); ctx.ellipse(4, 6, p.r, p.r, 0, 0, Math.PI * 2); ctx.fill();
+    // body — radial shade (lit center -> dark rim), on-palette teal-green
+    const g = ctx.createRadialGradient(-p.r * 0.22, -p.r * 0.24, p.r * 0.12, 0, 0, p.r);
+    g.addColorStop(0, p.light ? '#356b50' : '#274a38');
+    g.addColorStop(0.7, p.light ? '#204a37' : '#183726');
+    g.addColorStop(1, p.light ? '#122d20' : '#0d2418');
+    ctx.globalAlpha = 0.85;                                         // sit IN the water, not on top
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.fill();
+    // subtle dark mottle so it reads painterly, not a smooth vector disc
+    ctx.fillStyle = 'rgba(8,24,17,0.4)';
+    for (let i = 0; i < 3; i++) {
+      const a = p.notch * 2 + i * 2.1, rr = p.r * (0.3 + i * 0.2);
+      ctx.beginPath(); ctx.ellipse(Math.cos(a) * rr * 0.7, Math.sin(a) * rr * 0.7, p.r * 0.22, p.r * 0.15, a, 0, Math.PI * 2); ctx.fill();
+    }
+    // cleft notch (the lily-pad V) — a narrow dark water wedge
+    ctx.fillStyle = '#08201a';
+    ctx.beginPath(); ctx.moveTo(0, 0);
+    ctx.arc(0, 0, p.r + 2, p.notch - 0.2, p.notch + 0.2); ctx.closePath(); ctx.fill();
+    // a couple of faint veins (not a full pizza fan)
+    ctx.strokeStyle = 'rgba(10,32,24,0.32)'; ctx.lineWidth = 1.1;
+    for (let i = 0; i < 3; i++) {
+      const a = p.notch + Math.PI + (i - 1) * 0.6;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * p.r * 0.85, Math.sin(a) * p.r * 0.85); ctx.stroke();
+    }
+    // faint rim highlight, top-left
+    ctx.strokeStyle = 'rgba(120,190,150,0.2)'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(0, 0, p.r - 2, Math.PI * 1.05, Math.PI * 1.6); ctx.stroke();
+    ctx.restore();
+  }
+  // reed / cattail clusters
+  for (const rd of REEDS) {
+    ctx.save();
+    ctx.translate(rd.x, rd.y);
+    for (let i = 0; i < rd.n; i++) {
+      const off = (i - rd.n / 2) * 9;
+      const sway = Math.sin(time * 1.1 + rd.ph + i) * 6;
+      const h = rd.h * (0.75 + (i % 2) * 0.3);
+      ctx.strokeStyle = i % 2 ? '#1c3a28' : '#254c33'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(off, 0); ctx.quadraticCurveTo(off + sway * 0.5, -h * 0.6, off + sway, -h); ctx.stroke();
+      if (rd.cat && i === (rd.n >> 1)) {                          // cattail head
+        ctx.fillStyle = '#3a2817';
+        ctx.beginPath(); ctx.ellipse(off + sway, -h, 4.5, 12, 0, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+}
+
 // ---------- water ripples (concentric rings expanding on the pond surface) ----------
 function drawRipples(ctx: CanvasRenderingContext2D) {
   for (const rp of ripples) {
@@ -357,13 +439,13 @@ function drawSlashFx(ctx: CanvasRenderingContext2D, time: number): void {
     ctx.closePath();
     const g = ctx.createRadialGradient(0, 0, r0, 0, 0, r1);
     g.addColorStop(0, `rgba(${hot},0)`);
-    g.addColorStop(0.6, `rgba(${hot},${0.28 * fade})`);
-    g.addColorStop(1, `rgba(255,255,245,${0.5 * fade})`);
+    g.addColorStop(0.6, `rgba(${hot},${0.3 * fade})`);
+    g.addColorStop(1, `rgba(255,238,198,${0.5 * fade})`);   // warm cream, not sterile white
     ctx.fillStyle = g;
     ctx.fill();
-    // razor-thin ultra-bright leading edge at the arc's far side
+    // razor-thin bright leading edge at the arc's far side (warm-white so it reads as a hot blade)
     ctx.globalCompositeOperation = 'lighter';
-    ctx.strokeStyle = `rgba(255,255,248,${0.9 * fade})`;
+    ctx.strokeStyle = `rgba(255,236,190,${0.85 * fade})`;
     ctx.lineWidth = (s.kind === 'heavy' ? 5 : 3) * (1 - k * 0.4);
     ctx.beginPath(); ctx.arc(0, 0, r1, s.a0, s.a1); ctx.stroke();
     ctx.restore();
@@ -416,6 +498,7 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   ctx.globalCompositeOperation = 'soft-light';
   ctx.fillStyle = '#3aa07f'; ctx.globalAlpha = 0.42; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
   ctx.restore();
+  drawPondDressing(ctx, time);       // lily pads + reeds ON the graded water (breaks the stump read)
   drawLotus(ctx, time);
   if (decalCanvas) ctx.drawImage(decalCanvas, 0, 0);
   drawRipples(ctx);
@@ -512,6 +595,14 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   drawAtmosphere(ctx, time);
 
   ctx.restore();
+
+  // screen-space vignette: darken the corners so the repeated backdrop props at the edges recede
+  // into shadow and the eye stays on the lit frog + lotus (REF_02's edges fall off to near-black).
+  const vig = ctx.createRadialGradient(cw / 2, ch / 2, ch * 0.34, cw / 2, ch / 2, ch * 0.92);
+  vig.addColorStop(0, 'rgba(2,10,8,0)');
+  vig.addColorStop(1, 'rgba(1,6,5,0.62)');
+  ctx.fillStyle = vig;
+  ctx.fillRect(0, 0, cw, ch);
 
   // HUD is a fixed screen-space overlay (independent of the follow-camera), anchored top-left
   drawHud(ctx, w, cw, ch, fit, 0, 0, time, paused);
@@ -720,7 +811,7 @@ function drawSwordAt(ctx: CanvasRenderingContext2D, w: World, time: number) {
     ctx.fill();
     // bright leading edge — the blade's current cut line
     ctx.globalAlpha = 1;
-    ctx.strokeStyle = `rgba(255,255,242,${0.9 * (1 - p * 0.3)})`;
+    ctx.strokeStyle = `rgba(255,240,202,${0.9 * (1 - p * 0.3)})`;   // warm hot-blade edge, not white
     ctx.lineWidth = heavy ? 6 : 4; ctx.lineCap = 'round';
     ctx.beginPath();
     ctx.moveTo(Math.cos(a1) * r0, Math.sin(a1) * r0);

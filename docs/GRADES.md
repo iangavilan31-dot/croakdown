@@ -43,6 +43,32 @@ Honest, externally-verifiable gate status. No self-graded passes. See `design/11
 
 **Still OPEN for R3:** HUD cluster reads debug (all blinds+art+creative) — redesign; frog katana bigger/readable + brighter core; enemy variety visible; connect an anticipation/follow-through pose; env depth/brightness; capsule capture polish.
 
+### Round 3 — 2026-07-08 (wider katana + slime muting)  ·  avg 6.1 (FLAT / net-regressed)
+Two changes hurt the stills: widening the katana made it read as a spear, and over-muting the
+slimes flattened them. Both reverted (katana narrowed back at drawSwordAt; slime palette re-shaded).
+Diagnosis: numeric tuning had plateaued — the caps were STRUCTURAL (palette, enemy value, HUD).
+
+### Round 4 — 2026-07-08 (structural batch — break the plateau)
+Fixes: (1) runtime **teal atmosphere grade** on the painted backdrop → REF_02 deep-teal palette
+(was warm brown/purple); (2) **enemies → near-black silhouettes** carried by glowing eyes + rim
+(was mint bodies breaking palette); (3) **minimal floating HUD** (hearts L / essence-gem R / pips),
+killed the debug panel. Also fixed the QA camera-aim bug (shoot.mjs now reads the live `__view`).
+
+| Critic | Score (Δ vs R2) | Headline |
+|---|---|---|
+| Judge 1 — Art | 7.5 (+1.5) | Palette + enemies now premium & on-ref; repeated stumps + pure-white heavy crescent cap it |
+| Judge 2 — Animation | 7.5 (+1.5) | Frog weight/squash good, swing reads, enemies have glow-eye life; wants anticipation-pose variety |
+| Judge 3 — Feel | 8.0 (+1.5) | Carnage frame has real impact language — sparks, telegraph ring, essence drops, readable arcs |
+| Judge 4 — Creative | 8.0 (+0.5) | Reads as a real moody $15 indie now; environment content variety is the ceiling |
+| Blind 1 | 7.5 (+1.5) | Moody + alive; glowing eyes creepy-cute; lotus pretty; background stumps repeat |
+| Blind 2 | 7.0 (+1.5) | Pretty & alive; bg feels same-y; heavy swing flash a touch bright |
+| **AVERAGE** | **7.6 (+1.35)** | Plateau BROKEN. Palette/enemy/HUD caps cleared. |
+
+**Top-3 for R5:** (1) environment content — repeated tree-stumps are the last big "not the reference";
+add on-palette lily-pad / reed / cattail dressing + push stumps into vignette shadow. (2) slash VFX
+colour — pull the heavy/finisher crescent off pure-white toward warm-gold/lime (+ pink impact accent).
+(3) frog read — nudge sleepier/plumper toward REF_02's heavy-lidded slump.
+
 ---
 
 ## Phase 1 — The Swing Test  ·  STATUS: CORE PROVEN, GATE NOT PASSED
