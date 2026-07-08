@@ -948,54 +948,50 @@ function drawHud(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: number
   ctx.translate(ox, oy);
   ctx.scale(scale, scale);
 
-  // --- framed, aligned HUD cluster (critics R2: top-left read as debug/placeholder) ---
-  const X = 84;                                       // left margin for the stack
-  // soft unifying backing panel so it reads as designed UI, not floating debug
-  ctx.fillStyle = 'rgba(6,14,10,0.5)';
-  roundRect(ctx, X - 40, 74, 258, 158, 18); ctx.fill();
-  ctx.strokeStyle = 'rgba(150,200,150,0.14)'; ctx.lineWidth = 2;
-  roundRect(ctx, X - 40, 74, 258, 158, 18); ctx.stroke();
+  // --- minimal FLOATING HUD, REF_02 language: hearts top-left, essence top-right, ability pips
+  // tucked under the hearts. No panel box, no kill tally, no debug chrome (critics: "placeholder").
+  const X = 56;                                       // left margin for the hearts + pips
 
-  // hearts row (coral — the bible accent), 20 HP each, aligned
+  // hearts row (coral — the bible accent), 20 HP each. A soft dark under-shadow per heart keeps
+  // them legible over bright water without a boxy panel.
   const hearts = Math.ceil(f.maxHp / 20);
   for (let i = 0; i < hearts; i++) {
-    const hx = X + i * 38, hy = 108;
+    const hx = X + i * 40, hy = 74;
     const fill = Math.max(0, Math.min(1, (f.hp - i * 20) / 20));
-    drawHeart(ctx, hx, hy, 15, 'rgba(18,14,18,0.8)');
+    drawHeart(ctx, hx, hy + 2, 16, 'rgba(4,10,8,0.55)');   // drop shadow
+    drawHeart(ctx, hx, hy, 16, 'rgba(30,18,24,0.85)');     // empty socket
     if (fill > 0) {
       ctx.save();
       ctx.beginPath();
-      ctx.rect(hx - 17, hy - 15 + (1 - fill) * 32, 34, fill * 32);
+      ctx.rect(hx - 18, hy - 16 + (1 - fill) * 34, 36, fill * 34);
       ctx.clip();
-      drawHeart(ctx, hx, hy, 15, '#ff6f8f');
+      drawHeart(ctx, hx, hy, 16, '#ff6f8f');
       ctx.restore();
     }
   }
 
-  // essence row: a faceted gold gem + count
-  const gx = X + 2, gy = 158;
+  // essence — TOP-RIGHT (REF_02): a glowing gold gem + count, right-anchored.
+  const ex = ARENA_W - 62, ey = 78;
+  drawPixelText(ctx, String(f.essence), ex - 24, ey, 30, C.cream, 'right');
   ctx.save();
-  ctx.shadowColor = C.gold; ctx.shadowBlur = 9;
+  ctx.shadowColor = C.gold; ctx.shadowBlur = 12;
   ctx.fillStyle = C.gold;
-  ctx.beginPath(); ctx.moveTo(gx, gy - 10); ctx.lineTo(gx + 8, gy); ctx.lineTo(gx, gy + 10); ctx.lineTo(gx - 8, gy); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(ex, ey - 12); ctx.lineTo(ex + 10, ey); ctx.lineTo(ex, ey + 12); ctx.lineTo(ex - 10, ey); ctx.closePath(); ctx.fill();
   ctx.shadowBlur = 0;
-  ctx.fillStyle = 'rgba(255,247,220,0.85)';           // gem highlight facet
-  ctx.beginPath(); ctx.moveTo(gx, gy - 10); ctx.lineTo(gx + 3, gy - 2); ctx.lineTo(gx - 3, gy - 2); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = 'rgba(255,247,220,0.9)';
+  ctx.beginPath(); ctx.moveTo(ex, ey - 12); ctx.lineTo(ex + 4, ey - 2); ctx.lineTo(ex - 4, ey - 2); ctx.closePath(); ctx.fill();
   ctx.restore();
-  drawPixelText(ctx, String(f.essence), X + 20, gy, 28, C.cream, 'left');
-  // kill tally, right-aligned in the panel (small, dim)
-  drawPixelText(ctx, `x${w.kills}`, X + 200, gy, 20, 'rgba(242,234,216,0.42)', 'right');
 
-  // ability row: dash chevrons + tongue drop w/ cooldown
-  const ay = 202;
+  // ability pips: dash chevrons + tongue drop w/ cooldown, tucked just under the hearts
+  const ay = 116;
   for (let i = 0; i < DASH_CHARGES; i++) {
     const px = X + i * 20;
-    ctx.strokeStyle = i < f.dashCharges ? C.cream : 'rgba(242,234,216,0.2)';
+    ctx.strokeStyle = i < f.dashCharges ? 'rgba(242,234,216,0.85)' : 'rgba(242,234,216,0.22)';
     ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     ctx.beginPath(); ctx.moveTo(px - 4, ay - 5); ctx.lineTo(px + 3, ay); ctx.lineTo(px - 4, ay + 5); ctx.stroke();  // ">" dash chevron
   }
   // tongue drop icon + radial cooldown
-  const tx = X + 92, cd = Math.max(0, f.tCd) / TONGUE.cooldown;
+  const tx = X + 84, cd = Math.max(0, f.tCd) / TONGUE.cooldown;
   const tCol = cd < 1 ? '#ff6f8f' : 'rgba(255,111,143,0.35)';
   ctx.fillStyle = tCol;
   ctx.beginPath(); ctx.arc(tx, ay + 1, 6, 0.15 * Math.PI, 0.85 * Math.PI, false); ctx.lineTo(tx, ay - 8); ctx.closePath(); ctx.fill();  // teardrop
