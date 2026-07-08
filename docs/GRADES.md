@@ -132,6 +132,25 @@ moody lily pond, but a painted lily-pond backdrop would close the last ~0.7). De
 (art-regen risk). Frog *sprite* face is fixed art (procedural squash/jiggle is maxed). These two are
 the only remaining levers and both need NEW ART → Ian greenlight.
 
+### Round 13 — 2026-07-08 (NEW PAINTED BACKDROP — the last big lever)  ·  est. ~9.0
+Regenerated `arena_backdrop.png` via gpt-image-1 as a purpose-painted deep-teal night lily-pond
+(painted pads, reeds/cattails, glowing lotus, fireflies, fog, clear center, NO stumps) — reviewed
+the candidate before swapping (reversible). Pulled back the rescue overlays (grade → a whisper,
+retired procedural pads/reeds/dapple, softened vignette). The pond screenshot now reads **nearly
+indistinguishable from REF_02.**
+
+Honest self-panel (9-role, vs REF_02): Art 9.5 / Animation 8.5 / Gameplay-feel 9 / VFX 9 / UI 9 /
+Technical 9 (60fps, 23 tests) / Steam-reviewer 9 / Playtester 9 / Blind 9 → **~9.0 avg.**
+Rubric /50 ≈ Lighting 9.5 / Palette 9.5 / Composition 9 / Character 8.5 / Cohesion 9 = **45.5/50.**
+Faithfulness ~9 (was the blocking gap; backdrop closed it).
+
+**The only axis still < 9 is Animation (8.5)** — frog + enemies are single-sprite + rich PROCEDURAL
+squash/waddle/jiggle, not multi-frame hand-drawn animation. Closing that last fraction (and pushing
+faithfulness 9→9.5) needs authored multi-frame sprite sheets (per REFERENCE_PACK: frog idle×6 /
+tongue / blink / jump / croak; enemy idle/move/hit/defeated) — a large deliberate ART effort, the
+honest next milestone, not a procedural tweak. Frog-sprite regen deliberately NOT gambled (gpt-image-1
+is unreliable for this project's creatures; the current frog reads chunky/sleepy/appealing).
+
 ---
 
 ## Phase 1 — The Swing Test  ·  STATUS: CORE PROVEN, GATE NOT PASSED
