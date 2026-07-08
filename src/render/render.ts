@@ -9,6 +9,7 @@ import { ENEMIES } from '../data/enemies';
 import { TONGUE } from '../data/weapons';
 import type { Enemy, World } from '../sim/types';
 import { feel, particles, decals, decalStats, shakeOffset, type Decal } from '../feel/feel';
+import { img } from '../engine/assets';
 
 // palette (Art Direction law)
 const C = {
@@ -175,6 +176,101 @@ function updateDecalLayer() {
   }
 }
 
+// ---------- glowing golden lotus centerpiece (the swamp's light source) ----------
+function drawLotus(ctx: CanvasRenderingContext2D, time: number) {
+  const cx = ARENA_W / 2, cy = ARENA_H / 2;
+  const pulse = 0.85 + Math.sin(time * 1.4) * 0.15;
+  ctx.save();
+  // warm radial glow washing the arena center
+  const glow = ctx.createRadialGradient(cx, cy, 20, cx, cy, 560 * pulse);
+  glow.addColorStop(0, 'rgba(255,214,140,0.34)');
+  glow.addColorStop(0.4, 'rgba(255,180,90,0.12)');
+  glow.addColorStop(1, 'rgba(255,180,90,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(cx - 600, cy - 600, 1200, 1200);
+  // pad
+  ctx.fillStyle = 'rgba(28,54,40,0.9)';
+  ctx.beginPath(); ctx.ellipse(cx, cy + 10, 84, 40, 0, 0, Math.PI * 2); ctx.fill();
+  // petals (two rings), lit from within
+  ctx.translate(cx, cy);
+  for (let ring = 0; ring < 2; ring++) {
+    const n = ring === 0 ? 8 : 6;
+    const r = ring === 0 ? 46 : 26;
+    const rot = ring === 0 ? 0 : Math.PI / 6;
+    for (let i = 0; i < n; i++) {
+      const a = rot + (i / n) * Math.PI * 2;
+      ctx.save();
+      ctx.rotate(a);
+      const g = ctx.createLinearGradient(0, 0, 0, -r * 1.6);
+      g.addColorStop(0, '#c8892e');
+      g.addColorStop(1, ring === 0 ? '#ffe9a8' : '#fff6d8');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(-11, -r, 0, -r * 1.5);
+      ctx.quadraticCurveTo(11, -r, 0, 0);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+  // hot core
+  ctx.fillStyle = 'rgba(255,247,220,' + (0.7 * pulse) + ')';
+  ctx.shadowColor = '#ffd27a'; ctx.shadowBlur = 30 * pulse;
+  ctx.beginPath(); ctx.arc(0, -6, 12, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+// ---------- fireflies + fog (living swamp overlays) ----------
+const fireflies = Array.from({ length: 22 }, () => ({
+  x: Math.random() * ARENA_W, y: Math.random() * ARENA_H,
+  ph: Math.random() * Math.PI * 2, sp: 0.3 + Math.random() * 0.5,
+  rx: 40 + Math.random() * 120, ry: 30 + Math.random() * 90,
+}));
+function drawAtmosphere(ctx: CanvasRenderingContext2D, time: number) {
+  // fireflies drift in slow lissajous loops, twinkle warm
+  for (const f of fireflies) {
+    const x = f.x + Math.cos(time * f.sp + f.ph) * f.rx;
+    const y = f.y + Math.sin(time * f.sp * 1.3 + f.ph) * f.ry;
+    const tw = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(time * 3 + f.ph * 5));
+    ctx.globalAlpha = tw;
+    ctx.fillStyle = '#ffe58a';
+    ctx.shadowColor = '#ffd27a'; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(x, y, 2.4, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+  // slow drifting fog band (two layers) for depth
+  for (let i = 0; i < 2; i++) {
+    const off = (time * (6 + i * 4)) % (ARENA_W + 600) - 300;
+    const g = ctx.createLinearGradient(off, 0, off + 600, 0);
+    g.addColorStop(0, 'rgba(60,80,72,0)');
+    g.addColorStop(0.5, `rgba(70,92,82,${0.05 + i * 0.03})`);
+    g.addColorStop(1, 'rgba(60,80,72,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, i === 0 ? ARENA_H * 0.1 : ARENA_H * 0.6, ARENA_W, ARENA_H * 0.3);
+  }
+}
+
+// ---------- pixel-sprite helper (nearest, flip, squash, tint) ----------
+function drawSprite(ctx: CanvasRenderingContext2D, im: HTMLImageElement, x: number, y: number,
+                    h: number, flip: boolean, sx: number, sy: number, flash: number, rot = 0) {
+  const aspect = im.width / im.height;
+  const dh = h, dw = h * aspect;
+  ctx.save();
+  ctx.translate(x, y);
+  if (rot) ctx.rotate(rot);
+  ctx.scale((flip ? -1 : 1) * sx, sy);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(im, -dw / 2, -dh, dw, dh); // anchor at feet (bottom-center)
+  if (flash > 0) {
+    ctx.globalAlpha = flash;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.drawImage(im, -dw / 2, -dh, dw, dh);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+}
+
 // ---------- dash afterimages (render-local trail) ----------
 const trail: { x: number; y: number; life: number }[] = [];
 
@@ -193,6 +289,7 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   ctx.fillStyle = '#020806';
   ctx.fillRect(0, 0, cw, ch);
   ctx.save();
+  ctx.imageSmoothingEnabled = false; // crisp pixel art
   ctx.translate(ox, oy);
   ctx.scale(scale, scale);
 
@@ -204,7 +301,11 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   ctx.scale(zoom, zoom);
   ctx.translate(-ARENA_W / 2 + sx, -ARENA_H / 2 + sy);
 
-  ctx.drawImage(backdrop, 0, 0);
+  // real painted swamp backdrop (falls back to graybox pond until the image loads)
+  const bd = img('backdrop');
+  if (bd) ctx.drawImage(bd, 0, 0, ARENA_W, ARENA_H);
+  else { if (!backdrop) backdrop = buildBackdrop(); ctx.drawImage(backdrop, 0, 0); }
+  drawLotus(ctx, time);
   if (decalCanvas) ctx.drawImage(decalCanvas, 0, 0);
 
   // spawn telegraphs: pulsing glyph + glowing eyes
@@ -274,6 +375,8 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   }
   ctx.globalAlpha = 1;
 
+  drawAtmosphere(ctx, time);
+
   ctx.restore();
 
   drawHud(ctx, w, cw, ch, scale, ox, oy, time, paused);
@@ -292,52 +395,54 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
     return;
   }
   const atk = f.attack;
-  const hop = Math.sin(f.hopPhase * Math.PI) * 6;
-  let squashX = 1, squashY = 1;
-  if (atk.phase === 'windup' || atk.phase === 'heavywindup') { squashX = 1.08; squashY = 0.9; }
-  if (atk.phase === 'heavyhold') { squashX = 1.12 + Math.sin(time * 18) * 0.015; squashY = 0.86; }
-  if (atk.phase === 'active') { squashX = 0.94; squashY = 1.08; }
-  if (f.dashT > 0) { squashX = 1.25; squashY = 0.75; }
+  const speed = Math.hypot(f.vx, f.vy);
+  const moving = speed > 20 && f.dashT <= 0;
+  // hop arc: 0 at ground contact -> 1 at apex -> 0, once per hop. Drives lift + squash/stretch.
+  const hopArc = moving ? Math.abs(Math.sin(f.hopPhase * Math.PI)) : 0;
+  const hop = hopArc * 17 + (moving ? 0 : Math.sin(time * 2.1) * 1.4); // idle micro-bob
+  // stretch tall at the apex, squash wide on landing
+  let squashX = 1 - hopArc * 0.11;
+  let squashY = 1 + hopArc * 0.15;
+  if (!moving && f.dashT <= 0) { const b = Math.sin(time * 2.2) * 0.03; squashX -= b; squashY += b; } // breathing
+  if (atk.phase === 'windup' || atk.phase === 'heavywindup') { squashX *= 1.08; squashY *= 0.9; }
+  if (atk.phase === 'heavyhold') { squashX *= 1.12 + Math.sin(time * 18) * 0.015; squashY *= 0.86; }
+  if (atk.phase === 'active') { squashX *= 0.92; squashY *= 1.1; }
+  if (f.dashT > 0) { squashX = 1.32; squashY = 0.7; }
+  // lean into the hop + into horizontal motion (secondary motion)
+  const lean = (moving ? Math.sin(f.hopPhase * Math.PI * 2) * 0.05 : 0)
+    + Math.max(-0.1, Math.min(0.1, f.vx / 3200));
 
   const flicker = f.iframesT > 0 && Math.floor(time * 24) % 2 === 0;
   ctx.save();
   ctx.translate(fx, fy - hop);
+  if (lean) ctx.rotate(lean);
   if (flicker) ctx.globalAlpha = 0.45;
 
   // sword BEHIND frog when aiming up
   const aimUp = Math.sin(atk.phase === 'none' ? f.aim : atk.angle) < -0.3;
   if (aimUp) drawSword(ctx, w, time);
 
-  ctx.scale(squashX, squashY);
-  // body
-  ctx.fillStyle = f.hurtFlashT > 0 ? '#e8d8d2' : C.frog;
-  ctx.beginPath(); ctx.ellipse(0, 0, FROG_RADIUS, FROG_RADIUS * 0.88, 0, 0, Math.PI * 2); ctx.fill();
-  // amber team rim (P1)
-  ctx.strokeStyle = 'rgba(255,210,122,0.8)';
-  ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.ellipse(0, 0, FROG_RADIUS, FROG_RADIUS * 0.88, 0, 0, Math.PI * 2); ctx.stroke();
-  // belly
-  ctx.fillStyle = f.hurtFlashT > 0 ? '#fff' : C.frogBelly;
-  ctx.beginPath(); ctx.ellipse(0, FROG_RADIUS * 0.28, FROG_RADIUS * 0.62, FROG_RADIUS * 0.45, 0, 0, Math.PI * 2); ctx.fill();
-  // legs (simple haunches)
-  ctx.fillStyle = C.frogDark;
-  ctx.beginPath(); ctx.ellipse(-FROG_RADIUS * 0.85, FROG_RADIUS * 0.35, 12, 9, 0.5, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.ellipse(FROG_RADIUS * 0.85, FROG_RADIUS * 0.35, 12, 9, -0.5, 0, Math.PI * 2); ctx.fill();
-  // eyes track aim; blink on a seeded cycle
-  const blink = Math.sin(time * 0.7) > 0.995;
-  const eyeDx = Math.cos(f.aim) * 5, eyeDy = Math.sin(f.aim) * 4;
-  for (const side of [-1, 1]) {
-    ctx.fillStyle = C.frogDark;
-    ctx.beginPath(); ctx.arc(side * FROG_RADIUS * 0.45, -FROG_RADIUS * 0.62, 11, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#f5f2e0';
-    ctx.beginPath(); ctx.arc(side * FROG_RADIUS * 0.45, -FROG_RADIUS * 0.62, 8, 0, Math.PI * 2); ctx.fill();
-    if (!blink) {
-      ctx.fillStyle = '#1a140a';
-      ctx.beginPath(); ctx.arc(side * FROG_RADIUS * 0.45 + eyeDx, -FROG_RADIUS * 0.62 + eyeDy, 4, 0, Math.PI * 2); ctx.fill();
-    } else {
-      ctx.strokeStyle = '#1a140a'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(side * FROG_RADIUS * 0.45 - 6, -FROG_RADIUS * 0.62); ctx.lineTo(side * FROG_RADIUS * 0.45 + 6, -FROG_RADIUS * 0.62); ctx.stroke();
+  const facingLeft = Math.cos(atk.phase === 'none' ? f.aim : atk.angle) < 0;
+  ctx.scale((facingLeft ? -1 : 1) * squashX, squashY);
+  const frogImg = img('frog');
+  if (frogImg) {
+    const h = FROG_RADIUS * 3.0;
+    const dw = h * (frogImg.width / frogImg.height);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(frogImg, -dw / 2, -h * 0.66, dw, h); // anchored near feet
+    if (f.hurtFlashT > 0) {
+      ctx.globalAlpha = Math.min(0.75, f.hurtFlashT * 5);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.drawImage(frogImg, -dw / 2, -h * 0.66, dw, h);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
     }
+  } else {
+    // graybox fallback until the sprite loads
+    ctx.fillStyle = f.hurtFlashT > 0 ? '#e8d8d2' : C.frog;
+    ctx.beginPath(); ctx.ellipse(0, 0, FROG_RADIUS, FROG_RADIUS * 0.88, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = f.hurtFlashT > 0 ? '#fff' : C.frogBelly;
+    ctx.beginPath(); ctx.ellipse(0, FROG_RADIUS * 0.28, FROG_RADIUS * 0.62, FROG_RADIUS * 0.45, 0, 0, Math.PI * 2); ctx.fill();
   }
   ctx.restore();
 
@@ -480,6 +585,42 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
     sx2 = 1.1; sy2 = 0.9;
   }
   ctx.scale(sx2, sy2);
+
+  // real sludgeling sprite (all sludge-family kinds share it for the slice), then bail to the
+  // world-space windup telegraph. Graybox blob below is the fallback until the image loads.
+  const sImg = img('sludgeling');
+  if (sImg) {
+    // penguin-waddle: rock side-to-side + little hops while closing on the player (Ian's vision)
+    const moving = e.state === 'seek' && Math.hypot(e.vx, e.vy) > 10;
+    const wadT = time * 9 + e.seed * 20;
+    if (moving) {
+      const wadHop = Math.abs(Math.sin(wadT)) * r * 0.18;
+      ctx.rotate(Math.sin(wadT) * 0.14);           // rock
+      ctx.translate(0, -wadHop);                    // hop
+      ctx.scale(1 + Math.cos(wadT * 2) * 0.05, 1 - Math.cos(wadT * 2) * 0.05); // squish per step
+    }
+    const h = r * 2.7;
+    const dw = h * (sImg.width / sImg.height);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(sImg, -dw / 2, -h * 0.6, dw, h);
+    if (e.flashT > 0) {
+      ctx.globalAlpha = 0.85; ctx.globalCompositeOperation = 'lighter';
+      ctx.drawImage(sImg, -dw / 2, -h * 0.6, dw, h);
+      ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+    if (e.state === 'windup') {
+      const p = e.stateF / data.atkWindup;
+      ctx.save();
+      ctx.strokeStyle = `rgba(255,95,162,${0.2 + p * 0.55})`;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(e.atkX, e.atkY, data.atkRadius * (0.5 + p * 0.5), 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+    return;
+  }
 
   // body color: white flash > armor flash > windup warm > base
   const warm = e.state === 'windup' && (e.stateF & 4) !== 0;

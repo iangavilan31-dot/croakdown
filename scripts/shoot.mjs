@@ -11,8 +11,10 @@ import { mkdirSync } from 'node:fs';
 const OUT = 'docs/qa';
 mkdirSync(OUT, { recursive: true });
 
+// headless = never opens/steals a window (Ian: don't hijack the screen). Chromium headless
+// still runs rAF + renders canvas 2D, so screenshots are valid (unlike a backgrounded tab).
 const VW = 1280, VH = 800;
-const browser = await chromium.launch({ headless: false });
+const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: VW, height: VH } });
 
 // Real JS errors fail the gate. Benign 404s (drop-in BGM not generated yet, the CDN

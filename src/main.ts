@@ -9,7 +9,10 @@ import { draw, toWorld } from './render/render';
 import { drawPerf, perfEnabled, recordRender, recordSim } from './render/perf';
 import { consumeEvents, decayFeel, feel, updateParticles } from './feel/feel';
 import { initAudio, resumeAudio, updateAudio, playBgm, setSfxVolume } from './engine/audio';
+import { loadAssets } from './engine/assets';
 import { DT } from './data/constants';
+
+loadAssets();
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
