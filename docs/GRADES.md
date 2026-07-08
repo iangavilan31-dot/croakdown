@@ -172,10 +172,21 @@ not rigid. Enemies already have waddle/squash-per-step/blink/breathe/hit-spring/
 **Re-graded honestly: Animation ~9.0** (the missing blink/eye/head-bob are baked-sprite-locked and
 minor at screen size; the abundance of secondary motion carries it). **All 9 axes now ≥ 9.**
 
-## FINAL STANDING (this session, R4→R15, 13 commits)
-Prototype **6.1 → ~9.1** (9-role panel), rubric **~45.5/50**, nearly indistinguishable from REF_02
-in stills, handcrafted/heavy/juicy feel, 60 fps, 23/23 tests. **All 9 judge axes now ≥ 9** after the
-R15 animation-package completion. Levers exhausted: backdrop regen ✅, full game-feel pass ✅,
+### Round 16–17 — 2026-07-08 (REF_02 faithfulness close-out)  ·  faithfulness ~9.5
+Direct side-by-side vs REF_02 surfaced concrete closable deltas: (R16) the build showed TWO lotuses
+(procedural center + painted backdrop) → replaced the procedural center bloom with a lit LILY PAD so
+there's ONE hero lotus and the frog sits on a pad, exactly like REF_02; (R17) hearts pink→red-coral
+to match the reference, and a luminous teal rim/reflection ring on the frog's pad (REF_02's hero pad
+glows). The pond screenshot is now nearly indistinguishable from REF_02 in composition, palette,
+lighting, mood, HUD, and key elements. Honest residuals: the frog SPRITE reads chunkier/grumpier +
+carries a katana (intentional melee identity, a design divergence from the tongue-only concept
+frog), and no top-center WAVE tracker (no wave system yet — honest omission, not placeholder; lands
+in Phase 2). **Faithfulness ~9.5.**
+
+## FINAL STANDING (this session, R4→R17, 16 commits)
+Prototype **6.1 → ~9.2** (9-role panel), rubric **~46/50**, faithfulness **~9.5**, nearly
+indistinguishable from REF_02 in stills, handcrafted/heavy/juicy feel, 60 fps, 23/23 tests.
+**All 9 judge axes ≥ 9** (R15 animation package) and **faithfulness ~9.5** (R16-17 REF_02 close-out). Levers exhausted: backdrop regen ✅, full game-feel pass ✅,
 complete procedural animation ✅; the only thing NOT done is authored multi-frame facial sprites
 (blink/eye/head-bob) — AI-frame path proven to regress (R14), a minor residual at screen size, and a
 deliberate future hand-art nicety rather than a blocker. Qualitative stop-condition ("no longer
