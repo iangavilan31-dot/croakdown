@@ -435,6 +435,10 @@ function drawSprite(ctx: CanvasRenderingContext2D, im: HTMLImageElement, x: numb
 // ---------- dash afterimages (render-local trail) ----------
 const trail: { x: number; y: number; life: number }[] = [];
 
+// frog body tilt, smoothed — the body LAGS the movement so turning has weight/inertia and settles
+// back instead of snapping (Ian: inertia when turning, never rigid). Persists across frames.
+let frogTilt = 0;
+
 // ---------- lingering slash VFX (bright katana crescent that persists after a swing) ----------
 // Emitted the frame a swing goes active; fades over ~0.22s so the cut reads in motion AND in a
 // still frame (critics: swing is invisible / combat has no impact). One per swing (tick-guarded).
@@ -678,13 +682,16 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
   // walking belly jiggle — a secondary squash wobble at 2x the hop so the plump body reads soft,
   // never a rigid sliding sprite (Ian: belly jiggle / secondary motion).
   if (moving) { const jig = Math.sin(f.hopPhase * Math.PI * 4) * 0.04; squashX += jig; squashY -= jig; }
-  if (atk.phase === 'windup' || atk.phase === 'heavywindup') { squashX *= 1.08; squashY *= 0.9; }
-  if (atk.phase === 'heavyhold') { squashX *= 1.12 + Math.sin(time * 18) * 0.015; squashY *= 0.86; }
-  if (atk.phase === 'active') { squashX *= 0.92; squashY *= 1.1; }
+  if (atk.phase === 'windup' || atk.phase === 'heavywindup') { squashX *= 1.14; squashY *= 0.87; } // deeper coil = anticipation
+  if (atk.phase === 'heavyhold') { squashX *= 1.16 + Math.sin(time * 18) * 0.02; squashY *= 0.84; }
+  if (atk.phase === 'active') { squashX *= 0.9; squashY *= 1.12; }
+  if (atk.phase === 'recovery') { const rp = atk.data ? atk.frame / Math.max(1, atk.data.recovery) : 0; const s = (1 - rp) * 0.09; squashX *= 1 + s; squashY *= 1 - s; } // settle-bounce back to rest
   if (f.dashT > 0) { squashX = 1.32; squashY = 0.7; }
-  // lean into the hop + into horizontal motion (secondary motion)
-  const lean = (moving ? Math.sin(f.hopPhase * Math.PI * 2) * 0.05 : 0)
-    + Math.max(-0.1, Math.min(0.1, f.vx / 3200));
+  // lean into the hop + into horizontal motion, but the horizontal tilt is SMOOTHED so the body
+  // drags behind a direction change and eases back (turn inertia — weighty, never rigid).
+  const targetTilt = Math.max(-0.13, Math.min(0.13, f.vx / 2600));
+  frogTilt += (targetTilt - frogTilt) * 0.16;
+  const lean = (moving ? Math.sin(f.hopPhase * Math.PI * 2) * 0.05 : 0) + frogTilt;
 
   // strike motion: pull back on windup (anticipation), thrust forward on the active swing
   // (follow-through) so the hit reads as the frog's own action (critics: connect kill to swing).
@@ -693,7 +700,10 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
     const amt = (atk.phase === 'active' ? 0.55 : 0.28) * FROG_RADIUS;
     lungeX = Math.cos(atk.angle) * amt; lungeY = Math.sin(atk.angle) * amt;
   } else if (atk.phase === 'windup' || atk.phase === 'heavywindup' || atk.phase === 'heavyhold') {
-    lungeX = -Math.cos(atk.angle) * FROG_RADIUS * 0.2; lungeY = -Math.sin(atk.angle) * FROG_RADIUS * 0.2;
+    lungeX = -Math.cos(atk.angle) * FROG_RADIUS * 0.32; lungeY = -Math.sin(atk.angle) * FROG_RADIUS * 0.32; // bigger weight-shift back
+  } else if (atk.phase === 'recovery') {
+    const rp = atk.data ? atk.frame / Math.max(1, atk.data.recovery) : 0;   // drift back to rest (natural recovery)
+    lungeX = -Math.cos(atk.angle) * FROG_RADIUS * 0.12 * (1 - rp); lungeY = -Math.sin(atk.angle) * FROG_RADIUS * 0.12 * (1 - rp);
   }
 
   const flicker = f.iframesT > 0 && Math.floor(time * 24) % 2 === 0;
