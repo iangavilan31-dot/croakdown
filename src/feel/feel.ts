@@ -86,6 +86,20 @@ export function addDecal(x: number, y: number, kind: DecalKind, rot = Math.rando
   decalStats.adds++;
 }
 
+// ---------- water ripples (the swamp reacts to every footfall) ----------
+export interface Ripple { x: number; y: number; t: number; life: number; maxR: number }
+export const ripples: Ripple[] = [];
+export function spawnRipple(x: number, y: number, maxR: number, life = 0.7) {
+  if (ripples.length > 60) ripples.shift();
+  ripples.push({ x, y, t: 0, life, maxR });
+}
+export function updateRipples(dt: number) {
+  for (let i = ripples.length - 1; i >= 0; i--) {
+    ripples[i].t += dt;
+    if (ripples[i].t >= ripples[i].life) { ripples[i] = ripples[ripples.length - 1]; ripples.pop(); }
+  }
+}
+
 // ---------- event consumption (the fan-out) ----------
 const PINK = '#ff5fa2';
 const BLOOD = '#a3132e';
@@ -140,6 +154,7 @@ export function consumeEvents(w: World): void {
       case 'flop': {
         spawnParticles(e.x, e.y, 18, { spread: Math.PI * 2, speed: 300, color: '#5b4a36', maxLife: 0.5, size: 5, gravity: 220 });
         addDecal(e.x, e.y, 'crater', 0, 1.1);
+        spawnRipple(e.x, e.y + 10, 110, 0.7);
         addTrauma(TRAUMA_HEAVY);
         sfx('flop');
         break;
@@ -159,11 +174,13 @@ export function consumeEvents(w: World): void {
       }
       case 'dash': {
         spawnParticles(e.x - e.dirX * 20, e.y - e.dirY * 20, 8, { angle: Math.atan2(-e.dirY, -e.dirX), spread: 0.8, speed: 180, color: '#cfe8dd', maxLife: 0.3, size: 3 });
+        spawnRipple(e.x, e.y + 14, 70, 0.6);
         sfx('dash');
         break;
       }
       case 'hop': {
         spawnParticles(e.x, e.y + 18, 2, { spread: Math.PI, angle: Math.PI, speed: 60, color: '#3d5a4e', maxLife: 0.3, size: 2 });
+        spawnRipple(e.x, e.y + 16, 40, 0.55);
         sfx('hop');
         break;
       }

@@ -8,7 +8,7 @@ import {
 import { ENEMIES } from '../data/enemies';
 import { TONGUE } from '../data/weapons';
 import type { Enemy, World } from '../sim/types';
-import { feel, particles, decals, decalStats, shakeOffset, type Decal } from '../feel/feel';
+import { feel, particles, decals, decalStats, ripples, shakeOffset, type Decal } from '../feel/feel';
 import { img } from '../engine/assets';
 
 // palette (Art Direction law)
@@ -248,6 +248,31 @@ function drawAtmosphere(ctx: CanvasRenderingContext2D, time: number) {
   }
 }
 
+// ---------- water ripples (concentric rings expanding on the pond surface) ----------
+function drawRipples(ctx: CanvasRenderingContext2D) {
+  for (const rp of ripples) {
+    const p = rp.t / rp.life;            // 0 -> 1 lifetime
+    const a = (1 - p) * 0.5;             // fade out
+    if (a <= 0.01) continue;
+    ctx.strokeStyle = `rgba(180,225,210,${a})`;
+    ctx.lineWidth = 2.5 * (1 - p * 0.6);
+    // leading ring
+    let r = rp.maxR * p;
+    ctx.beginPath();
+    ctx.ellipse(rp.x, rp.y, r, r * 0.36, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    // trailing ring (chases behind for a real ripple read)
+    const p2 = p - 0.28;
+    if (p2 > 0) {
+      r = rp.maxR * p2;
+      ctx.strokeStyle = `rgba(180,225,210,${a * 0.6})`;
+      ctx.beginPath();
+      ctx.ellipse(rp.x, rp.y, r, r * 0.36, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+}
+
 // ---------- pixel-sprite helper (nearest, flip, squash, tint) ----------
 function drawSprite(ctx: CanvasRenderingContext2D, im: HTMLImageElement, x: number, y: number,
                     h: number, flip: boolean, sx: number, sy: number, flash: number, rot = 0) {
@@ -305,6 +330,7 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   else { if (!backdrop) backdrop = buildBackdrop(); ctx.drawImage(backdrop, 0, 0); }
   drawLotus(ctx, time);
   if (decalCanvas) ctx.drawImage(decalCanvas, 0, 0);
+  drawRipples(ctx);
 
   // spawn telegraphs: pulsing glyph + glowing eyes
   for (const t of w.telegraphs) {

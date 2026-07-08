@@ -7,7 +7,7 @@ import type { SimInput, World } from './sim/types';
 import { sampleInput } from './engine/input';
 import { draw, toWorld } from './render/render';
 import { drawPerf, perfEnabled, recordRender, recordSim } from './render/perf';
-import { consumeEvents, decayFeel, feel, updateParticles } from './feel/feel';
+import { consumeEvents, decayFeel, feel, updateParticles, updateRipples } from './feel/feel';
 import { initAudio, resumeAudio, updateAudio, playBgm, setSfxVolume } from './engine/audio';
 import { loadAssets } from './engine/assets';
 import { DT } from './data/constants';
@@ -97,6 +97,7 @@ function frame(now: number) {
 
     consumeEvents(world);
     updateParticles(dt);
+    updateRipples(dt);
     decayFeel(dt);
     updateAudio(dt);
   }
