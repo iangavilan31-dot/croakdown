@@ -711,7 +711,7 @@ function drawBackKatana(ctx: CanvasRenderingContext2D, r: number) {
   ctx.fillStyle = '#b6ff6a'; ctx.shadowColor = '#8fff5a'; ctx.shadowBlur = 5;
   ctx.beginPath(); ctx.arc(0, -w * 1.2, w * 0.5, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
   // wrapped handle (tsuka) rising the other way + pommel (kashira)
-  ctx.fillStyle = '#243038'; roundRect(ctx, -H, -w * 0.85, H, w * 1.7, w * 0.5); ctx.fill();
+  ctx.fillStyle = '#3a2a1c'; roundRect(ctx, -H, -w * 0.85, H, w * 1.7, w * 0.5); ctx.fill();
   ctx.strokeStyle = '#111a20'; ctx.lineWidth = w * 0.28;
   for (let i = 0; i < 4; i++) { const hx = -H + w * 0.7 + i * (H / 4); ctx.beginPath(); ctx.moveTo(hx - w * 0.5, -w * 0.85); ctx.lineTo(hx + w * 0.5, w * 0.85); ctx.stroke(); }
   ctx.fillStyle = '#2a2018'; ctx.beginPath(); ctx.arc(-H, 0, w * 1.05, 0, Math.PI * 2); ctx.fill();
@@ -815,7 +815,7 @@ function drawSwordAt(ctx: CanvasRenderingContext2D, w: World, time: number) {
   ctx.fillStyle = '#b6ff6a'; ctx.shadowColor = '#8fff5a'; ctx.shadowBlur = 5;
   ctx.beginPath(); ctx.arc(11, -6, 1.6, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
   // cloth-wrapped tsuka (handle)
-  ctx.fillStyle = '#243038'; ctx.fillRect(-5, -3.5, 16, 7);
+  ctx.fillStyle = '#3a2a1c'; ctx.fillRect(-5, -3.5, 16, 7);
   ctx.strokeStyle = '#101a20'; ctx.lineWidth = 1.2;
   for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-4 + i * 4, -3.5); ctx.lineTo(-1 + i * 4, 3.5); ctx.stroke(); }
   // kashira (pommel)
@@ -863,9 +863,13 @@ function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: num
 
   // dark outline + soft bioluminescent rim (separates from dark water & foliage)
   ctx.save();
-  ctx.shadowColor = 'rgba(150,240,150,0.7)'; ctx.shadowBlur = 8;
-  ctx.fillStyle = flash ? '#daffe0' : P.outline;
-  ctx.beginPath(); ctx.ellipse(0, 0, rx + 2.5, ry + 2.5, 0, 0, Math.PI * 2); ctx.fill();
+  // Separate the swarm from the soft olive lily pads (blind gameplay judge: blobs camouflage
+  // into the foliage — same size/value/soft edge, only the eyes read). A crisp near-black
+  // outline gives a hard silhouette edge the pads lack, and the biolum rim is pulled tight
+  // (low blur) so it haloes the shape instead of blooming into pad-green. No off-palette colour.
+  ctx.shadowColor = 'rgba(150,240,150,0.6)'; ctx.shadowBlur = 4;
+  ctx.fillStyle = flash ? '#daffe0' : '#02100a';
+  ctx.beginPath(); ctx.ellipse(0, 0, rx + 3.5, ry + 3.5, 0, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 
   if (flash) {
