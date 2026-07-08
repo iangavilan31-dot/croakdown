@@ -284,11 +284,11 @@ function mulberry(seed: number): () => number {
   };
 }
 const dRng = mulberry(0x0a7ed3);
-const PADS = Array.from({ length: 17 }, () => {
+const PADS = Array.from({ length: 24 }, () => {
   let x = 0, y = 0;
   do { x = 130 + dRng() * (ARENA_W - 260); y = 130 + dRng() * (ARENA_H - 260); }
-  while (Math.hypot(x - ARENA_W / 2, y - ARENA_H / 2) < 300);       // keep the play/lotus center clear
-  return { x, y, r: 26 + dRng() * 38, rot: dRng() * Math.PI, light: dRng() < 0.34, notch: dRng() * Math.PI * 2 };
+  while (Math.hypot(x - ARENA_W / 2, y - ARENA_H / 2) < 290);       // keep the play/lotus center clear
+  return { x, y, r: 30 + dRng() * 46, rot: dRng() * Math.PI, light: dRng() < 0.36, notch: dRng() * Math.PI * 2 };
 });
 const REEDS = Array.from({ length: 8 }, () => ({
   x: dRng() < 0.5 ? 70 + dRng() * 240 : ARENA_W - 70 - dRng() * 240,
@@ -463,6 +463,10 @@ function drawSlashFx(ctx: CanvasRenderingContext2D, time: number): void {
     ctx.strokeStyle = `rgba(255,236,190,${0.85 * fade})`;
     ctx.lineWidth = (s.kind === 'heavy' ? 5 : 3) * (1 - k * 0.4);
     ctx.beginPath(); ctx.arc(0, 0, r1, s.a0, s.a1); ctx.stroke();
+    // hot-pink attack accent just inside the edge — ties combat to the palette's pink accent (Ian)
+    ctx.strokeStyle = `rgba(255,95,162,${0.6 * fade})`;
+    ctx.lineWidth = (s.kind === 'heavy' ? 3 : 2) * (1 - k * 0.4);
+    ctx.beginPath(); ctx.arc(0, 0, r1 * 0.9, s.a0, s.a1); ctx.stroke();
     ctx.restore();
   }
 }
@@ -973,18 +977,21 @@ function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: num
   // big cute glowing eyes with glint (track facing)
   const look = e.facing;
   const lx = Math.cos(look) * r * 0.12, ly = Math.sin(look) * r * 0.08;
-  const es = (e.kind === 'gloopa' ? 0.22 : e.kind === 'spikeblob' ? 0.19 : 0.18) * r;
+  const es = (e.kind === 'gloopa' ? 0.24 : e.kind === 'spikeblob' ? 0.21 : 0.2) * r;   // bigger, expressive
   const warmEye = ((e.seed * 0.379) % 1) < 0.28;    // ~28% amber-eyed (REF_02 swarm has mixed eyes)
   const iris = (warm || warmEye) ? '#ffb060' : '#c9ff72';
+  const blink = (((time + e.seed * 7) % (3.2 + (e.seed % 1.5))) < 0.13) ? 0.14 : 1;   // desynced blink
   for (const side of [-1, 1]) {
     const ox = side * r * 0.33 + lx, oy = -r * 0.1 + ly;
     ctx.fillStyle = '#0c1f13';
-    ctx.beginPath(); ctx.ellipse(ox, oy, es * 1.1, es * 1.35, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(ox, oy, es * 1.1, es * 1.35 * blink, 0, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = iris; ctx.shadowColor = iris; ctx.shadowBlur = 6;
-    ctx.beginPath(); ctx.ellipse(ox, oy, es * 0.66, es * 0.9, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(ox, oy, es * 0.66, es * 0.9 * blink, 0, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath(); ctx.arc(ox - es * 0.28, oy - es * 0.45, es * 0.24, 0, Math.PI * 2); ctx.fill();
+    if (blink > 0.5) {
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(ox - es * 0.28, oy - es * 0.45, es * 0.24, 0, Math.PI * 2); ctx.fill();
+    }
   }
   // gloopa third eye (grotesque bruiser tell)
   if (e.kind === 'gloopa') {
