@@ -375,27 +375,29 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   if (!backdrop) backdrop = buildBackdrop();
   updateDecalLayer();
 
-  // letterboxed uniform scale
-  const scale = Math.min(cw / ARENA_W, ch / ARENA_H);
-  view.scale = scale / devicePixelRatio;
-  const w2 = ARENA_W * scale, h2 = ARENA_H * scale;
-  const ox = (cw - w2) / 2, oy = (ch - h2) / 2;
-  view.ox = ox / devicePixelRatio; view.oy = oy / devicePixelRatio;
+  // FOLLOW-CAMERA zoomed ~40% past the letterbox fit, centered on the frog and clamped to the
+  // arena — the hero + combat now read at a legible scale (critics: everything too small/muddy).
+  const fit = Math.min(cw / ARENA_W, ch / ARENA_H);
+  const ZOOM = 1.4;
+  const [sx, sy, rot] = shakeOffset(time);
+  const camScale = fit * ZOOM * (1 + feel.zoomPulse * 0.02);
+  const viewW = cw / camScale, viewH = ch / camScale;
+  const ff = w.frog;
+  const camFx = ff.px + (ff.x - ff.px) * alpha, camFy = ff.py + (ff.y - ff.py) * alpha;
+  const camX = viewW >= ARENA_W ? ARENA_W / 2 : Math.max(viewW / 2, Math.min(ARENA_W - viewW / 2, camFx));
+  const camY = viewH >= ARENA_H ? ARENA_H / 2 : Math.max(viewH / 2, Math.min(ARENA_H - viewH / 2, camFy));
+  view.scale = camScale / devicePixelRatio;
+  view.ox = cw / (2 * devicePixelRatio) - view.scale * camX;
+  view.oy = ch / (2 * devicePixelRatio) - view.scale * camY;
 
   ctx.fillStyle = '#020806';
   ctx.fillRect(0, 0, cw, ch);
   ctx.save();
   ctx.imageSmoothingEnabled = false; // crisp pixel art
-  ctx.translate(ox, oy);
-  ctx.scale(scale, scale);
-
-  // camera: trauma shake + zoom pulse (juice-only camera law)
-  const [sx, sy, rot] = shakeOffset(time);
-  const zoom = 1 + feel.zoomPulse * 0.02;
-  ctx.translate(ARENA_W / 2, ARENA_H / 2);
+  ctx.translate(cw / 2, ch / 2);
   ctx.rotate(rot);
-  ctx.scale(zoom, zoom);
-  ctx.translate(-ARENA_W / 2 + sx, -ARENA_H / 2 + sy);
+  ctx.scale(camScale, camScale);
+  ctx.translate(-camX + sx, -camY + sy);
 
   // real painted swamp backdrop (falls back to graybox pond until the image loads)
   const bd = img('backdrop');
@@ -498,7 +500,8 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
 
   ctx.restore();
 
-  drawHud(ctx, w, cw, ch, scale, ox, oy, time, paused);
+  // HUD is a fixed screen-space overlay (independent of the follow-camera), anchored top-left
+  drawHud(ctx, w, cw, ch, fit, 0, 0, time, paused);
 }
 
 // ---------- frog ----------
