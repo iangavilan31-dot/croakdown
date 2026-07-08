@@ -294,6 +294,20 @@ const REEDS = Array.from({ length: 8 }, () => ({
   x: dRng() < 0.5 ? 70 + dRng() * 240 : ARENA_W - 70 - dRng() * 240,
   y: 150 + dRng() * (ARENA_H - 300), n: 3 + ((dRng() * 4) | 0), h: 58 + dRng() * 66, ph: dRng() * 6.28, cat: dRng() < 0.5,
 }));
+// large soft light/shadow patches (a canopy dappling the pond) — irregular organic value variation
+// that breaks the backdrop's tiled-mound repetition and reads handcrafted, not gridded.
+const DAPPLE = Array.from({ length: 16 }, () => ({
+  x: dRng() * ARENA_W, y: dRng() * ARENA_H, r: 200 + dRng() * 340, dark: dRng() < 0.68,
+}));
+function drawCanopyDapple(ctx: CanvasRenderingContext2D) {
+  for (const d of DAPPLE) {
+    const g = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.r);
+    if (d.dark) { g.addColorStop(0, 'rgba(2,13,10,0.3)'); g.addColorStop(1, 'rgba(2,13,10,0)'); }
+    else { g.addColorStop(0, 'rgba(96,158,124,0.07)'); g.addColorStop(1, 'rgba(96,158,124,0)'); }
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill();
+  }
+}
 
 function drawPondDressing(ctx: CanvasRenderingContext2D, time: number) {
   // lily pads
@@ -416,7 +430,7 @@ function pushSlash(w: World, fx: number, fy: number): void {
   lastSlashTick = w.tick;
   const dir = atk.chainIdx % 2 === 0 ? 1 : -1;
   const half = atk.data.arc / 2;
-  slashFx.push({ x: fx, y: fy, a0: atk.angle - dir * half, a1: atk.angle + dir * half, reach: atk.data.reach, kind: atk.data.cls, t: 0, life: 0.22 });
+  slashFx.push({ x: fx, y: fy, a0: atk.angle - dir * half, a1: atk.angle + dir * half, reach: atk.data.reach, kind: atk.data.cls, t: 0, life: 0.28 });
   if (slashFx.length > 8) slashFx.shift();
 }
 
@@ -430,7 +444,7 @@ function drawSlashFx(ctx: CanvasRenderingContext2D, time: number): void {
     const k = s.t / s.life;                       // 0->1
     const fade = 1 - k;
     const hot = s.kind === 'heavy' ? '255,214,120' : s.kind === 'medium' ? '255,232,150' : '190,255,150';
-    const r0 = s.reach * (0.5 + k * 0.12), r1 = s.reach * (1.02 + k * 0.1);   // expands slightly as it fades
+    const r0 = s.reach * (0.4 + k * 0.14), r1 = s.reach * (1.06 + k * 0.1);    // fuller crescent band, expands as it fades
     ctx.save();
     ctx.translate(s.x, s.y);
     // hot crescent band
@@ -499,6 +513,7 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   ctx.globalCompositeOperation = 'soft-light';
   ctx.fillStyle = '#3aa07f'; ctx.globalAlpha = 0.42; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
   ctx.restore();
+  drawCanopyDapple(ctx);             // organic light/shadow patches break the tiled-mound repetition
   drawPondDressing(ctx, time);       // lily pads + reeds ON the graded water (breaks the stump read)
   drawLotus(ctx, time);
   if (decalCanvas) ctx.drawImage(decalCanvas, 0, 0);

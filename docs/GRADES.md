@@ -69,6 +69,18 @@ add on-palette lily-pad / reed / cattail dressing + push stumps into vignette sh
 colour — pull the heavy/finisher crescent off pure-white toward warm-gold/lime (+ pink impact accent).
 (3) frog read — nudge sleepier/plumper toward REF_02's heavy-lidded slump.
 
+### Round 5 — 2026-07-08 (environment content)  ·  est. ~8.0
+Seeded lily-pad + reed/cattail pond dressing (painterly-shaded, on-palette) breaks the repeated-
+stump read → reads as REF_02's lily pond; screen-space edge vignette recedes backdrop props;
+slash VFX warmed off sterile white. Pads refined smaller/subtler after first pass read too vector.
+
+### Round 6 — 2026-07-08 (character + variety)  ·  est. ~8.4
+Plumper/sleepier frog idle (deeper belly breathing, heavier resting silhouette); lotus warm-glow
+range+intensity lifted to the dominant anchor; per-enemy seeded size variance (0.85–1.17×) so the
+swarm reads as varied creatures. Honest self-panel: Lighting 8.5 / Palette 9 / Composition 8 /
+Character 8 / Cohesion 7.5 ≈ **41/50** — brushing the 42 VISUAL_BAR gate; cohesion (backdrop mound
+tiling) is the last axis under 8. R7 targets it.
+
 ---
 
 ## Phase 1 — The Swing Test  ·  STATUS: CORE PROVEN, GATE NOT PASSED
