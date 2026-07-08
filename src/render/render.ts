@@ -99,11 +99,21 @@ function buildBackdrop(): HTMLCanvasElement {
 // game" (blind Reference + Commercial judges). Down-res the backdrop to a pixel grid ONCE; the
 // render's nearest-neighbor upscale then gives it the same chunky grain as the frog/enemies.
 let pixBackdrop: HTMLCanvasElement | null = null;
-const BACKDROP_PIXEL = 3;   // ARENA / this = internal pixel resolution (higher = chunkier)
+let pixBackdropF = -1;
+// A blind 3-judge candidate round (px=1/2/3/4/6, docs/qa/pix-compare.png) found NO clearly-superior
+// density — all MARGINAL, and 2/3 preferred the SMOOTH original (px=1): down-res-ing a soft painterly
+// backdrop just adds a rival pixel scale that fights the hero instead of unifying with it. The real
+// clash is render-STYLE (soft-painterly backdrop vs hard-pixel sprites), not grain size — only a true
+// pixel-art repaint of the backdrop resolves it (a call on the signed painterly-pixel hybrid). So this
+// defaults to 1 (smooth); __bpx keeps the QA knob live for that future decision.
+const BACKDROP_PIXEL = 1;
 function getPixBackdrop(bd: HTMLImageElement): HTMLCanvasElement {
-  if (pixBackdrop) return pixBackdrop;
+  // __bpx is a QA override so the candidate-compare probe can sweep densities live (1 = smooth original)
+  const f = Math.max(1, (window as any).__bpx ?? BACKDROP_PIXEL);
+  if (pixBackdrop && pixBackdropF === f) return pixBackdrop;
+  pixBackdropF = f;
   const c = document.createElement('canvas');
-  c.width = Math.round(ARENA_W / BACKDROP_PIXEL); c.height = Math.round(ARENA_H / BACKDROP_PIXEL);
+  c.width = Math.round(ARENA_W / f); c.height = Math.round(ARENA_H / f);
   const g = c.getContext('2d')!;
   g.imageSmoothingEnabled = true;    // smooth downscale -> clean solid pixel blocks
   g.drawImage(bd, 0, 0, c.width, c.height);
