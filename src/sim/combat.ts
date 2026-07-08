@@ -69,7 +69,7 @@ export function applyMeleeHit(
     e.armorFlashT = 0.12;
     e.freeze = Math.max(e.freeze, 1);
   } else {
-    e.flashT = 0.1;
+    e.flashT = 0.16;                        // longer white hit-flash so contact reads (critics)
     e.freeze = Math.max(e.freeze, vFrames);
   }
 
@@ -104,7 +104,7 @@ export function applyMeleeHit(
 export function applyPhysicsDamage(w: World, e: Enemy, dmg: number, dirX: number, dirY: number): boolean {
   const hpBefore = e.hp;
   e.hp -= dmg;
-  e.flashT = 0.08;
+  e.flashT = 0.12;
   e.freeze = Math.max(e.freeze, 2);
   const killed = e.hp <= 0;
   if (killed) killEnemy(w, e, dirX, dirY, dmg >= hpBefore * OVERKILL_MULT);

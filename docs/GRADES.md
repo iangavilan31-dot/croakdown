@@ -22,6 +22,27 @@ Honest, externally-verifiable gate status. No self-graded passes. See `design/11
 **Fixes applied this round:** frog 3.0→4.8 + warm hero rim; enemies muted colorize + softer regen + biolum rim + grounding + bigger + stronger waddle/hit-recoil; swing crescent bright + white cut-line; attack telegraph → authored filling danger-zone (was debug ring); density 8→14 start/cap 52/cadence 12→7.
 **Still OPEN:** enemy silhouette still spiky (gpt-image-1 refuses round → go PROCEDURAL slime next); re-verify blink/croak/walk at new size; brightness/contrast for thumbnail; HUD pip clarity; enemy variety; capsule frame w/ active slash.
 
+### Round 2 — 2026-07-08 (procedural slimes + round-1 fixes)
+| Critic | Score (Δ) | Headline |
+|---|---|---|
+| Judge 1 — Art | 6.0 (+1.0) | Env top-tier; slimes now too BRIGHT/mint break palette; frog rim too haloed; katana invisible |
+| Judge 2 — Animation | 6.0 (+0.5) | Frog weighty+good; slimes a clone hive-mind (no phase variety/hop); connect kill to swing |
+| Judge 3 — Feel | 6.5 (+1.0) | Swing reads grey not bright; NO hit-flash landing; telegraph shares gold w/ hero+loot |
+| Judge 4 — Creative | 7.5 (+1.0) | Real $15 game; world=9 hero=6; katana/combat-verb invisible in stills; HUD placeholder |
+| Blind 1 | 6.0 (+1.5) | Vibe premium; enemies flat placeholder ovals; combat no impact language; dark/empty |
+| Blind 2 | 5.5 (−0.5) | Enemies flat 2-dot blobs clump unreadable; HUD debug-tier; attacks ambiguous |
+| **AVERAGE** | **6.25 (+0.75)** | Climbing. Combat impact = the unanimous #1 gap. |
+
+**Fixes applied this round (combat-impact batch):**
+- **Lingering katana SLASH VFX** (`slashFx`): bright hot crescent + razor white edge persists ~0.22s after a swing → combat verb now READS in motion + stills (see phase1-04-carnage). Biggest win.
+- Hit-flash longer (0.1→0.16s) + bright white glow-spark burst on contact.
+- Slimes: muted grass-green palette (was mint) + wider edge→core shading + darker outline; desynced idle bob + stronger wobble (kill clone-sync).
+- Telegraph → hot RED core (was gold, shared w/ hero/loot).
+- Frog rim softened (less haloed).
+- QA: capsule capture `phase1-02-swing` (frog mid-active next to enemies).
+
+**Still OPEN for R3:** HUD cluster reads debug (all blinds+art+creative) — redesign; frog katana bigger/readable + brighter core; enemy variety visible; connect an anticipation/follow-through pose; env depth/brightness; capsule capture polish.
+
 ---
 
 ## Phase 1 — The Swing Test  ·  STATUS: CORE PROVEN, GATE NOT PASSED

@@ -319,6 +319,57 @@ function drawSprite(ctx: CanvasRenderingContext2D, im: HTMLImageElement, x: numb
 // ---------- dash afterimages (render-local trail) ----------
 const trail: { x: number; y: number; life: number }[] = [];
 
+// ---------- lingering slash VFX (bright katana crescent that persists after a swing) ----------
+// Emitted the frame a swing goes active; fades over ~0.22s so the cut reads in motion AND in a
+// still frame (critics: swing is invisible / combat has no impact). One per swing (tick-guarded).
+interface SlashFx { x: number; y: number; a0: number; a1: number; reach: number; kind: 'light' | 'medium' | 'heavy'; t: number; life: number }
+const slashFx: SlashFx[] = [];
+let lastSlashTick = -1;
+let lastRenderTime = 0;
+
+function pushSlash(w: World, fx: number, fy: number): void {
+  const atk = w.frog.attack;
+  if (atk.phase !== 'active' || atk.frame !== 0 || w.tick === lastSlashTick || !atk.data) return;
+  lastSlashTick = w.tick;
+  const dir = atk.chainIdx % 2 === 0 ? 1 : -1;
+  const half = atk.data.arc / 2;
+  slashFx.push({ x: fx, y: fy, a0: atk.angle - dir * half, a1: atk.angle + dir * half, reach: atk.data.reach, kind: atk.data.cls, t: 0, life: 0.22 });
+  if (slashFx.length > 8) slashFx.shift();
+}
+
+function drawSlashFx(ctx: CanvasRenderingContext2D, time: number): void {
+  const dt = Math.min(0.05, Math.max(0, time - lastRenderTime));
+  lastRenderTime = time;
+  for (let i = slashFx.length - 1; i >= 0; i--) {
+    const s = slashFx[i];
+    s.t += dt;
+    if (s.t >= s.life) { slashFx.splice(i, 1); continue; }
+    const k = s.t / s.life;                       // 0->1
+    const fade = 1 - k;
+    const hot = s.kind === 'heavy' ? '255,214,120' : s.kind === 'medium' ? '255,232,150' : '190,255,150';
+    const r0 = s.reach * (0.5 + k * 0.12), r1 = s.reach * (1.02 + k * 0.1);   // expands slightly as it fades
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    // hot crescent band
+    ctx.beginPath();
+    ctx.arc(0, 0, r1, s.a0, s.a1);
+    ctx.arc(0, 0, r0, s.a1, s.a0, true);
+    ctx.closePath();
+    const g = ctx.createRadialGradient(0, 0, r0, 0, 0, r1);
+    g.addColorStop(0, `rgba(${hot},0)`);
+    g.addColorStop(0.6, `rgba(${hot},${0.28 * fade})`);
+    g.addColorStop(1, `rgba(255,255,245,${0.5 * fade})`);
+    ctx.fillStyle = g;
+    ctx.fill();
+    // razor-thin ultra-bright leading edge at the arc's far side
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = `rgba(255,255,248,${0.9 * fade})`;
+    ctx.lineWidth = (s.kind === 'heavy' ? 5 : 3) * (1 - k * 0.4);
+    ctx.beginPath(); ctx.arc(0, 0, r1, s.a0, s.a1); ctx.stroke();
+    ctx.restore();
+  }
+}
+
 // ---------- main draw ----------
 export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: number, alpha: number, time: number, paused: boolean) {
   if (!backdrop) backdrop = buildBackdrop();
@@ -430,6 +481,9 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
     ctx.beginPath(); ctx.ellipse(t.x, t.y, FROG_RADIUS * 0.9, FROG_RADIUS * 0.7, 0, 0, Math.PI * 2); ctx.fill();
   }
 
+  // lingering katana slashes (drawn over entities for punch)
+  drawSlashFx(ctx, time);
+
   // particles
   for (const p of particles) {
     ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
@@ -460,6 +514,7 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
     return;
   }
   const atk = f.attack;
+  pushSlash(w, fx, fy);                    // emit a lingering slash the frame a swing goes active
   const speed = Math.hypot(f.vx, f.vy);
   const moving = speed > 20 && f.dashT <= 0;
   // hop arc: 0 at ground contact -> 1 at apex -> 0, once per hop. Drives lift + squash/stretch.
@@ -515,8 +570,8 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
     const dw = h * (frogImg.width / frogImg.height);
     const bx = -dw / 2, by = -h * 0.66;
     ctx.imageSmoothingEnabled = false;
-    // warm rim/hero-glow so the frog always pops off the stumps + water (value contrast)
-    ctx.shadowColor = 'rgba(255,206,130,0.95)'; ctx.shadowBlur = 16;
+    // soft warm rim so the frog reads lit (not haloed) and pops off the dark water
+    ctx.shadowColor = 'rgba(255,198,124,0.7)'; ctx.shadowBlur = 11;
     ctx.drawImage(frogImg, bx, by, dw, h);
     ctx.shadowBlur = 0;
     ctx.drawImage(frogImg, bx, by, dw, h);             // crisp body on top of the halo
@@ -698,24 +753,26 @@ function drawSwordAt(ctx: CanvasRenderingContext2D, w: World, time: number) {
 function drawAttackTell(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, p: number) {
   const rr = radius * (0.55 + p * 0.45);
   ctx.save();
-  const g = ctx.createRadialGradient(x, y, rr * 0.2, x, y, rr);
-  g.addColorStop(0, `rgba(255,120,60,${0.04 + p * 0.22})`);
-  g.addColorStop(0.75, `rgba(240,80,50,${0.03 + p * 0.14})`);
-  g.addColorStop(1, 'rgba(240,80,50,0)');
+  const g = ctx.createRadialGradient(x, y, rr * 0.15, x, y, rr);
+  g.addColorStop(0, `rgba(255,54,44,${0.08 + p * 0.3})`);      // hot red core = "danger" (not gold/loot)
+  g.addColorStop(0.7, `rgba(230,70,44,${0.03 + p * 0.14})`);
+  g.addColorStop(1, 'rgba(230,70,44,0)');
   ctx.fillStyle = g;
   ctx.beginPath(); ctx.ellipse(x, y, rr, rr * 0.55, 0, 0, Math.PI * 2); ctx.fill();
   // filling wedge sweep (clock hand) so the timing reads
-  ctx.strokeStyle = `rgba(255,190,120,${0.35 + p * 0.55})`;
+  ctx.strokeStyle = `rgba(255,110,80,${0.4 + p * 0.55})`;
   ctx.lineWidth = 1.5 + p * 2.5;
   ctx.beginPath(); ctx.ellipse(x, y, rr, rr * 0.55, 0, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); ctx.stroke();
   ctx.restore();
 }
 
 // per-kind slime palettes (muted swamp greens, tonal bands edge->core for a shaded sphere)
+// Muted swamp-greens (grass, not cyan-mint) with a WIDE edge->core value range so the sphere
+// reads as shaded not flat, and dark outlines to sit in the palette (critics R2: too bright + flat).
 const SLIME_PAL: Record<string, { outline: string; edge: string; mid: string; hi: string; core: string; fleck: string }> = {
-  blobbit: { outline: '#153320', edge: '#2c6640', mid: '#3f8a54', hi: '#5fae6f', core: '#8fd693', fleck: 'rgba(160,245,160,0.6)' },
-  spikeblob: { outline: '#0e2618', edge: '#244f38', mid: '#356a48', hi: '#4d8a5c', core: '#72b481', fleck: 'rgba(130,215,150,0.5)' },
-  gloopa: { outline: '#1b2a12', edge: '#465838', mid: '#647a46', hi: '#8a9d5c', core: '#bccb86', fleck: 'rgba(205,225,150,0.5)' },
+  blobbit: { outline: '#0c2015', edge: '#1d4529', mid: '#316a3f', hi: '#54985a', core: '#83c877', fleck: 'rgba(150,235,140,0.5)' },
+  spikeblob: { outline: '#0a1c14', edge: '#1a4230', mid: '#2c5f42', hi: '#468456', core: '#6cae70', fleck: 'rgba(120,205,135,0.45)' },
+  gloopa: { outline: '#141f0e', edge: '#3a4a2c', mid: '#586a3c', hi: '#828f52', core: '#aec079', fleck: 'rgba(195,215,140,0.45)' },
 };
 
 /** A soft ROUND cute jelly slime: shaded tonal-band body, gloss, internal flecks, big glowing
@@ -723,7 +780,7 @@ const SLIME_PAL: Record<string, { outline: string; edge: string; mid: string; hi
 function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: number, warm: boolean) {
   const flash = e.flashT > 0;
   const P = SLIME_PAL[e.kind] ?? SLIME_PAL.blobbit;
-  const wob = 1 + Math.sin(time * 4 + e.seed * 10) * 0.045;   // jelly wobble
+  const wob = 1 + Math.sin(time * (3.4 + (e.seed % 0.7) * 3) + e.seed * 10) * 0.08;   // jelly wobble, desynced
   const rx = r * 1.04 * wob, ry = r * 0.94 / wob;
 
   // dark outline + soft bioluminescent rim (separates from dark water & foliage)
@@ -839,6 +896,9 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
     ctx.rotate(Math.sin(wadT) * 0.18);
     ctx.translate(0, -wadHop);
     ctx.scale(1 + Math.cos(wadT * 2) * 0.1, 1 - Math.cos(wadT * 2) * 0.1);
+  } else {
+    // idle bob — per-instance phase so a crowd never syncs (critics: "wall of clones")
+    ctx.translate(0, Math.sin(time * 2.4 + e.seed * 25) * r * 0.09);
   }
   if (e.flashT > 0) ctx.scale(1.3, 0.72);           // hard flatten recoil on hit (juice)
   drawSlime(ctx, e, r, time, warm);

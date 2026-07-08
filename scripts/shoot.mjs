@@ -109,7 +109,10 @@ while (Date.now() - start < 26000) {
     await sleep(90);
   }
 
-  if (!shotSwarm && s.enemies >= 12) { await shot('phase1-02-swarm'); shotSwarm = true; }
+  // capsule shot: catch the frog MID-SWING right next to enemies (combat verb must read)
+  if (!shotSwarm && s.nd < 120 && (s.frog.phase === 'active' || s.frog.phase === 'follow')) {
+    await shot('phase1-02-swing'); shotSwarm = true;
+  }
   if (step % 12 === 0) log(`t+${s.elapsed}s`, { enemies: s.enemies, kills: s.kills, hp: s.frog.hp, ess: s.frog.essence });
 }
 
