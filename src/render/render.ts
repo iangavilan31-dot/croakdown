@@ -483,9 +483,12 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
   if (lean) ctx.rotate(lean);
   if (flicker) ctx.globalAlpha = 0.45;
 
+  // The katana lives SHEATHED on the back (drawBackKatana) and is only drawn/swung during an
+  // attack — no more dragging a heavy blade around while idle (Ian: "weird heavy thing").
+  const attacking = atk.phase !== 'none';
   // sword BEHIND frog when aiming up
   const aimUp = Math.sin(atk.phase === 'none' ? f.aim : atk.angle) < -0.3;
-  if (aimUp) drawSword(ctx, w, time);
+  if (aimUp && attacking) drawSword(ctx, w, time);
 
   const facingLeft = Math.cos(atk.phase === 'none' ? f.aim : atk.angle) < 0;
   ctx.scale((facingLeft ? -1 : 1) * squashX, squashY);
@@ -543,11 +546,8 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
     ctx.restore();
   }
 
-  // sword IN FRONT when aiming down/side
-  if (!aimUp) {
-    ctx.save();
-    ctx.translate(0, 0);
-    ctx.restore();
+  // sword IN FRONT when aiming down/side (only while attacking — otherwise it's sheathed)
+  if (!aimUp && attacking) {
     ctx.save();
     ctx.translate(fx, fy - hop);
     drawSwordAt(ctx, w, time);
@@ -616,20 +616,33 @@ function drawSwordAt(ctx: CanvasRenderingContext2D, w: World, time: number) {
     const dir = atk.data === null || atk.chainIdx % 2 === 0 ? 1 : -1;
     const half = atk.data!.arc / 2;
     ang = atk.angle - dir * half + dir * atk.data!.arc * p;
-    // arc smear (crescent)
-    ctx.save();
-    ctx.globalAlpha = 0.5;
+    // crisp katana slash: a sweeping crescent band + a bright leading cut-line. Colour reads the
+    // combo step (light=lime-white, finisher=gold, heavy=amber) so each hit looks distinct.
     const heavy = atk.data!.cls === 'heavy';
-    const grad = ctx.createRadialGradient(0, 0, atk.data!.reach * 0.35, 0, 0, atk.data!.reach);
-    grad.addColorStop(0, 'rgba(242,234,216,0)');
-    grad.addColorStop(1, heavy ? 'rgba(255,210,122,0.85)' : 'rgba(242,234,216,0.7)');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
+    const fin = atk.data!.cls === 'medium';
+    const col = heavy ? '255,205,120' : fin ? '255,228,150' : '206,244,188';
+    const reach = atk.data!.reach;
     const a0 = atk.angle - dir * half, a1 = ang;
-    ctx.moveTo(0, 0);
-    ctx.arc(0, 0, atk.data!.reach, a0, a1, dir < 0);
+    const r0 = reach * 0.55, r1 = reach * 1.02;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(0, 0, r1, a0, a1, dir < 0);
+    ctx.arc(0, 0, r0, a1, a0, dir >= 0);
     ctx.closePath();
+    const grad = ctx.createRadialGradient(0, 0, r0, 0, 0, r1);
+    grad.addColorStop(0, `rgba(${col},0)`);
+    grad.addColorStop(1, `rgba(${col},${0.45 + p * 0.25})`);
+    ctx.fillStyle = grad;
+    ctx.globalAlpha = 0.9 * (1 - p * 0.15);
     ctx.fill();
+    // bright leading edge — the blade's current cut line
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = `rgba(255,255,242,${0.9 * (1 - p * 0.3)})`;
+    ctx.lineWidth = heavy ? 6 : 4; ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a1) * r0, Math.sin(a1) * r0);
+    ctx.lineTo(Math.cos(a1) * (r1 + 6), Math.sin(a1) * (r1 + 6));
+    ctx.stroke();
     ctx.restore();
   } else if (atk.phase === 'follow') {
     const dir = atk.chainIdx % 2 === 0 ? 1 : -1;
@@ -814,11 +827,11 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
 
   ctx.restore();
 
-  // windup strike telegraph (honest ground truth)
+  // windup strike telegraph (honest ground truth) — warm amber danger, not pink
   if (e.state === 'windup') {
     const p = e.stateF / data.atkWindup;
     ctx.save();
-    ctx.strokeStyle = `rgba(255,95,162,${0.2 + p * 0.55})`;
+    ctx.strokeStyle = `rgba(255,140,70,${0.2 + p * 0.55})`;
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(e.atkX, e.atkY, data.atkRadius * (0.5 + p * 0.5), 0, Math.PI * 2);
