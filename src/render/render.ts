@@ -389,6 +389,7 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   view.scale = camScale / devicePixelRatio;
   view.ox = cw / (2 * devicePixelRatio) - view.scale * camX;
   view.oy = ch / (2 * devicePixelRatio) - view.scale * camY;
+  (window as any).__view = view;   // QA (shoot.mjs) mirrors the live follow-camera for correct mouse-aim
 
   ctx.fillStyle = '#020806';
   ctx.fillRect(0, 0, cw, ch);
@@ -403,6 +404,18 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   const bd = img('backdrop');
   if (bd) ctx.drawImage(bd, 0, 0, ARENA_W, ARENA_H);
   else { if (!backdrop) backdrop = buildBackdrop(); ctx.drawImage(backdrop, 0, 0); }
+  // ATMOSPHERE GRADE (ground plane only, before props/entities): the painted backdrop ships
+  // warm brown-purple; the REF_02 bar is a deep TEAL night-swamp. Remap hue -> teal, cool the
+  // shadows (kill the brown mud), then a teal midtone push so it reads lush not flat. This lands
+  // palette + lighting + faithfulness without regenerating the 1.8 MB art.
+  ctx.save();
+  ctx.globalCompositeOperation = 'color';
+  ctx.fillStyle = '#12564c'; ctx.globalAlpha = 0.52; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.fillStyle = '#0a332e'; ctx.globalAlpha = 0.34; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  ctx.globalCompositeOperation = 'soft-light';
+  ctx.fillStyle = '#3aa07f'; ctx.globalAlpha = 0.42; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  ctx.restore();
   drawLotus(ctx, time);
   if (decalCanvas) ctx.drawImage(decalCanvas, 0, 0);
   drawRipples(ctx);
@@ -783,10 +796,13 @@ function drawAttackTell(ctx: CanvasRenderingContext2D, x: number, y: number, rad
 // per-kind slime palettes (muted swamp greens, tonal bands edge->core for a shaded sphere)
 // Muted swamp-greens (grass, not cyan-mint) with a WIDE edge->core value range so the sphere
 // reads as shaded not flat, and dark outlines to sit in the palette (critics R2: too bright + flat).
+// REF_02 enemies read as near-BLACK swamp blobs — a dark silhouette carried by glowing eyes + a
+// biolum rim, NOT a bright body. R1/R2 critics flagged the mint bodies as a palette break; pulled
+// the whole value range WAY down so enemies live desaturated and only the eyes/rim borrow light.
 const SLIME_PAL: Record<string, { outline: string; edge: string; mid: string; hi: string; core: string; fleck: string }> = {
-  blobbit: { outline: '#0c2015', edge: '#1d4529', mid: '#316a3f', hi: '#54985a', core: '#83c877', fleck: 'rgba(150,235,140,0.5)' },
-  spikeblob: { outline: '#0a1c14', edge: '#1a4230', mid: '#2c5f42', hi: '#468456', core: '#6cae70', fleck: 'rgba(120,205,135,0.45)' },
-  gloopa: { outline: '#141f0e', edge: '#3a4a2c', mid: '#586a3c', hi: '#828f52', core: '#aec079', fleck: 'rgba(195,215,140,0.45)' },
+  blobbit: { outline: '#03110a', edge: '#0c2315', mid: '#143220', hi: '#1f452c', core: '#2c6039', fleck: 'rgba(120,210,140,0.32)' },
+  spikeblob: { outline: '#030e09', edge: '#0b2014', mid: '#122d1d', hi: '#1c432b', core: '#285838', fleck: 'rgba(110,195,130,0.28)' },
+  gloopa: { outline: '#0a1108', edge: '#1b2713', mid: '#2a381e', hi: '#3c4d27', core: '#516635', fleck: 'rgba(170,190,120,0.3)' },
 };
 
 /** A soft ROUND cute jelly slime: shaded tonal-band body, gloss, internal flecks, big glowing

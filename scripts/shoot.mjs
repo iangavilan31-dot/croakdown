@@ -28,14 +28,16 @@ page.on('pageerror', (e) => errors.push(String(e)));
 const shot = (name) => page.screenshot({ path: `${OUT}/${name}.png` });
 const sleep = (ms) => page.waitForTimeout(ms);
 
-// world<->screen mapping (must mirror render.ts letterboxing)
+// world<->screen mapping — read the LIVE follow-camera transform the game publishes on
+// window.__view (zoom + frog-follow + clamp), so mouse-aim lands on the real on-screen enemy.
+// Falls back to the old letterbox fit if the game hasn't drawn a frame yet.
 const ARENA_W = 1920, ARENA_H = 1080;
-function mapping() {
+async function toScreen(wx, wy) {
+  const v = await page.evaluate(() => window.__view ?? null);
+  if (v) return [wx * v.scale + v.ox, wy * v.scale + v.oy];
   const scale = Math.min(VW / ARENA_W, VH / ARENA_H);
-  const ox = (VW - ARENA_W * scale) / 2, oy = (VH - ARENA_H * scale) / 2;
-  return { scale, ox, oy };
+  return [wx * scale + (VW - ARENA_W * scale) / 2, wy * scale + (VH - ARENA_H * scale) / 2];
 }
-const toScreen = (wx, wy) => { const m = mapping(); return [wx * m.scale + m.ox, wy * m.scale + m.oy]; };
 
 const state = () => page.evaluate(() => {
   const w = window.__world;
@@ -86,7 +88,7 @@ while (Date.now() - start < 26000) {
 
   // aim at nearest enemy (or drift right if none)
   const target = s.nearest ?? { x: s.frog.x + 200, y: s.frog.y };
-  const [sx, sy] = toScreen(target.x, target.y);
+  const [sx, sy] = await toScreen(target.x, target.y);
   await page.mouse.move(sx, sy);
 
   // close distance if far, else stand and swing
