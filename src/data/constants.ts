@@ -40,21 +40,23 @@ export const TUMBLE_COLLIDE_DMG = 0.04; // x relative speed
 export const WALL_SPLAT_FRAC = 0.5;     // +50% of launching hit damage
 export const RECOIL_HOP = 12;
 
-// Hitstop (frames @60; victim base by class, attacker gets 70%)
-export const HITSTOP_LIGHT = 3;
-export const HITSTOP_MEDIUM = 5;
-export const HITSTOP_HEAVY = 9;
-export const HITSTOP_KILL_BONUS = 3;
-export const HITSTOP_MULTI_CAP = 14;
-export const HITSTOP_ATTACKER_FRAC = 0.7;
+// Hitstop (frames @60; victim base by class, attacker gets 70%). Ian's masterpass: swings must
+// feel EXPENSIVE/HEAVY — bumped so contact bites harder (chunkier freeze on every hit).
+export const HITSTOP_LIGHT = 4;
+export const HITSTOP_MEDIUM = 7;
+export const HITSTOP_HEAVY = 13;
+export const HITSTOP_KILL_BONUS = 4;
+export const HITSTOP_MULTI_CAP = 18;
+export const HITSTOP_ATTACKER_FRAC = 0.72;
 
-// Trauma budgets (shake = trauma^2, decay 1.8/s, max 24px / 0.5deg)
-export const TRAUMA_LIGHT = 0.05;
-export const TRAUMA_HEAVY = 0.15;
-export const TRAUMA_KILL = 0.1;
-export const TRAUMA_SPLAT = 0.25;
-export const TRAUMA_MAX = 0.7;
-export const TRAUMA_DECAY = 1.8;
+// Trauma budgets (shake = trauma^2, decay 1.8/s, max 24px / 0.5deg). Heavier hits kick the camera
+// harder for weight; decay a touch slower so the shake reads instead of snapping back instantly.
+export const TRAUMA_LIGHT = 0.06;
+export const TRAUMA_HEAVY = 0.19;
+export const TRAUMA_KILL = 0.12;
+export const TRAUMA_SPLAT = 0.28;
+export const TRAUMA_MAX = 0.75;
+export const TRAUMA_DECAY = 1.6;
 
 // Economy feel (prototype: collection only)
 export const MAGNET_RADIUS = 90;

@@ -563,7 +563,7 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   const f = w.frog;
   const fx = f.px + (f.x - f.px) * alpha, fy = f.py + (f.y - f.py) * alpha;
   ctx.beginPath();
-  ctx.ellipse(fx, fy + FROG_RADIUS * 0.8, FROG_RADIUS * 1.0, FROG_RADIUS * 0.34, 0, 0, Math.PI * 2);
+  ctx.ellipse(fx, fy + FROG_RADIUS * 0.86, FROG_RADIUS * 1.32, FROG_RADIUS * 0.42, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // essence drops
@@ -642,10 +642,10 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
   const moving = speed > 20 && f.dashT <= 0;
   // hop arc: 0 at ground contact -> 1 at apex -> 0, once per hop. Drives lift + squash/stretch.
   const hopArc = moving ? Math.abs(Math.sin(f.hopPhase * Math.PI)) : 0;
-  const hop = hopArc * 17 + (moving ? 0 : Math.sin(time * 2.1) * 1.4); // idle micro-bob
-  // stretch tall at the apex, squash wide on landing
-  let squashX = 1 - hopArc * 0.11;
-  let squashY = 1 + hopArc * 0.15;
+  const hop = hopArc * 20 + (moving ? 0 : Math.sin(time * 2.1) * 1.4); // idle micro-bob
+  // stretch tall at the apex, squash wide on landing (heavier amplitude — Ian: chunky/plump/squishy)
+  let squashX = 1 - hopArc * 0.17;
+  let squashY = 1 + hopArc * 0.22;
   // idle: plumper resting silhouette + deeper belly breathing (REF_02 frog reads heavy/slumped)
   if (!moving && f.dashT <= 0 && atk.phase === 'none') {
     const b = Math.sin(time * 1.9) * 0.05;
@@ -700,10 +700,10 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
 
   // sheathed KATANA on the back (Ian: "a samurai sword on the back — dope"). Scaled to the
   // bigger sprite so the wrapped handle + tsuba clearly rise over the shoulder (critics: invisible).
-  if (frogImg) drawBackKatana(ctx, FROG_RADIUS * 2.05);
+  if (frogImg) drawBackKatana(ctx, FROG_RADIUS * 2.7);
 
   if (frogImg) {
-    const h = FROG_RADIUS * 4.8;                        // bigger hero silhouette (critics: ~1.6x up)
+    const h = FROG_RADIUS * 6.6;                        // ~1.4x bigger hero (Ian masterpass: frog is THE focus, ~1.8x)
     const dw = h * (frogImg.width / frogImg.height);
     const bx = -dw / 2, by = -h * 0.66;
     ctx.imageSmoothingEnabled = false;
@@ -998,8 +998,8 @@ function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: num
 function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time: number) {
   const data = ENEMIES[e.kind];
   const ex = e.px + (e.x - e.px) * alpha, ey = e.py + (e.y - e.py) * alpha;
-  const sv = 0.85 + ((e.seed * 0.61803) % 1) * 0.32;   // per-instance size — a crowd of varied
-  const r = data.radius * sv;                          // creatures, not cloned sprites (critic note)
+  const sv = 0.96 + ((e.seed * 0.61803) % 1) * 0.36;   // bigger, blobbier, varied bodies (Ian: BIG,
+  const r = data.radius * sv;                          // never tiny dots) — render-only, crowd not cloned
   ctx.save();
 
   // hitstop sprite shake (hurtbox static — Sakurai law)
@@ -1033,12 +1033,14 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
   // spiky urchins). Bouncy waddle + hard hit-flatten, then a richly-shaded round jelly body.
   const warm = e.state === 'windup' && (e.stateF & 4) !== 0;
   const moving = e.state === 'seek' && Math.hypot(e.vx, e.vy) > 10;
-  const wadT = time * 9 + e.seed * 20;
+  // heavy-penguin waddle (Ian): SLOW side-to-side sway + lateral lean + deep squash per step +
+  // belly wobble, desynced per-instance so a crowd never marches in lockstep.
+  const wadT = time * (5.2 + (e.seed % 0.5)) + e.seed * 20;
   if (moving) {
-    const wadHop = Math.abs(Math.sin(wadT)) * r * 0.32;
-    ctx.rotate(Math.sin(wadT) * 0.18);
-    ctx.translate(0, -wadHop);
-    ctx.scale(1 + Math.cos(wadT * 2) * 0.1, 1 - Math.cos(wadT * 2) * 0.1);
+    const wadHop = Math.abs(Math.sin(wadT)) * r * 0.3;
+    ctx.translate(Math.sin(wadT) * r * 0.2, -wadHop);   // rock left-right AND lift (penguin plod)
+    ctx.rotate(Math.sin(wadT) * 0.24);
+    ctx.scale(1 + Math.cos(wadT * 2) * 0.14, 1 - Math.cos(wadT * 2) * 0.14);
   } else {
     // idle bob — per-instance phase so a crowd never syncs (critics: "wall of clones")
     ctx.translate(0, Math.sin(time * 2.4 + e.seed * 25) * r * 0.09);
