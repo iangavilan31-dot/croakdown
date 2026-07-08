@@ -309,6 +309,25 @@ function drawCanopyDapple(ctx: CanvasRenderingContext2D) {
   }
 }
 
+// gentle animated water shimmer — slow drifting soft light pools so the pond surface reads ALIVE
+// and reflective, never a flat plane (Ian: water shimmer / reflections / painterly depth).
+function drawWaterShimmer(ctx: CanvasRenderingContext2D, time: number) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 7; i++) {
+    const ph = i * 1.7;
+    const x = ((ARENA_W * (0.1 + 0.13 * i)) + Math.sin(time * 0.14 + ph) * 130) % ARENA_W;
+    const y = ARENA_H * (0.16 + 0.1 * i) + Math.cos(time * 0.11 + ph) * 90;
+    const a = 0.018 + 0.016 * (0.5 + 0.5 * Math.sin(time * 0.6 + ph));
+    const g = ctx.createRadialGradient(x, y, 0, x, y, 300);
+    g.addColorStop(0, `rgba(120,205,182,${a})`);
+    g.addColorStop(1, 'rgba(120,205,182,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(x, y, 320, 120, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
 function drawPondDressing(ctx: CanvasRenderingContext2D, time: number) {
   // lily pads
   for (const p of PADS) {
@@ -518,6 +537,7 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   ctx.fillStyle = '#3aa07f'; ctx.globalAlpha = 0.42; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
   ctx.restore();
   drawCanopyDapple(ctx);             // organic light/shadow patches break the tiled-mound repetition
+  drawWaterShimmer(ctx, time);       // slow drifting light pools -> living reflective water
   drawPondDressing(ctx, time);       // lily pads + reeds ON the graded water (breaks the stump read)
   drawLotus(ctx, time);
   if (decalCanvas) ctx.drawImage(decalCanvas, 0, 0);
