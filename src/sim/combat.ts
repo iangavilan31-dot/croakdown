@@ -58,8 +58,11 @@ export function applyMeleeHit(
   res.killed = e.hp <= 0;
   const overkill = res.killed && dmg >= hpBefore * OVERKILL_MULT;
 
-  // knockback impulse -> velocity change
-  const dv = impulse / data.mass;
+  // knockback impulse -> velocity change. Ian masterpass: STRONG shove — non-launching hits slide
+  // enemies back x1.4 with momentum. LAUNCHING hits keep raw velocity so the tumble/bowling/wall-
+  // splat economy (and its tests) is untouched.
+  const tumbles = !res.killed && willLaunch(impulse, data.mass);
+  const dv = (impulse / data.mass) * (tumbles ? 1 : 1.4);
   e.vx += dirX * dv;
   e.vy += dirY * dv;
 
@@ -74,7 +77,7 @@ export function applyMeleeHit(
   }
 
   // launch check -> tumble (enemies as projectiles)
-  if (!res.killed && willLaunch(impulse, data.mass)) {
+  if (tumbles) {
     e.state = 'tumble';
     e.stateF = 0;
     e.tumbleT = TUMBLE_TIME;

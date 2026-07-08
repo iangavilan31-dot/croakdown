@@ -651,6 +651,9 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
     const b = Math.sin(time * 1.9) * 0.05;
     squashX = squashX * 1.04 - b; squashY = squashY * 0.99 + b;
   }
+  // walking belly jiggle — a secondary squash wobble at 2x the hop so the plump body reads soft,
+  // never a rigid sliding sprite (Ian: belly jiggle / secondary motion).
+  if (moving) { const jig = Math.sin(f.hopPhase * Math.PI * 4) * 0.04; squashX += jig; squashY -= jig; }
   if (atk.phase === 'windup' || atk.phase === 'heavywindup') { squashX *= 1.08; squashY *= 0.9; }
   if (atk.phase === 'heavyhold') { squashX *= 1.12 + Math.sin(time * 18) * 0.015; squashY *= 0.86; }
   if (atk.phase === 'active') { squashX *= 0.92; squashY *= 1.1; }
@@ -1045,7 +1048,14 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
     // idle bob — per-instance phase so a crowd never syncs (critics: "wall of clones")
     ctx.translate(0, Math.sin(time * 2.4 + e.seed * 25) * r * 0.09);
   }
-  if (e.flashT > 0) ctx.scale(1.3, 0.72);           // hard flatten recoil on hit (juice)
+  if (e.flashT > 0) {
+    // hit reaction: hard compress at impact, then spring back with a damped jiggle before settling
+    // (Ian: compress -> recoil -> bounce -> jiggle -> settle). k: 0 at impact -> 1 as the flash ends.
+    const k = Math.min(1, 1 - e.flashT / 0.16);
+    const amp = 1 - k;
+    const jig = Math.sin(k * Math.PI * 3) * 0.07 * (1 - k);
+    ctx.scale(1 + amp * 0.34 + jig, 1 - amp * 0.3 - jig);
+  }
   drawSlime(ctx, e, r, time, warm);
 
   ctx.restore();

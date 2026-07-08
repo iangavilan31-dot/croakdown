@@ -84,13 +84,13 @@ t('pool integrity: get/put round-trips', () => {
 });
 
 // ---------------- hitstop math (Game Feel Standards §1) ----------------
-t('hitstop: class bases 3/5/9, kill +3, multi-hit cap 14', () => {
-  assert.equal(S.baseHitstop('light'), 3);
-  assert.equal(S.baseHitstop('medium'), 5);
-  assert.equal(S.baseHitstop('heavy'), 9);
-  assert.equal(S.swingHitstop('heavy', 0, true), 12);
-  assert.equal(S.swingHitstop('heavy', 9, true), 14);   // capped
-  assert.equal(S.attackerHitstop(10), 7);               // 70%
+t('hitstop: class bases 4/7/13, kill +4, multi-hit cap 18', () => {   // Ian masterpass: heavier hits
+  assert.equal(S.baseHitstop('light'), 4);
+  assert.equal(S.baseHitstop('medium'), 7);
+  assert.equal(S.baseHitstop('heavy'), 13);
+  assert.equal(S.swingHitstop('heavy', 0, true), 17);   // 13 + 4 kill
+  assert.equal(S.swingHitstop('heavy', 9, true), 18);   // capped
+  assert.equal(S.attackerHitstop(10), 7);               // 72%
 });
 t('launch threshold: impulse/mass > 600', () => {
   assert.ok(S.willLaunch(1200, 1));      // heavy vs fodder -> flies
@@ -178,7 +178,7 @@ t('bowling: tumbling blobbit damages the one it hits', () => {
   a.state = 'seek'; b.state = 'seek';
   a.hp = 100; a.maxHp = 100; // survives the launching hit so it can bowl
   S.applyMeleeHit(w, a, 34, 1200, 'heavy', 1, 0, 0);
-  const log = run(w, 12);
+  const log = run(w, 22);   // heavier hitstop (masterpass) freezes the bowler longer before it tumbles
   assert.ok(log.some((e) => e.type === 'tumbleImpact'), 'impact event');
   assert.ok(b.hp < 20 || !b.alive, `victim damaged (hp ${b.hp})`);
 });
