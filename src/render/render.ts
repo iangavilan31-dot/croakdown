@@ -193,26 +193,10 @@ function drawLotus(ctx: CanvasRenderingContext2D, time: number) {
   glow.addColorStop(1, 'rgba(255,186,96,0)');
   ctx.fillStyle = glow;
   ctx.fillRect(cx - 600, cy - 600, 1200, 1200);
-  // big shaded lily pad (the frog's home base), painted-pad style to match the backdrop
-  ctx.translate(cx, cy + 8);
-  ctx.scale(1, 0.62);
-  const r = 92;
-  const g = ctx.createRadialGradient(-r * 0.22, -r * 0.24, r * 0.12, 0, 0, r);
-  g.addColorStop(0, '#3a7052'); g.addColorStop(0.7, '#234f39'); g.addColorStop(1, '#123527');
-  ctx.fillStyle = g;
-  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
-  // cleft notch + a couple veins + rim highlight (lily pad read)
-  ctx.fillStyle = '#0b2419';
-  ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r + 2, -1.77, -1.37); ctx.closePath(); ctx.fill();
-  ctx.strokeStyle = 'rgba(10,32,24,0.3)'; ctx.lineWidth = 1.4;
-  for (let i = 0; i < 4; i++) { const a = 1.4 + (i - 1.5) * 0.55; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * r * 0.85, Math.sin(a) * r * 0.85); ctx.stroke(); }
-  ctx.strokeStyle = 'rgba(130,200,160,0.22)'; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(0, 0, r - 3, Math.PI * 1.05, Math.PI * 1.6); ctx.stroke();
-  // luminous teal rim/reflection ring around the frog's pad (REF_02: the hero pad glows softly)
-  ctx.strokeStyle = 'rgba(150,235,190,' + (0.22 + pulse * 0.1) + ')'; ctx.lineWidth = 3;
-  ctx.shadowColor = 'rgba(150,240,180,0.6)'; ctx.shadowBlur = 12;
-  ctx.beginPath(); ctx.arc(0, 0, r + 2, 0, Math.PI * 2); ctx.stroke();
-  ctx.shadowBlur = 0;
+  // (The arena-center procedural lily-pad disc was removed: with the follow-camera the frog
+  // roams off it, leaving an orphan geometric plate with pie-slice veins — the last programmer-art
+  // tell in the frame. The painted backdrop already supplies pads + the gold lotus light; the frog
+  // is grounded by its own cast shadow + warm rim. Only the soft ambient glow pool remains.)
   ctx.restore();
 }
 
@@ -435,6 +419,18 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   ctx.fillStyle = '#12564c'; ctx.globalAlpha = 0.14; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
   ctx.globalCompositeOperation = 'soft-light';
   ctx.fillStyle = '#3aa07f'; ctx.globalAlpha = 0.16; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  ctx.restore();
+  // REF_02 is GLOW-DRIVEN: the painted pond had drifted too evenly-bright (critic + eye:
+  // "desaturate, let the bioluminescence be the light"). Radial multiply sinks the banks
+  // toward near-black teal while keeping the lit center readable, so the lotus glow,
+  // fireflies and rim-lit hero become the only real light source — Art Direction: never flat.
+  ctx.save();
+  ctx.globalCompositeOperation = 'multiply';
+  const dark = ctx.createRadialGradient(ARENA_W / 2, ARENA_H / 2, ARENA_H * 0.16, ARENA_W / 2, ARENA_H / 2, ARENA_H * 0.82);
+  dark.addColorStop(0, '#b4c4be');    // lit center: gentle knock, hero stays readable
+  dark.addColorStop(0.5, '#5c7a71');
+  dark.addColorStop(1, '#13332c');    // banks sink to deep near-black teal
+  ctx.fillStyle = dark; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
   ctx.restore();
   drawWaterShimmer(ctx, time);       // slow drifting light pools -> living reflective water
   // (procedural lily pads / reeds / heavy dapple retired — the painted backdrop provides them now)
