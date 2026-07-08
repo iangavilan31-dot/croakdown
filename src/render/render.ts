@@ -208,6 +208,11 @@ function drawLotus(ctx: CanvasRenderingContext2D, time: number) {
   for (let i = 0; i < 4; i++) { const a = 1.4 + (i - 1.5) * 0.55; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * r * 0.85, Math.sin(a) * r * 0.85); ctx.stroke(); }
   ctx.strokeStyle = 'rgba(130,200,160,0.22)'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(0, 0, r - 3, Math.PI * 1.05, Math.PI * 1.6); ctx.stroke();
+  // luminous teal rim/reflection ring around the frog's pad (REF_02: the hero pad glows softly)
+  ctx.strokeStyle = 'rgba(150,235,190,' + (0.22 + pulse * 0.1) + ')'; ctx.lineWidth = 3;
+  ctx.shadowColor = 'rgba(150,240,180,0.6)'; ctx.shadowBlur = 12;
+  ctx.beginPath(); ctx.arc(0, 0, r + 2, 0, Math.PI * 2); ctx.stroke();
+  ctx.shadowBlur = 0;
   ctx.restore();
 }
 
@@ -1122,7 +1127,7 @@ function drawHud(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: number
       ctx.beginPath();
       ctx.rect(hx - 18, hy - 16 + (1 - fill) * 34, 36, fill * 34);
       ctx.clip();
-      drawHeart(ctx, hx, hy, 16, '#ff6f8f');
+      drawHeart(ctx, hx, hy, 16, '#e8546a');            // red-coral to match REF_02's hearts
       ctx.restore();
     }
   }
