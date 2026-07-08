@@ -29,6 +29,20 @@ CRITTER = (
     "a dark rounded blob-creature silhouette with small glowing eyes, lurking swamp critter, "
 )
 
+# SLICE hero assets target REF_01: DETAILED PIXEL ART (painterly-pixel hybrid), stylized not
+# realistic, so they blend with the pixel-art swamp backdrop. Generated high-detail then
+# pixelated in post (tools/postprocess.py) to a crisp pixel grid. Ian art-direction 2026-07-07:
+# "reference photo combined with pixel art is the direction" + "must blend into the pixel bg".
+SLICE_STYLE = (
+    "detailed high-quality PIXEL ART game sprite, in the style of Hyper Light Drifter and Dead "
+    "Cells, crisp clean readable pixels with soft dithered shading and a gentle bioluminescent "
+    "rim light, STYLIZED not realistic, chunky appealing storybook forms, dark swamp fantasy at "
+    "night, deep murky swamp greens and bog purples with soft glowing accents, cute-but-eerie, "
+    "bold heavy silhouette, centered, fully transparent background, no ground, no scene, no text"
+)
+# slice heroes: generated high-detail, then bg-cleaned + pixelated in post to match the backdrop
+SLICE_HEROES = {"frog_warden", "prop_lotus", "enemy_sludgeling", "enemy_bogrunner", "enemy_shellback"}
+
 BOSS_CARD_STYLE = (
     "spider-punk zine collage boss poster, torn paper edges, halftone dots, "
     "high contrast screenprint, swamp-mystic palette (deep green, bog purple, "
@@ -38,15 +52,18 @@ BOSS_CARD_STYLE = (
 
 # key -> (prompt, quality, size)
 ASSETS: dict[str, tuple[str, str, str]] = {
-    # frogs (heroes — the smug chunky toad energy from the reference mockup)
-    "frog_warden": (f"smug chunky green toad warrior with heavy-lidded eyes and mottled skin, long pink tongue coiled at its mouth, sitting alert facing right, {STYLE}", "medium", "1024x1024"),
+    # frogs (heroes — the grumpy chunky toad from REF_01/REF_02; the game's icon)
+    "frog_warden": (f"a single chunky grumpy green toad, heavy-lidded sleepy half-closed eyes, mottled olive-green skin with darker spots and faint glowing flecks, plump rounded heavy body, sitting alert in a slight three-quarter top-down view facing forward-right, isolated single character, {SLICE_STYLE}", "high", "1024x1024"),
+    # golden lotus centerpiece — the iconic light source in both reference mockups
+    "prop_lotus": (f"a single glowing golden lotus flower blooming on a dark lily pad, warm radiant golden-white glow, layered petals lit from within, top-down three-quarter view, {SLICE_STYLE}", "high", "1024x1024"),
     "frog_sporeback": (f"plump purple-gray toad shaman with glowing teal mushrooms and spores growing out of its back, one eye milky, facing right, {STYLE}", "medium", "1024x1024"),
     "frog_ribbit": (f"battle-scarred red-brown toad knight dragging an enormous rusted greatsword twice its size, low stance, grim heavy-lidded stare, facing right, {STYLE}", "medium", "1024x1024"),
-    # basic enemies — dark lurker blobs with glowing eyes (the mockup's critters)
-    "enemy_sludgeling": (f"{CRITTER} dripping wet moss clumps, two glowing sickly pink eyes, {STYLE}", "low", "1024x1024"),
-    "enemy_bogrunner": (f"lean darting swamp imp creature caught mid-sprint, hunched forward, long spindly legs, slick dark purple hide, one large glowing orange eye, {STYLE}", "low", "1024x1024"),
+    # slice roster (Ian art-direction 2026-07-07 v2): SIMPLE clean readable swamp blobs like the
+    # reference enemies — rounded shapes, glowing eyes, little legs, mossy swamp-green, NOT muddy.
+    "enemy_sludgeling": (f"a small plump round swamp slime creature, a TRANSLUCENT gooey jelly body of glowing green swamp sludge with visible bubbles and gunk and a tiny lily seed suspended INSIDE it, two big round glowing yellow-green eyes, tiny stubby legs, wet and jiggly and dripping, a simple clean cute-but-gross readable shape, {SLICE_STYLE}", "high", "1024x1024"),
+    "enemy_bogrunner": (f"a small lean swamp sprite creature mid-dash, sleek wet dark-green tadpole-imp body, long thin springy legs, one big round glowing amber eye, a wisp of trailing algae, quick and darting, a simple clean readable shape, {SLICE_STYLE}", "high", "1024x1024"),
     "enemy_spitter": (f"{CRITTER} bloated with a fleshy tube snout aiming up, glowing green throat sac, {STYLE}", "low", "1024x1024"),
-    "enemy_shellback": (f"squat armored swamp turtle-beetle, massive cracked stone-like domed shell covering its whole body, tiny glowing teal eyes peeking from under the shell rim, moss and barnacles on the shell, {STYLE}", "low", "1024x1024"),
+    "enemy_shellback": (f"a big round plump swamp turtle-toad creature, a clear grumpy mossy head with two big glowing teal eyes at the FRONT, a smooth mossy domed shell on its back dotted with a few glowing spores, thick stubby legs, slow and heavy, a simple clean readable shape, {SLICE_STYLE}", "high", "1024x1024"),
     "enemy_broodmother": (f"grotesque swollen egg-sac toad matriarch, translucent belly full of glowing young, too many eyes, {STYLE}", "medium", "1024x1024"),
     "enemy_broodling": (f"{CRITTER} tiny pink hatchling with one oversized glowing eye, {STYLE}", "low", "1024x1024"),
     "enemy_dragonfly": (f"eerie dragonfly with tattered ghost-lit wings and a needle body, glowing cyan compound eyes, {STYLE}", "low", "1024x1024"),
@@ -130,16 +147,17 @@ def generate(keys: list[str]) -> None:
 
 
 def downscale() -> None:
-    """Shrink sprites for load time; cards/title stay full-size."""
+    """Shrink legacy pixel sprites for load time. Slice heroes stay FULL-RES + painterly
+    (REF_02 target) — the renderer scales them down smoothly, so never crunch them here."""
     from PIL import Image
     for p in OUT.glob("*.png"):
-        if p.stem.startswith(("card_", "title_", "arena_")):
+        if p.stem.startswith(("card_", "title_", "arena_")) or p.stem in SLICE_HEROES:
             continue
         img = Image.open(p)
         if img.width > 320:
-            img.thumbnail((320, 320), Image.NEAREST)  # keep pixels crisp
+            img.thumbnail((320, 320), Image.NEAREST)
             img.save(p)
-    print("downscaled sprites to <=320px (nearest)")
+    print("downscaled legacy sprites to <=320px; slice heroes kept full-res")
 
 
 def manifest() -> None:

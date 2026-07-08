@@ -1,4 +1,6 @@
 {
+  "_frog_v2_backup": "/art/_frog_v2_backup.png",
+  "_frog_warden_v1_backup": "/art/_frog_warden_v1_backup.png",
   "arena_backdrop": "/art/arena_backdrop.png",
   "card_drowned_stag": "/art/card_drowned_stag.png",
   "card_elder_sludge": "/art/card_elder_sludge.png",
@@ -20,6 +22,7 @@
   "frog_ribbit": "/art/frog_ribbit.png",
   "frog_sporeback": "/art/frog_sporeback.png",
   "frog_warden": "/art/frog_warden.png",
+  "prop_lotus": "/art/prop_lotus.png",
   "title_vista": "/art/title_vista.png",
   "tower_bulrush_t1": "/art/tower_bulrush_t1.png",
   "tower_bulrush_t2": "/art/tower_bulrush_t2.png",
