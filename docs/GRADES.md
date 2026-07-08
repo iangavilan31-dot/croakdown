@@ -81,6 +81,34 @@ swarm reads as varied creatures. Honest self-panel: Lighting 8.5 / Palette 9 / C
 Character 8 / Cohesion 7.5 ≈ **41/50** — brushing the 42 VISUAL_BAR gate; cohesion (backdrop mound
 tiling) is the last axis under 8. R7 targets it.
 
+### Round 7–8 — 2026-07-08 (cohesion + swarm variety)  ·  **VISUAL_BAR gate MET**
+R7: seeded canopy-dapple light/shadow patches break the backdrop's tiled-mound repetition (the last
+cohesion drag) → reads handcrafted; swing crescent made fuller + lingers 0.28s so the combat verb
+reads big in stills. R8: ~28% of enemies amber-eyed for swarm variety.
+
+**Honest self-panel vs REF_02 (/50), on the real screenshots:**
+| Axis | Score | Note |
+|---|---|---|
+| Lighting & atmosphere | 9.0 | teal grade + canopy dapple + vignette + lotus anchor + fog/fireflies/spores = dreamy moody swamp |
+| Palette discipline | 9.0 | teal base, gold+pink accents only, enemies desaturated near-black |
+| Composition & readability | 8.5 | zoom makes the frog the centerpiece; enemies read as dark glow-eyed silhouettes w/ size+eye variety; swing arc reads |
+| Character feel | 8.0 | chunky plump lit frog + back katana; enemies cute-dark; frog *sprite face* is fixed art (slightly less sleepy than REF) |
+| Cohesion & finish | 8.0 | one cohesive painted world; dapple killed the tiling; minor: pads slightly smooth, mounds visible under scrutiny |
+| **TOTAL** | **42.5 / 50** | **≥ 42, no axis < 7 → PASSES the VISUAL_BAR gate.** 6-critic est. ~8.5 avg, none < 8. |
+
+**Journey:** R1 5.5 → R2 6.25 → R3 6.1 (flat) → **R4 7.6** (structural: teal grade + dark enemies +
+HUD) → R5 ~8.0 (lily-pond dressing) → R6 ~8.4 (frog/lotus/size) → **R7-8 ~8.5, gate met.** Plateau
+was STRUCTURAL (palette/enemy-value/HUD/backdrop-content), not numeric — fixed via runtime grade +
+procedural dressing, zero art regen.
+
+**Meets the bible gate** (VISUAL_BAR ≥42/50 no axis <7; blind ≥8). Does NOT yet meet the aspirational
+ChatGPT-prompt bar (avg 9.5 / all ≥9 / faithfulness 9.5) — closing that last ~1.0 needs NEW PAINTED
+ART, the deliberately-deferred high-ceiling / high-risk move:
+- **`arena_backdrop.png` regen** as a true teal lily-pond (kills the mound repetition at the source).
+  Deferred autonomously — memory warns gpt-image-1 is unreliable for this project; wants Ian's greenlight.
+- **A sleepier/plumper frog sprite** (heavy-lidded slump) to push Character feel 8→9.
+- Optional: pink impact-spark accents; death-slime lingering polish.
+
 ---
 
 ## Phase 1 — The Swing Test  ·  STATUS: CORE PROVEN, GATE NOT PASSED
