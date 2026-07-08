@@ -109,6 +109,29 @@ ART, the deliberately-deferred high-ceiling / high-risk move:
 - **A sleepier/plumper frog sprite** (heavy-lidded slump) to push Character feel 8→9.
 - Optional: pink impact-spark accents; death-slime lingering polish.
 
+### Round 9–11 — 2026-07-08 (GAME FEEL masterpass, Ian's 2nd goal directive)  ·  est. ~8.8
+Ian re-issued the goal with **GAME FEEL FIRST** emphasis (heavy/chunky/squishy, bigger frog, big
+blobby penguin-waddle enemies, juicy combat). Focused the loop on feel, not just stills:
+- **R9:** frog ~1.4× bigger + heavier hop squash/stretch; hitstop L4/M7/H13 (+kill4, cap18) + more
+  trauma → hits feel EXPENSIVE; enemies bigger/blobbier w/ a slow heavy-penguin waddle (lateral
+  rock + lean + deep per-step squash), desynced per-instance.
+- **R10:** non-launching hits knock back x1.4 (slide w/ momentum, launch economy untouched); enemy
+  hit-reaction = compress→jiggle→settle spring; frog walking belly-jiggle; hitstop test updated,
+  **23/23 green**.
+- **R11:** hot-pink attack accent on swing arcs (palette tie); bigger blinking enemy eyes; denser
+  lily pads dominate the mounds.
+
+Honest self-panel (9-role, vs REF_02 + Ian's feel bar): Art 9 / Animation 8.5 / Gameplay-feel 9 /
+VFX 9 / UI 9 / Technical 9 (60fps, 23 tests) / Steam-reviewer 8.5 / Playtester 9 / Blind 8.5 →
+**~8.8 avg, none < 8.** Reads as a commercial indie; combat is juicy, frog is the chunky star,
+enemies waddle with weight.
+
+**Standing gap to the aspirational 9.5 / "indistinguishable from reference":** the painted
+`arena_backdrop.png` is still tree-mounds (runtime-graded teal + dapple + pads make it read as a
+moody lily pond, but a painted lily-pond backdrop would close the last ~0.7). Deferred autonomously
+(art-regen risk). Frog *sprite* face is fixed art (procedural squash/jiggle is maxed). These two are
+the only remaining levers and both need NEW ART → Ian greenlight.
+
 ---
 
 ## Phase 1 — The Swing Test  ·  STATUS: CORE PROVEN, GATE NOT PASSED
