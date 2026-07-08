@@ -183,13 +183,14 @@ function drawLotus(ctx: CanvasRenderingContext2D, time: number) {
   const cx = ARENA_W / 2, cy = ARENA_H / 2;
   const pulse = 0.85 + Math.sin(time * 1.4) * 0.15;
   ctx.save();
-  // warm radial glow washing the arena center
-  const glow = ctx.createRadialGradient(cx, cy, 20, cx, cy, 560 * pulse);
-  glow.addColorStop(0, 'rgba(255,214,140,0.34)');
-  glow.addColorStop(0.4, 'rgba(255,180,90,0.12)');
+  // warm radial glow washing the arena center — the swamp's hero light source (REF_02 lotus).
+  // Lifted range + intensity so it reads as the dominant warm anchor against the cool teal water.
+  const glow = ctx.createRadialGradient(cx, cy, 20, cx, cy, 680 * pulse);
+  glow.addColorStop(0, 'rgba(255,216,146,0.42)');
+  glow.addColorStop(0.35, 'rgba(255,186,96,0.16)');
   glow.addColorStop(1, 'rgba(255,180,90,0)');
   ctx.fillStyle = glow;
-  ctx.fillRect(cx - 600, cy - 600, 1200, 1200);
+  ctx.fillRect(cx - 720, cy - 720, 1440, 1440);
   // pad
   ctx.fillStyle = 'rgba(28,54,40,0.9)';
   ctx.beginPath(); ctx.ellipse(cx, cy + 10, 84, 40, 0, 0, Math.PI * 2); ctx.fill();
@@ -630,7 +631,11 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
   // stretch tall at the apex, squash wide on landing
   let squashX = 1 - hopArc * 0.11;
   let squashY = 1 + hopArc * 0.15;
-  if (!moving && f.dashT <= 0) { const b = Math.sin(time * 2.2) * 0.03; squashX -= b; squashY += b; } // breathing
+  // idle: plumper resting silhouette + deeper belly breathing (REF_02 frog reads heavy/slumped)
+  if (!moving && f.dashT <= 0 && atk.phase === 'none') {
+    const b = Math.sin(time * 1.9) * 0.05;
+    squashX = squashX * 1.04 - b; squashY = squashY * 0.99 + b;
+  }
   if (atk.phase === 'windup' || atk.phase === 'heavywindup') { squashX *= 1.08; squashY *= 0.9; }
   if (atk.phase === 'heavyhold') { squashX *= 1.12 + Math.sin(time * 18) * 0.015; squashY *= 0.86; }
   if (atk.phase === 'active') { squashX *= 0.92; squashY *= 1.1; }
@@ -977,7 +982,8 @@ function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: num
 function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time: number) {
   const data = ENEMIES[e.kind];
   const ex = e.px + (e.x - e.px) * alpha, ey = e.py + (e.y - e.py) * alpha;
-  const r = data.radius;
+  const sv = 0.85 + ((e.seed * 0.61803) % 1) * 0.32;   // per-instance size — a crowd of varied
+  const r = data.radius * sv;                          // creatures, not cloned sprites (critic note)
   ctx.save();
 
   // hitstop sprite shake (hurtbox static — Sakurai law)
