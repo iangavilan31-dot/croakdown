@@ -112,7 +112,10 @@ let pixBackdropF = -1;
 // and a pixel-grain into the painting so it reads in the same visual language as the sprites, while
 // keeping the composition/lotus/pads. Reversible: BACKDROP_LEVELS=0 disables (pure smooth original).
 const BACKDROP_PIXEL = 1.6;   // slight down-res so the dither reads as chunky pixels
-const BACKDROP_LEVELS = 6;    // posterize levels/channel (fewer = harder steps); 0 = off (smooth)
+// Blind confirmation round REVERSED the dither: 2/3 judges said the halftone flattened the contrast
+// enemies/pickups need and "muted everything into a grey-green smear". Reverted to 0 (smooth original).
+// The art-law "heavy dithering" did NOT survive contact with real judging — kept as a tunable knob only.
+const BACKDROP_LEVELS = 0;    // posterize levels/channel (fewer = harder steps); 0 = off (smooth)
 function getPixBackdrop(bd: HTMLImageElement): HTMLCanvasElement {
   // __bpx is a QA override so the candidate-compare probe can sweep densities live (1 = full res)
   const f = Math.max(1, (window as any).__bpx ?? BACKDROP_PIXEL);
@@ -962,8 +965,11 @@ function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: num
   const look = e.facing;
   const lx = Math.cos(look) * r * 0.12, ly = Math.sin(look) * r * 0.08;
   const es = (e.kind === 'gloopa' ? 0.24 : e.kind === 'spikeblob' ? 0.21 : 0.2) * r;   // bigger, expressive
-  const warmEye = ((e.seed * 0.379) % 1) < 0.28;    // ~28% amber-eyed (REF_02 swarm has mixed eyes)
-  const iris = (warm || warmEye) ? '#ffb060' : '#c9ff72';
+  // REF_02 blobs have MENACING pink/red pinprick eyes (the palette's danger accent), not cute lime —
+  // blind Reference judge: current enemies "read harmless". Hot-pink swarm + ~40% ember variants;
+  // also separates the swarm from the green pads + gold fireflies it used to blend with.
+  const warmEye = ((e.seed * 0.379) % 1) < 0.4;
+  const iris = (warm || warmEye) ? '#ff7a3c' : '#ff5f9a';
   const blink = (((time + e.seed * 7) % (3.2 + (e.seed % 1.5))) < 0.13) ? 0.14 : 1;   // desynced blink
   for (const side of [-1, 1]) {
     const ox = side * r * 0.33 + lx, oy = -r * 0.1 + ly;
