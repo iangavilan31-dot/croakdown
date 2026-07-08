@@ -11,7 +11,7 @@ import { spawnEnemy } from './world';
 const TELEGRAPH_FRAMES = 60;
 
 function targetCount(elapsed: number): number {
-  return Math.min(40, 8 + Math.floor(elapsed / 12));
+  return Math.min(52, 14 + Math.floor(elapsed / 7));   // denser horde (critics: too sparse)
 }
 
 function pickKind(w: World): EnemyKind {
@@ -42,9 +42,9 @@ export function updateSpawner(w: World): void {
   const pending = w.enemies.length + w.telegraphs.length;
   if (pending >= want || pending >= ENEMY_CAP) return;
 
-  // stagger spawns: at most one telegraph per 12 ticks
+  // stagger spawns: at most one telegraph per 7 ticks (fills the arena faster)
   w.spawnAccum++;
-  if (w.spawnAccum < 12) return;
+  if (w.spawnAccum < 7) return;
   w.spawnAccum = 0;
 
   // pick an edge-ring point away from the frog

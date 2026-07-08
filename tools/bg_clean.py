@@ -93,7 +93,7 @@ def dehalo(path: str, sat_max: float = 0.20, val_min: float = 0.22) -> None:
     print(f"dehaloed {Path(path).name}")
 
 
-def colorize_green(path: str, val_lift: float = 0.30) -> None:
+def colorize_green(path: str, val_lift: float = 0.26) -> None:
     """Recolor a (dark) blob sprite into a BRIGHT TRANSLUCENT GREEN slime. gpt-image-1 keeps
     drawing the swamp's enemies black no matter the prompt; the SHAPE + eyes are good, only the
     hue is wrong. Map every opaque pixel onto a green ramp: brightness is lifted (so even near-black
@@ -110,8 +110,8 @@ def colorize_green(path: str, val_lift: float = 0.30) -> None:
                 continue
             _hh, _ss, vv = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
             nv = val_lift + (1 - val_lift) * vv          # lift darks into visible green
-            hue = 0.34 - 0.12 * vv                        # dark=emerald(.34) -> bright=lime/yellow(.22)
-            sat = 0.55 + 0.35 * vv                        # brighter = more saturated jelly
+            hue = 0.36 - 0.09 * vv                        # emerald(.36) -> soft lime(.27), less yellow-neon
+            sat = 0.40 + 0.28 * vv                        # muted jelly (critics: drop saturation, not neon)
             nr, ng, nb = colorsys.hsv_to_rgb(hue, sat, nv)
             px[x, y] = (int(nr * 255), int(ng * 255), int(nb * 255), a)
     im.save(path)

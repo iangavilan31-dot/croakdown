@@ -57,11 +57,12 @@ FROG = (
 # ---- ENEMY: cute, plump, squishy, GREEN. NOT black. --------------------------
 BLOBBIT = (
     "A CUTE round kawaii SLIME monster, like a happy slime from Slime Rancher or the classic Dragon "
-    "Quest slime: a plump glossy DROPLET-shaped blob of BRIGHT TRANSLUCENT GREEN jelly (lime and "
-    "emerald), wobbly and squishy, that you can partly see through, with tiny bubbles and glowing "
-    "spore flecks suspended inside. Two big shiny happy dark eyes with white highlights, a tiny "
-    "cute smiling mouth, a bright glossy highlight on top. Adorable, wholesome, bouncy. IMPORTANT: "
-    "BRIGHT GREEN and glossy — absolutely NOT black, NOT dark, NOT scary, NOT a demon, NO horns"
+    "Quest slime: a plump glossy SMOOTH ROUNDED gumdrop/teardrop blob of soft mossy-green jelly, "
+    "wobbly and squishy, partly translucent, with tiny bubbles and faint glowing spore flecks inside. "
+    "Two big soft glowing eyes, a tiny cute mouth, a gentle glossy highlight on top. Adorable and "
+    "wholesome. CRUCIAL SILHOUETTE: perfectly SMOOTH and ROUND — absolutely NO spikes, NO points, NO "
+    "urchin bumps, NO horns; a simple soft blob outline. Muted natural swamp green (not neon), sits "
+    "calmly in a moody palette — NOT black, NOT dark, NOT scary"
 )
 
 KATANA = (

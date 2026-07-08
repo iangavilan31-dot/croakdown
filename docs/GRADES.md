@@ -4,6 +4,26 @@ Honest, externally-verifiable gate status. No self-graded passes. See `design/11
 
 ---
 
+## JUDGED QUALITY LOOP (Ian directive: don't stop till avg ≥9.0, no judge <8)
+
+### Round 1 — 2026-07-08 (after art overhaul + combo/font pass)
+6-critic panel (4 judges w/ goal+bible, 2 blind). Screenshots: pond/heavy/carnage/motion.
+
+| Critic | Score | Headline |
+|---|---|---|
+| Judge 1 — Art director | 5.0 | Env premium; enemies off-model spiky neon; hero muddy+small; VFX placeholder |
+| Judge 2 — Animation | 5.5 | Frog too small to read anim; enemies stiff; hop touchdown ripple good |
+| Judge 3 — Game feel | 5.5 | Enemies camouflage; swing faintest thing on screen; too empty |
+| Judge 4 — Creative dir | 6.5 | Env $15-game; hero too small/dark; no combat verb in stills |
+| Blind 1 | 4.5 | Frog near-invisible; enemies clip-art; too dark; HUD placeholder |
+| Blind 2 | 6.0 | Pretty; frog camouflages into stumps; zero enemy variety; sparse |
+| **AVERAGE** | **5.5** | Backgrounds carry it; hero+enemies+combat VFX drag it down |
+
+**Fixes applied this round:** frog 3.0→4.8 + warm hero rim; enemies muted colorize + softer regen + biolum rim + grounding + bigger + stronger waddle/hit-recoil; swing crescent bright + white cut-line; attack telegraph → authored filling danger-zone (was debug ring); density 8→14 start/cap 52/cadence 12→7.
+**Still OPEN:** enemy silhouette still spiky (gpt-image-1 refuses round → go PROCEDURAL slime next); re-verify blink/croak/walk at new size; brightness/contrast for thumbnail; HUD pip clarity; enemy variety; capsule frame w/ active slash.
+
+---
+
 ## Phase 1 — The Swing Test  ·  STATUS: CORE PROVEN, GATE NOT PASSED
 
 *One frog, one stick, the sludge trio, a graybox pond, zero rewards.*

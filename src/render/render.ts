@@ -511,14 +511,19 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
   if (frogImg) drawBackKatana(ctx, FROG_RADIUS);
 
   if (frogImg) {
-    const h = FROG_RADIUS * 3.0;
+    const h = FROG_RADIUS * 4.8;                        // bigger hero silhouette (critics: ~1.6x up)
     const dw = h * (frogImg.width / frogImg.height);
+    const bx = -dw / 2, by = -h * 0.66;
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(frogImg, -dw / 2, -h * 0.66, dw, h); // anchored near feet
+    // warm rim/hero-glow so the frog always pops off the stumps + water (value contrast)
+    ctx.shadowColor = 'rgba(255,206,130,0.95)'; ctx.shadowBlur = 16;
+    ctx.drawImage(frogImg, bx, by, dw, h);
+    ctx.shadowBlur = 0;
+    ctx.drawImage(frogImg, bx, by, dw, h);             // crisp body on top of the halo
     if (f.hurtFlashT > 0) {
       ctx.globalAlpha = Math.min(0.75, f.hurtFlashT * 5);
       ctx.globalCompositeOperation = 'lighter';
-      ctx.drawImage(frogImg, -dw / 2, -h * 0.66, dw, h);
+      ctx.drawImage(frogImg, bx, by, dw, h);
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;
     }
@@ -688,6 +693,24 @@ function drawSwordAt(ctx: CanvasRenderingContext2D, w: World, time: number) {
   ctx.restore();
 }
 
+// Authored attack telegraph: a danger zone that FILLS as the enemy winds up (soft red-amber
+// disc + a crisp ring that snaps bright at the end) — reads as "incoming", not a debug gizmo.
+function drawAttackTell(ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, p: number) {
+  const rr = radius * (0.55 + p * 0.45);
+  ctx.save();
+  const g = ctx.createRadialGradient(x, y, rr * 0.2, x, y, rr);
+  g.addColorStop(0, `rgba(255,120,60,${0.04 + p * 0.22})`);
+  g.addColorStop(0.75, `rgba(240,80,50,${0.03 + p * 0.14})`);
+  g.addColorStop(1, 'rgba(240,80,50,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.ellipse(x, y, rr, rr * 0.55, 0, 0, Math.PI * 2); ctx.fill();
+  // filling wedge sweep (clock hand) so the timing reads
+  ctx.strokeStyle = `rgba(255,190,120,${0.35 + p * 0.55})`;
+  ctx.lineWidth = 1.5 + p * 2.5;
+  ctx.beginPath(); ctx.ellipse(x, y, rr, rr * 0.55, 0, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
+
 // ---------- enemies ----------
 function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time: number) {
   const data = ENEMIES[e.kind];
@@ -726,35 +749,31 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
   // world-space windup telegraph. Graybox blob below is the fallback until the image loads.
   const sImg = (e.flashT > 0 && img('blobbitHit')) ? img('blobbitHit') : img('sludgeling');
   if (sImg) {
-    // penguin-waddle: rock side-to-side + little hops while closing on the player (Ian's vision)
+    // bouncy waddle: rock + hop + per-step squish while closing on the player (critics: too stiff)
     const moving = e.state === 'seek' && Math.hypot(e.vx, e.vy) > 10;
     const wadT = time * 9 + e.seed * 20;
     if (moving) {
-      const wadHop = Math.abs(Math.sin(wadT)) * r * 0.18;
-      ctx.rotate(Math.sin(wadT) * 0.14);           // rock
+      const wadHop = Math.abs(Math.sin(wadT)) * r * 0.3;
+      ctx.rotate(Math.sin(wadT) * 0.2);            // rock
       ctx.translate(0, -wadHop);                    // hop
-      ctx.scale(1 + Math.cos(wadT * 2) * 0.05, 1 - Math.cos(wadT * 2) * 0.05); // squish per step
+      ctx.scale(1 + Math.cos(wadT * 2) * 0.09, 1 - Math.cos(wadT * 2) * 0.09); // squish per step
     }
-    const h = r * 2.7;
+    if (e.flashT > 0) ctx.scale(1.28, 0.72);        // hard flatten recoil on hit (juice)
+    const h = r * 3.15;                             // plumper/bigger (critics: read as threats)
     const dw = h * (sImg.width / sImg.height);
     ctx.imageSmoothingEnabled = false;
+    // soft bioluminescent rim so the slime separates from the dark water + green foliage
+    ctx.shadowColor = 'rgba(150,240,150,0.75)'; ctx.shadowBlur = 7;
+    ctx.drawImage(sImg, -dw / 2, -h * 0.6, dw, h);
+    ctx.shadowBlur = 0;
     ctx.drawImage(sImg, -dw / 2, -h * 0.6, dw, h);
     if (e.flashT > 0) {
-      ctx.globalAlpha = 0.85; ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.9; ctx.globalCompositeOperation = 'lighter';
       ctx.drawImage(sImg, -dw / 2, -h * 0.6, dw, h);
       ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
     }
     ctx.restore();
-    if (e.state === 'windup') {
-      const p = e.stateF / data.atkWindup;
-      ctx.save();
-      ctx.strokeStyle = `rgba(255,140,70,${0.2 + p * 0.55})`;   // warm danger tell (not pink)
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(e.atkX, e.atkY, data.atkRadius * (0.5 + p * 0.5), 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
+    if (e.state === 'windup') drawAttackTell(ctx, e.atkX, e.atkY, data.atkRadius, e.stateF / data.atkWindup);
     return;
   }
 
@@ -827,16 +846,9 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
 
   ctx.restore();
 
-  // windup strike telegraph (honest ground truth) — warm amber danger, not pink
+  // windup strike telegraph (honest ground truth) — authored filling danger zone
   if (e.state === 'windup') {
-    const p = e.stateF / data.atkWindup;
-    ctx.save();
-    ctx.strokeStyle = `rgba(255,140,70,${0.2 + p * 0.55})`;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(e.atkX, e.atkY, data.atkRadius * (0.5 + p * 0.5), 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.restore();
+    drawAttackTell(ctx, e.atkX, e.atkY, data.atkRadius, e.stateF / data.atkWindup);
   }
 }
 
