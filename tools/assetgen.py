@@ -48,9 +48,11 @@ FROG = (
     "cream-colored underbelly, soft warm rim light from nearby lotus glow"
 )
 SLUDGELING = (
-    "The Sludgeling, first enemy: a small round creature made entirely of translucent green swamp "
-    "sludge, with tiny bubbles, floating algae, bits of mud and glowing spores visible suspended "
-    "INSIDE its jelly body, two large bright glowing eyes, wet and jiggly, adorable but eerie"
+    "The Sludgeling, first enemy: a small round creature made entirely of translucent glowing "
+    "green swamp sludge, with tiny bubbles, floating algae, bits of mud and glowing spores clearly "
+    "visible suspended INSIDE its jelly body, two large bright glowing yellow-green eyes, tiny "
+    "stubby feet, wet and jiggly, adorable but eerie, a CLEAN BOLD DARK OUTLINE around the whole "
+    "shape, strong readable silhouette (NO pink, NO magenta anywhere)"
 )
 REEDSWORD = (
     "The Reed Sword: a primitive handcrafted sword forged from hardened swamp reeds, hilt wrapped "
