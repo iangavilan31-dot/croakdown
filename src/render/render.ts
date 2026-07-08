@@ -971,7 +971,8 @@ function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: num
   const look = e.facing;
   const lx = Math.cos(look) * r * 0.12, ly = Math.sin(look) * r * 0.08;
   const es = (e.kind === 'gloopa' ? 0.22 : e.kind === 'spikeblob' ? 0.19 : 0.18) * r;
-  const iris = warm ? '#ffb060' : '#c9ff72';
+  const warmEye = ((e.seed * 0.379) % 1) < 0.28;    // ~28% amber-eyed (REF_02 swarm has mixed eyes)
+  const iris = (warm || warmEye) ? '#ffb060' : '#c9ff72';
   for (const side of [-1, 1]) {
     const ox = side * r * 0.33 + lx, oy = -r * 0.1 + ly;
     ctx.fillStyle = '#0c1f13';
