@@ -8,7 +8,7 @@ import { sampleInput } from './engine/input';
 import { draw, toWorld } from './render/render';
 import { drawPerf, perfEnabled, recordRender, recordSim } from './render/perf';
 import { consumeEvents, decayFeel, feel, updateParticles, updateRipples } from './feel/feel';
-import { initAudio, resumeAudio, updateAudio, playBgm, setSfxVolume } from './engine/audio';
+import { initAudio, resumeAudio, updateAudio, startMusic, setSfxVolume } from './engine/audio';
 import { loadAssets } from './engine/assets';
 import { DT } from './data/constants';
 
@@ -44,7 +44,7 @@ function ensureAudio() {
   audioStarted = true;
   initAudio();
   resumeAudio();
-  playBgm('wave');
+  startMusic();
 }
 window.addEventListener('pointerdown', ensureAudio);
 window.addEventListener('keydown', ensureAudio);

@@ -28,12 +28,21 @@ export function getMusicVolume() { return bgmVol; }
 export function setMusicVolume(v: number) {
   bgmVol = Math.max(0, Math.min(1, Math.round(v * 10) / 10));
   if (currentBgm) currentBgm.volume = bgmVol;
+  if (musicBus && ctx) musicBus.gain.setTargetAtTime(bgmVol, ctx.currentTime, 0.1);
 }
 
 export function updateAudio(dt: number) {
   if (duckT > 0 && duckBus && ctx) {
     duckT -= dt;
     duckBus.gain.setTargetAtTime(duckT > 0 ? 0.35 : 1, ctx.currentTime, 0.05);
+  }
+  // procedural music scheduler (lookahead ~0.2s so timing survives frame jitter)
+  if (musicOn && ctx && musicBus) {
+    while (nextNoteTime < ctx.currentTime + 0.2) {
+      scheduleStep(musicStep, nextNoteTime);
+      nextNoteTime += SECS_PER_STEP;
+      musicStep = (musicStep + 1) % 32;
+    }
   }
 }
 function duck() { duckT = 0.18; }
@@ -148,4 +157,73 @@ function startTrack(a: HTMLAudioElement) {
     a.volume = Math.min(bgmVol, a.volume + 0.04);
     if (a.volume >= bgmVol) clearInterval(fade);
   }, 60);
+}
+
+// ---------- procedural ambient music bed (synthesized, no assets) ----------
+// A quiet, dreamlike nighttime swamp (Audio Direction): a slow detuned drone
+// under a filter LFO, a soft heartbeat sub for forward motion, and sparse
+// pentatonic "bioluminescent" chimes. Scheduled with a lookahead clock so the
+// music stays in time regardless of render frame rate. Works headless.
+let musicBus: GainNode | null = null;
+let musicOn = false;
+let nextNoteTime = 0;
+let musicStep = 0;
+const BPM = 58;                               // slow, meditative
+const SECS_PER_STEP = 60 / BPM / 2;           // eighth-note grid
+// warm D-minor pentatonic (D F A C, two octaves) — sits under the golden lotus glow
+const SCALE = [146.83, 174.61, 220.0, 261.63, 293.66, 349.23, 440.0];
+
+export function startMusic() {
+  if (!ctx || musicOn || !master) return;
+  musicOn = true;
+  musicBus = ctx.createGain();
+  musicBus.gain.value = 0;
+  musicBus.connect(master);
+  musicBus.gain.setTargetAtTime(bgmVol, ctx.currentTime, 2.5);  // slow fade-in
+  // drone: detuned saws through a lowpass that breathes on a slow LFO
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = 380; lp.Q.value = 4;
+  lp.connect(musicBus);
+  const lfo = ctx.createOscillator(); const lfoG = ctx.createGain();
+  lfo.frequency.value = 0.05; lfoG.gain.value = 200;
+  lfo.connect(lfoG); lfoG.connect(lp.frequency); lfo.start();
+  for (const [f, det] of [[73.42, -5], [73.42, 6], [110.0, 0]] as [number, number][]) {
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = det;
+    g.gain.value = 0.045;
+    o.connect(g); g.connect(lp); o.start();
+  }
+  nextNoteTime = ctx.currentTime + 0.15;
+  musicStep = 0;
+}
+
+function scheduleStep(s: number, t: number) {
+  if (!ctx || !musicBus) return;
+  // heartbeat sub on the downbeat (every 8 steps) — slow pulse of forward motion
+  if (s % 8 === 0) {
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(58, t);
+    o.frequency.exponentialRampToValueAtTime(40, t + 0.4);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.11, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+    o.connect(g); g.connect(musicBus); o.start(t); o.stop(t + 0.55);
+  }
+  // sparse chimes: a soft triangle bell + glassy octave overtone, long tail
+  if (Math.random() < 0.24) {
+    const base = SCALE[(Math.random() * SCALE.length) | 0] * (Math.random() < 0.25 ? 2 : 1);
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = 'triangle'; o.frequency.value = base;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.06, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+    o.connect(g); g.connect(musicBus); o.start(t); o.stop(t + 1.7);
+    const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+    o2.type = 'sine'; o2.frequency.value = base * 2;
+    g2.gain.setValueAtTime(0.0001, t);
+    g2.gain.linearRampToValueAtTime(0.022, t + 0.02);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + 1.2);
+    o2.connect(g2); g2.connect(musicBus); o2.start(t); o2.stop(t + 1.3);
+  }
 }
