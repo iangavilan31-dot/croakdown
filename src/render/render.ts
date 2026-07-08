@@ -178,46 +178,36 @@ function updateDecalLayer() {
   }
 }
 
-// ---------- glowing golden lotus centerpiece (the swamp's light source) ----------
+// ---------- center: the frog's lit lily PAD (REF_02 faithfulness) ----------
+// REF_02 has ONE hero lotus (now the painted one baked into arena_backdrop) and the frog sitting
+// on a LILY PAD. So the center is a big shaded lily pad + a soft warm glow pool (lights the frog),
+// NOT a second competing lotus bloom.
 function drawLotus(ctx: CanvasRenderingContext2D, time: number) {
   const cx = ARENA_W / 2, cy = ARENA_H / 2;
   const pulse = 0.85 + Math.sin(time * 1.4) * 0.15;
   ctx.save();
-  // warm radial glow washing the arena center — the swamp's hero light source (REF_02 lotus).
-  // Lifted range + intensity so it reads as the dominant warm anchor against the cool teal water.
-  const glow = ctx.createRadialGradient(cx, cy, 20, cx, cy, 680 * pulse);
-  glow.addColorStop(0, 'rgba(255,216,146,0.42)');
-  glow.addColorStop(0.35, 'rgba(255,186,96,0.16)');
-  glow.addColorStop(1, 'rgba(255,180,90,0)');
+  // soft warm ambient glow pool — lights the hero without pretending to be a light-source lotus
+  const glow = ctx.createRadialGradient(cx, cy, 20, cx, cy, 560 * pulse);
+  glow.addColorStop(0, 'rgba(255,214,150,0.28)');
+  glow.addColorStop(0.4, 'rgba(255,188,110,0.10)');
+  glow.addColorStop(1, 'rgba(255,186,96,0)');
   ctx.fillStyle = glow;
-  ctx.fillRect(cx - 720, cy - 720, 1440, 1440);
-  // pad
-  ctx.fillStyle = 'rgba(28,54,40,0.9)';
-  ctx.beginPath(); ctx.ellipse(cx, cy + 10, 84, 40, 0, 0, Math.PI * 2); ctx.fill();
-  // petals (three rings, rounded + overlapping), lit warm gold from within
-  ctx.translate(cx, cy - 4);
-  const drawPetal = (len: number, wide: number, c0: string, c1: string) => {
-    const g = ctx.createLinearGradient(0, 0, 0, -len);
-    g.addColorStop(0, c0); g.addColorStop(1, c1);
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.moveTo(0, 4);
-    ctx.bezierCurveTo(-wide, -len * 0.4, -wide * 0.5, -len, 0, -len);   // rounded tip
-    ctx.bezierCurveTo(wide * 0.5, -len, wide, -len * 0.4, 0, 4);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(120,70,20,0.25)'; ctx.lineWidth = 1; ctx.stroke();
-  };
-  // outer ring — deep amber
-  for (let i = 0; i < 8; i++) { ctx.save(); ctx.rotate((i / 8) * Math.PI * 2); drawPetal(52, 26, '#a9691f', '#e8a63c'); ctx.restore(); }
-  // mid ring — brighter gold, offset
-  for (let i = 0; i < 8; i++) { ctx.save(); ctx.rotate(((i + 0.5) / 8) * Math.PI * 2); drawPetal(40, 22, '#c8892e', '#ffcf6e'); ctx.restore(); }
-  // inner ring — pale warm, cupping the core
-  for (let i = 0; i < 6; i++) { ctx.save(); ctx.rotate((i / 6) * Math.PI * 2 + 0.3); drawPetal(24, 17, '#e0a83e', '#fff0c0'); ctx.restore(); }
-  // hot core
-  ctx.fillStyle = 'rgba(255,247,220,' + (0.85 * pulse) + ')';
-  ctx.shadowColor = '#ffd27a'; ctx.shadowBlur = 26 * pulse;
-  ctx.beginPath(); ctx.arc(0, -6, 13, 0, Math.PI * 2); ctx.fill();
-  ctx.shadowBlur = 0;
+  ctx.fillRect(cx - 600, cy - 600, 1200, 1200);
+  // big shaded lily pad (the frog's home base), painted-pad style to match the backdrop
+  ctx.translate(cx, cy + 8);
+  ctx.scale(1, 0.62);
+  const r = 92;
+  const g = ctx.createRadialGradient(-r * 0.22, -r * 0.24, r * 0.12, 0, 0, r);
+  g.addColorStop(0, '#3a7052'); g.addColorStop(0.7, '#234f39'); g.addColorStop(1, '#123527');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+  // cleft notch + a couple veins + rim highlight (lily pad read)
+  ctx.fillStyle = '#0b2419';
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, r + 2, -1.77, -1.37); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(10,32,24,0.3)'; ctx.lineWidth = 1.4;
+  for (let i = 0; i < 4; i++) { const a = 1.4 + (i - 1.5) * 0.55; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * r * 0.85, Math.sin(a) * r * 0.85); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(130,200,160,0.22)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(0, 0, r - 3, Math.PI * 1.05, Math.PI * 1.6); ctx.stroke();
   ctx.restore();
 }
 
