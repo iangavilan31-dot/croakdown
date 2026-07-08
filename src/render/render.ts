@@ -735,7 +735,7 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
     if (e.state === 'windup') {
       const p = e.stateF / data.atkWindup;
       ctx.save();
-      ctx.strokeStyle = `rgba(255,95,162,${0.2 + p * 0.55})`;
+      ctx.strokeStyle = `rgba(255,140,70,${0.2 + p * 0.55})`;   // warm danger tell (not pink)
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(e.atkX, e.atkY, data.atkRadius * (0.5 + p * 0.5), 0, Math.PI * 2);
@@ -854,10 +854,7 @@ function drawHud(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: number
   ctx.shadowColor = C.gold; ctx.shadowBlur = 10;
   ctx.beginPath(); ctx.arc(102, 152, 8, 0, Math.PI * 2); ctx.fill();
   ctx.shadowBlur = 0;
-  ctx.font = '800 30px Outfit, sans-serif';
-  ctx.fillStyle = C.cream;
-  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.fillText(String(f.essence), 122, 154);
+  drawPixelText(ctx, String(f.essence), 122, 154, 30, C.cream, 'left');
 
   // dash pips
   for (let i = 0; i < DASH_CHARGES; i++) {
@@ -876,31 +873,20 @@ function drawHud(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: number
     ctx.beginPath(); ctx.arc(166, 196, 11, -Math.PI / 2, -Math.PI / 2 + (1 - cd) * Math.PI * 2); ctx.stroke();
   }
 
-  // kill tally: subtle notches under essence (the pond keeps score) — capped display
-  ctx.fillStyle = 'rgba(242,234,216,0.35)';
-  ctx.font = '700 20px Outfit, sans-serif';
-  ctx.fillText(`×${w.kills}`, 122, 196);
+  // kill tally: subtle notches under essence (the pond keeps score)
+  drawPixelText(ctx, `x${w.kills}`, 122, 196, 20, 'rgba(242,234,216,0.4)', 'left');
 
   if (paused) {
     overlay(ctx, 'rgba(2,8,6,0.72)');
-    ctx.fillStyle = C.cream;
-    ctx.font = '900 84px Outfit, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('PAUSED', ARENA_W / 2, ARENA_H / 2);
+    drawPixelText(ctx, 'PAUSED', ARENA_W / 2, ARENA_H / 2, 68, C.cream, 'center', 900);
   }
   if (w.gameOver) {
     overlay(ctx, 'rgba(6,2,4,0.68)');
-    ctx.fillStyle = C.pink;
-    ctx.font = '900 92px Outfit, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('THE POND CLAIMS YOU', ARENA_W / 2, ARENA_H / 2 - 30);
-    ctx.fillStyle = C.cream;
-    ctx.font = '700 34px Outfit, sans-serif';
-    ctx.fillText(`×${w.kills}`, ARENA_W / 2, ARENA_H / 2 + 44);
+    // themed, restrained (Ian: minimal UI text) — sickly swamp-green, pixel font
+    drawPixelText(ctx, 'THE POND CLAIMS YOU', ARENA_W / 2, ARENA_H / 2 - 26, 54, '#8fd17a', 'center', 900);
+    drawPixelText(ctx, `x${w.kills}`, ARENA_W / 2, ARENA_H / 2 + 40, 30, C.gold, 'center', 800);
     if (Math.sin(time * 4) > 0) {
-      ctx.font = '700 26px Outfit, sans-serif';
-      ctx.fillStyle = 'rgba(242,234,216,0.7)';
-      ctx.fillText('R — again', ARENA_W / 2, ARENA_H / 2 + 110);
+      drawPixelText(ctx, 'R', ARENA_W / 2, ARENA_H / 2 + 100, 24, 'rgba(242,234,216,0.7)', 'center', 800);
     }
   }
   ctx.restore();
@@ -909,6 +895,30 @@ function drawHud(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: number
 function overlay(ctx: CanvasRenderingContext2D, fill: string) {
   ctx.fillStyle = fill;
   ctx.fillRect(-200, -200, ARENA_W + 400, ARENA_H + 400);
+}
+
+// Pixel-font text: render small, upscale with smoothing off -> chunky bitmap look that matches
+// the reference font AND needs no external font file (verifiable headless). All game text uses it.
+let ptCanvas: HTMLCanvasElement | null = null;
+function drawPixelText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number,
+                       size: number, color: string, align: 'left' | 'center' | 'right' = 'left', weight = 800) {
+  const scale = 3;
+  const src = Math.max(6, Math.round(size / scale));
+  if (!ptCanvas) ptCanvas = document.createElement('canvas');
+  const o = ptCanvas;
+  const g = o.getContext('2d')!;
+  const font = `${weight} ${src}px 'Outfit', 'Trebuchet MS', sans-serif`;
+  g.font = font;
+  const tw = Math.max(1, Math.ceil(g.measureText(text).width));
+  o.width = tw + 2; o.height = src + 4;                 // resizing clears the canvas
+  g.font = font; g.textBaseline = 'top'; g.textAlign = 'left'; g.fillStyle = color;
+  g.fillText(text, 1, 2);
+  const dw = o.width * scale, dh = o.height * scale;
+  let dx = x; if (align === 'center') dx = x - dw / 2; else if (align === 'right') dx = x - dw;
+  const prev = ctx.imageSmoothingEnabled;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(o, dx, y - dh / 2, dw, dh);
+  ctx.imageSmoothingEnabled = prev;
 }
 
 function drawHeart(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, color: string) {
