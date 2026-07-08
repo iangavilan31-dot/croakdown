@@ -93,6 +93,24 @@ function buildBackdrop(): HTMLCanvasElement {
   return c;
 }
 
+// Pixel-density unification (Art Direction LOCK: "no mixed pixel densities within a scene";
+// north stars Eastward/Moonlighter = painterly BUT pixel-consistent). The gpt-image backdrop
+// renders too smooth/hi-res beside the pixel sprites, so the hero read as "pasted from another
+// game" (blind Reference + Commercial judges). Down-res the backdrop to a pixel grid ONCE; the
+// render's nearest-neighbor upscale then gives it the same chunky grain as the frog/enemies.
+let pixBackdrop: HTMLCanvasElement | null = null;
+const BACKDROP_PIXEL = 3;   // ARENA / this = internal pixel resolution (higher = chunkier)
+function getPixBackdrop(bd: HTMLImageElement): HTMLCanvasElement {
+  if (pixBackdrop) return pixBackdrop;
+  const c = document.createElement('canvas');
+  c.width = Math.round(ARENA_W / BACKDROP_PIXEL); c.height = Math.round(ARENA_H / BACKDROP_PIXEL);
+  const g = c.getContext('2d')!;
+  g.imageSmoothingEnabled = true;    // smooth downscale -> clean solid pixel blocks
+  g.drawImage(bd, 0, 0, c.width, c.height);
+  pixBackdrop = c;
+  return pixBackdrop;
+}
+
 function roundRect(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   g.beginPath();
   g.moveTo(x + r, y);
@@ -409,7 +427,7 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
 
   // real painted swamp backdrop (falls back to graybox pond until the image loads)
   const bd = img('backdrop');
-  if (bd) ctx.drawImage(bd, 0, 0, ARENA_W, ARENA_H);
+  if (bd) { const pb = getPixBackdrop(bd); ctx.drawImage(pb, 0, 0, ARENA_W, ARENA_H); }  // pixel-density unified
   else { if (!backdrop) backdrop = buildBackdrop(); ctx.drawImage(backdrop, 0, 0); }
   // Backdrop is now a purpose-painted deep-teal lily-pond (REF_02-matched, gpt-image-1 2026-07-08).
   // Only a WHISPER of teal grade remains — just enough to seat the entities/VFX in the same light;
