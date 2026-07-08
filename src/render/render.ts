@@ -711,6 +711,90 @@ function drawAttackTell(ctx: CanvasRenderingContext2D, x: number, y: number, rad
   ctx.restore();
 }
 
+// per-kind slime palettes (muted swamp greens, tonal bands edge->core for a shaded sphere)
+const SLIME_PAL: Record<string, { outline: string; edge: string; mid: string; hi: string; core: string; fleck: string }> = {
+  blobbit: { outline: '#153320', edge: '#2c6640', mid: '#3f8a54', hi: '#5fae6f', core: '#8fd693', fleck: 'rgba(160,245,160,0.6)' },
+  spikeblob: { outline: '#0e2618', edge: '#244f38', mid: '#356a48', hi: '#4d8a5c', core: '#72b481', fleck: 'rgba(130,215,150,0.5)' },
+  gloopa: { outline: '#1b2a12', edge: '#465838', mid: '#647a46', hi: '#8a9d5c', core: '#bccb86', fleck: 'rgba(205,225,150,0.5)' },
+};
+
+/** A soft ROUND cute jelly slime: shaded tonal-band body, gloss, internal flecks, big glowing
+ *  eyes with glints, biolum rim, per-kind features. Drawn in the enemy's squash/waddle space. */
+function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: number, warm: boolean) {
+  const flash = e.flashT > 0;
+  const P = SLIME_PAL[e.kind] ?? SLIME_PAL.blobbit;
+  const wob = 1 + Math.sin(time * 4 + e.seed * 10) * 0.045;   // jelly wobble
+  const rx = r * 1.04 * wob, ry = r * 0.94 / wob;
+
+  // dark outline + soft bioluminescent rim (separates from dark water & foliage)
+  ctx.save();
+  ctx.shadowColor = 'rgba(150,240,150,0.7)'; ctx.shadowBlur = 8;
+  ctx.fillStyle = flash ? '#daffe0' : P.outline;
+  ctx.beginPath(); ctx.ellipse(0, 0, rx + 2.5, ry + 2.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  if (flash) {
+    ctx.fillStyle = '#eafff0';
+    ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+  } else {
+    // shaded sphere: concentric tonal bands offset toward the upper-left light
+    const bands: [number, number, number, string][] = [
+      [0, 0, 1.0, P.edge], [-0.06, -0.06, 0.84, P.mid], [-0.13, -0.15, 0.58, P.hi], [-0.2, -0.24, 0.3, P.core],
+    ];
+    for (const [ox, oy, s, c] of bands) {
+      ctx.fillStyle = c;
+      ctx.beginPath(); ctx.ellipse(ox * r, oy * r, rx * s, ry * s, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    // internal spore flecks (seeded, static-ish)
+    ctx.fillStyle = P.fleck;
+    for (let i = 0; i < 4; i++) {
+      const a = e.seed * 30 + i * 1.7, rr = (0.25 + (i % 3) * 0.22) * r;
+      ctx.beginPath(); ctx.arc(Math.cos(a) * rr * 0.8, Math.sin(a) * rr * 0.6 + r * 0.1, r * 0.06, 0, Math.PI * 2); ctx.fill();
+    }
+    // glossy highlight, top-left
+    ctx.fillStyle = 'rgba(225,255,225,0.5)';
+    ctx.beginPath(); ctx.ellipse(-r * 0.34, -r * 0.42, r * 0.26, r * 0.15, -0.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // per-kind features (kept ROUND — soft bumps, not sharp spikes)
+  if (!flash && e.kind === 'spikeblob') {
+    ctx.fillStyle = P.edge;
+    for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.arc(i * r * 0.44, -ry * 0.78, r * 0.16, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = P.mid;
+    for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.arc(i * r * 0.44 - r * 0.04, -ry * 0.82, r * 0.09, 0, Math.PI * 2); ctx.fill(); }
+  }
+  if (!flash && e.kind === 'gloopa') {   // droopy heavy jowls
+    ctx.fillStyle = P.mid;
+    ctx.beginPath(); ctx.ellipse(-rx * 0.7, ry * 0.35, r * 0.26, r * 0.2, 0, 0, Math.PI * 2);
+    ctx.ellipse(rx * 0.7, ry * 0.35, r * 0.26, r * 0.2, 0, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // big cute glowing eyes with glint (track facing)
+  const look = e.facing;
+  const lx = Math.cos(look) * r * 0.12, ly = Math.sin(look) * r * 0.08;
+  const es = (e.kind === 'gloopa' ? 0.22 : e.kind === 'spikeblob' ? 0.19 : 0.18) * r;
+  const iris = warm ? '#ffb060' : '#c9ff72';
+  for (const side of [-1, 1]) {
+    const ox = side * r * 0.33 + lx, oy = -r * 0.1 + ly;
+    ctx.fillStyle = '#0c1f13';
+    ctx.beginPath(); ctx.ellipse(ox, oy, es * 1.1, es * 1.35, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = iris; ctx.shadowColor = iris; ctx.shadowBlur = 6;
+    ctx.beginPath(); ctx.ellipse(ox, oy, es * 0.66, es * 0.9, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(ox - es * 0.28, oy - es * 0.45, es * 0.24, 0, Math.PI * 2); ctx.fill();
+  }
+  // gloopa third eye (grotesque bruiser tell)
+  if (e.kind === 'gloopa') {
+    ctx.fillStyle = '#0c1f13';
+    ctx.beginPath(); ctx.ellipse(lx, -r * 0.5 + ly, es * 0.7, es * 0.85, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = iris; ctx.shadowColor = iris; ctx.shadowBlur = 5;
+    ctx.beginPath(); ctx.arc(lx, -r * 0.5 + ly, es * 0.42, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+  }
+
+  if (flash) { ctx.globalAlpha = 0.55; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+}
+
 // ---------- enemies ----------
 function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time: number) {
   const data = ENEMIES[e.kind];
@@ -745,104 +829,19 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
   }
   ctx.scale(sx2, sy2);
 
-  // real sludgeling sprite (all sludge-family kinds share it for the slice), then bail to the
-  // world-space windup telegraph. Graybox blob below is the fallback until the image loads.
-  const sImg = (e.flashT > 0 && img('blobbitHit')) ? img('blobbitHit') : img('sludgeling');
-  if (sImg) {
-    // bouncy waddle: rock + hop + per-step squish while closing on the player (critics: too stiff)
-    const moving = e.state === 'seek' && Math.hypot(e.vx, e.vy) > 10;
-    const wadT = time * 9 + e.seed * 20;
-    if (moving) {
-      const wadHop = Math.abs(Math.sin(wadT)) * r * 0.3;
-      ctx.rotate(Math.sin(wadT) * 0.2);            // rock
-      ctx.translate(0, -wadHop);                    // hop
-      ctx.scale(1 + Math.cos(wadT * 2) * 0.09, 1 - Math.cos(wadT * 2) * 0.09); // squish per step
-    }
-    if (e.flashT > 0) ctx.scale(1.28, 0.72);        // hard flatten recoil on hit (juice)
-    const h = r * 3.15;                             // plumper/bigger (critics: read as threats)
-    const dw = h * (sImg.width / sImg.height);
-    ctx.imageSmoothingEnabled = false;
-    // soft bioluminescent rim so the slime separates from the dark water + green foliage
-    ctx.shadowColor = 'rgba(150,240,150,0.75)'; ctx.shadowBlur = 7;
-    ctx.drawImage(sImg, -dw / 2, -h * 0.6, dw, h);
-    ctx.shadowBlur = 0;
-    ctx.drawImage(sImg, -dw / 2, -h * 0.6, dw, h);
-    if (e.flashT > 0) {
-      ctx.globalAlpha = 0.9; ctx.globalCompositeOperation = 'lighter';
-      ctx.drawImage(sImg, -dw / 2, -h * 0.6, dw, h);
-      ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
-    }
-    ctx.restore();
-    if (e.state === 'windup') drawAttackTell(ctx, e.atkX, e.atkY, data.atkRadius, e.stateF / data.atkWindup);
-    return;
-  }
-
-  // body color: white flash > armor flash > windup warm > base
+  // PROCEDURAL cute-slime (Ian + critics want a soft ROUND squishy blob; gpt-image-1 only makes
+  // spiky urchins). Bouncy waddle + hard hit-flatten, then a richly-shaded round jelly body.
   const warm = e.state === 'windup' && (e.stateF & 4) !== 0;
-  let body = e.kind === 'gloopa' ? C.sludgeDark : C.sludge;
-  if (warm) body = '#8a3050';
-  if (e.armorFlashT > 0) body = '#8b9490';
-  if (e.flashT > 0) body = '#ffffff';
-  ctx.fillStyle = body;
-
-  // blob silhouette (round-bottomed)
-  ctx.beginPath();
-  ctx.ellipse(0, 0, r, r * 0.85, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // drips
-  ctx.beginPath();
-  ctx.ellipse(-r * 0.4, r * 0.55, r * 0.28, r * 0.2, 0, 0, Math.PI * 2);
-  ctx.ellipse(r * 0.45, r * 0.5, r * 0.22, r * 0.16, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // spikeblob spikes
-  if (e.kind === 'spikeblob') {
-    const out = e.spikesOut ? 1 : 0.25;
-    // inflate tell right before toggle
-    const period = e.spikesOut ? 1.2 : 1.8;
-    const tell = e.spikeT / period > 0.8 ? 1.12 : 1;
-    ctx.fillStyle = e.flashT > 0 ? '#fff' : e.spikesOut ? '#5d7a6a' : '#3a4f43';
-    for (let i = 0; i < 8; i++) {
-      const a = (i / 8) * Math.PI * 2 + 0.3;
-      const bx = Math.cos(a) * r * 0.9 * tell, by = Math.sin(a) * r * 0.75 * tell;
-      const tx = Math.cos(a) * (r * 0.9 + 14 * out) * tell, ty = Math.sin(a) * (r * 0.75 + 14 * out) * tell;
-      ctx.beginPath();
-      ctx.moveTo(bx + Math.sin(a) * 5, by - Math.cos(a) * 5);
-      ctx.lineTo(tx, ty);
-      ctx.lineTo(bx - Math.sin(a) * 5, by + Math.cos(a) * 5);
-      ctx.closePath();
-      ctx.fill();
-    }
+  const moving = e.state === 'seek' && Math.hypot(e.vx, e.vy) > 10;
+  const wadT = time * 9 + e.seed * 20;
+  if (moving) {
+    const wadHop = Math.abs(Math.sin(wadT)) * r * 0.32;
+    ctx.rotate(Math.sin(wadT) * 0.18);
+    ctx.translate(0, -wadHop);
+    ctx.scale(1 + Math.cos(wadT * 2) * 0.1, 1 - Math.cos(wadT * 2) * 0.1);
   }
-
-  // gloopa crown of bones (bruiser tell)
-  if (e.kind === 'gloopa') {
-    ctx.fillStyle = e.flashT > 0 ? '#fff' : '#c9bfa8';
-    for (let i = -1; i <= 1; i++) {
-      ctx.beginPath();
-      ctx.moveTo(i * 14 - 5, -r * 0.7);
-      ctx.lineTo(i * 14, -r * 0.7 - 12);
-      ctx.lineTo(i * 14 + 5, -r * 0.7);
-      ctx.closePath();
-      ctx.fill();
-    }
-  }
-
-  // glowing eyes (cool/dark body, eye glow = the readable bit)
-  const eyeC = warm ? C.pink : C.eye;
-  ctx.shadowColor = eyeC; ctx.shadowBlur = 7;
-  ctx.fillStyle = eyeC;
-  const look = e.facing;
-  const lx = Math.cos(look) * 4, ly = Math.sin(look) * 3;
-  ctx.beginPath();
-  ctx.arc(-r * 0.3 + lx, -r * 0.25 + ly, e.kind === 'gloopa' ? 6 : 4.5, 0, Math.PI * 2);
-  ctx.arc(r * 0.3 + lx, -r * 0.25 + ly, e.kind === 'gloopa' ? 6 : 4.5, 0, Math.PI * 2);
-  ctx.fill();
-  // the grotesque touch: third eye on gloopa
-  if (e.kind === 'gloopa') {
-    ctx.beginPath(); ctx.arc(lx, -r * 0.55 + ly, 4, 0, Math.PI * 2); ctx.fill();
-  }
-  ctx.shadowBlur = 0;
+  if (e.flashT > 0) ctx.scale(1.3, 0.72);           // hard flatten recoil on hit (juice)
+  drawSlime(ctx, e, r, time, warm);
 
   ctx.restore();
 
