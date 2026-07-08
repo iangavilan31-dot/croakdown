@@ -191,32 +191,30 @@ function drawLotus(ctx: CanvasRenderingContext2D, time: number) {
   // pad
   ctx.fillStyle = 'rgba(28,54,40,0.9)';
   ctx.beginPath(); ctx.ellipse(cx, cy + 10, 84, 40, 0, 0, Math.PI * 2); ctx.fill();
-  // petals (two rings), lit from within
-  ctx.translate(cx, cy);
-  for (let ring = 0; ring < 2; ring++) {
-    const n = ring === 0 ? 8 : 6;
-    const r = ring === 0 ? 46 : 26;
-    const rot = ring === 0 ? 0 : Math.PI / 6;
-    for (let i = 0; i < n; i++) {
-      const a = rot + (i / n) * Math.PI * 2;
-      ctx.save();
-      ctx.rotate(a);
-      const g = ctx.createLinearGradient(0, 0, 0, -r * 1.6);
-      g.addColorStop(0, '#c8892e');
-      g.addColorStop(1, ring === 0 ? '#ffe9a8' : '#fff6d8');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.quadraticCurveTo(-11, -r, 0, -r * 1.5);
-      ctx.quadraticCurveTo(11, -r, 0, 0);
-      ctx.fill();
-      ctx.restore();
-    }
-  }
+  // petals (three rings, rounded + overlapping), lit warm gold from within
+  ctx.translate(cx, cy - 4);
+  const drawPetal = (len: number, wide: number, c0: string, c1: string) => {
+    const g = ctx.createLinearGradient(0, 0, 0, -len);
+    g.addColorStop(0, c0); g.addColorStop(1, c1);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(0, 4);
+    ctx.bezierCurveTo(-wide, -len * 0.4, -wide * 0.5, -len, 0, -len);   // rounded tip
+    ctx.bezierCurveTo(wide * 0.5, -len, wide, -len * 0.4, 0, 4);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(120,70,20,0.25)'; ctx.lineWidth = 1; ctx.stroke();
+  };
+  // outer ring — deep amber
+  for (let i = 0; i < 8; i++) { ctx.save(); ctx.rotate((i / 8) * Math.PI * 2); drawPetal(52, 26, '#a9691f', '#e8a63c'); ctx.restore(); }
+  // mid ring — brighter gold, offset
+  for (let i = 0; i < 8; i++) { ctx.save(); ctx.rotate(((i + 0.5) / 8) * Math.PI * 2); drawPetal(40, 22, '#c8892e', '#ffcf6e'); ctx.restore(); }
+  // inner ring — pale warm, cupping the core
+  for (let i = 0; i < 6; i++) { ctx.save(); ctx.rotate((i / 6) * Math.PI * 2 + 0.3); drawPetal(24, 17, '#e0a83e', '#fff0c0'); ctx.restore(); }
   // hot core
-  ctx.fillStyle = 'rgba(255,247,220,' + (0.7 * pulse) + ')';
-  ctx.shadowColor = '#ffd27a'; ctx.shadowBlur = 30 * pulse;
-  ctx.beginPath(); ctx.arc(0, -6, 12, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,247,220,' + (0.85 * pulse) + ')';
+  ctx.shadowColor = '#ffd27a'; ctx.shadowBlur = 26 * pulse;
+  ctx.beginPath(); ctx.arc(0, -6, 13, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
   ctx.restore();
 }
 
@@ -534,21 +532,45 @@ function drawSwordAt(ctx: CanvasRenderingContext2D, w: World, time: number) {
   }
 
   ctx.save();
-  ctx.rotate(0);
   ctx.translate(Math.cos(ang) * 16, Math.sin(ang) * 16 + raise);
   ctx.rotate(ang);
-  // blade — a soggy branch (tier 1 stick)
-  ctx.fillStyle = '#6b5236';
-  ctx.fillRect(8, -5, L, 10);
-  ctx.fillStyle = '#54402a';
-  ctx.fillRect(8, -5, L, 4);
-  // knots
+  // REED SWORD (design/4 Weapons): a blade of hardened swamp reeds, leather-wrapped grip,
+  // mossy-vine binding, chipped edge, glowing lime moss at the guard.
+  // blade body (tapered reed, olive-green)
+  ctx.fillStyle = '#5c6b2f';
+  ctx.beginPath();
+  ctx.moveTo(14, -6); ctx.lineTo(L - 6, -4); ctx.lineTo(L + 4, 0); ctx.lineTo(L - 6, 4); ctx.lineTo(14, 6);
+  ctx.closePath(); ctx.fill();
+  // lit reed edge (top highlight)
+  ctx.fillStyle = '#8fae4a';
+  ctx.beginPath();
+  ctx.moveTo(14, -6); ctx.lineTo(L - 6, -4); ctx.lineTo(L - 8, -1); ctx.lineTo(14, -2);
+  ctx.closePath(); ctx.fill();
+  // dark reed spine
+  ctx.fillStyle = '#3a4a22';
+  ctx.fillRect(14, 2, L - 18, 3);
+  // a couple of chips out of the edge
+  ctx.fillStyle = 'rgba(10,16,8,0.6)';
+  ctx.beginPath(); ctx.arc(L * 0.6, 5, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(L * 0.82, -4, 2.4, 0, Math.PI * 2); ctx.fill();
+  // vine binding wraps near the base of the blade
+  ctx.strokeStyle = '#2f5233'; ctx.lineWidth = 2.5;
+  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(16 + i * 5, -6); ctx.lineTo(20 + i * 5, 6); ctx.stroke(); }
+  // guard + glowing moss
+  ctx.fillStyle = '#5a4a2e';
+  ctx.fillRect(10, -8, 6, 16);
+  ctx.fillStyle = '#b6ff6a';
+  ctx.shadowColor = '#8fff5a'; ctx.shadowBlur = 6;
+  ctx.beginPath(); ctx.arc(13, -7, 2.2, 0, Math.PI * 2); ctx.arc(12, 7, 1.8, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+  // leather-wrapped grip
+  ctx.fillStyle = '#3a2c1c';
+  ctx.fillRect(-2, -5, 12, 10);
+  ctx.strokeStyle = '#241a10'; ctx.lineWidth = 1.5;
+  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(0 + i * 4, -5); ctx.lineTo(2 + i * 4, 5); ctx.stroke(); }
+  // pommel
   ctx.fillStyle = '#4a3722';
-  ctx.beginPath(); ctx.arc(L * 0.45, 0, 6, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(L * 0.8, -2, 5, 0, Math.PI * 2); ctx.fill();
-  // grip
-  ctx.fillStyle = '#2c2c28';
-  ctx.fillRect(0, -6, 12, 12);
+  ctx.beginPath(); ctx.arc(-3, 0, 4, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 }
 
