@@ -106,17 +106,39 @@ let pixBackdropF = -1;
 // clash is render-STYLE (soft-painterly backdrop vs hard-pixel sprites), not grain size — only a true
 // pixel-art repaint of the backdrop resolves it (a call on the signed painterly-pixel hybrid). So this
 // defaults to 1 (smooth); __bpx keeps the QA knob live for that future decision.
-const BACKDROP_PIXEL = 1;
+// The density round proved down-res alone can't unify the SOFT painterly backdrop with the HARD
+// pixel hero — the clash is edge/colour HARDNESS, not grain. So stylize the backdrop into pixel-art
+// terms: a modest down-res + colour POSTERIZE + ordered (Bayer 4x4) DITHER bakes hard colour steps
+// and a pixel-grain into the painting so it reads in the same visual language as the sprites, while
+// keeping the composition/lotus/pads. Reversible: BACKDROP_LEVELS=0 disables (pure smooth original).
+const BACKDROP_PIXEL = 1.6;   // slight down-res so the dither reads as chunky pixels
+const BACKDROP_LEVELS = 6;    // posterize levels/channel (fewer = harder steps); 0 = off (smooth)
 function getPixBackdrop(bd: HTMLImageElement): HTMLCanvasElement {
-  // __bpx is a QA override so the candidate-compare probe can sweep densities live (1 = smooth original)
+  // __bpx is a QA override so the candidate-compare probe can sweep densities live (1 = full res)
   const f = Math.max(1, (window as any).__bpx ?? BACKDROP_PIXEL);
   if (pixBackdrop && pixBackdropF === f) return pixBackdrop;
   pixBackdropF = f;
+  const w = Math.round(ARENA_W / f), h = Math.round(ARENA_H / f);
   const c = document.createElement('canvas');
-  c.width = Math.round(ARENA_W / f); c.height = Math.round(ARENA_H / f);
+  c.width = w; c.height = h;
   const g = c.getContext('2d')!;
-  g.imageSmoothingEnabled = true;    // smooth downscale -> clean solid pixel blocks
-  g.drawImage(bd, 0, 0, c.width, c.height);
+  g.imageSmoothingEnabled = true;
+  g.drawImage(bd, 0, 0, w, h);
+  if (BACKDROP_LEVELS >= 2) {
+    // ordered dither + posterize -> hard pixel-art colour steps that match the sprite hardness
+    const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+    const step = 255 / (BACKDROP_LEVELS - 1);
+    const im = g.getImageData(0, 0, w, h); const d = im.data;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      const t = (bayer[(y & 3) * 4 + (x & 3)] / 16 - 0.5) * step;   // dither threshold offset
+      for (let k = 0; k < 3; k++) {
+        const v = Math.round((d[i + k] + t) / step) * step;
+        d[i + k] = v < 0 ? 0 : v > 255 ? 255 : v;
+      }
+    }
+    g.putImageData(im, 0, 0);
+  }
   pixBackdrop = c;
   return pixBackdrop;
 }
