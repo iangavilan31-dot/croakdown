@@ -17,8 +17,8 @@ function targetCount(elapsed: number): number {
 function pickKind(w: World): EnemyKind {
   const t = w.elapsed;
   const r = w.rng();
-  if (t > 45 && r < 0.12) return 'gloopa';
-  if (t > 25 && r < 0.28) return 'spikeblob';
+  if (t > 28 && r < 0.14) return 'gloopa';      // variety earlier so the horde isn't one clone (critics)
+  if (t > 12 && r < 0.3) return 'spikeblob';
   return 'blobbit';
 }
 

@@ -532,9 +532,19 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
   const lean = (moving ? Math.sin(f.hopPhase * Math.PI * 2) * 0.05 : 0)
     + Math.max(-0.1, Math.min(0.1, f.vx / 3200));
 
+  // strike motion: pull back on windup (anticipation), thrust forward on the active swing
+  // (follow-through) so the hit reads as the frog's own action (critics: connect kill to swing).
+  let lungeX = 0, lungeY = 0;
+  if (atk.phase === 'active' || atk.phase === 'follow') {
+    const amt = (atk.phase === 'active' ? 0.55 : 0.28) * FROG_RADIUS;
+    lungeX = Math.cos(atk.angle) * amt; lungeY = Math.sin(atk.angle) * amt;
+  } else if (atk.phase === 'windup' || atk.phase === 'heavywindup' || atk.phase === 'heavyhold') {
+    lungeX = -Math.cos(atk.angle) * FROG_RADIUS * 0.2; lungeY = -Math.sin(atk.angle) * FROG_RADIUS * 0.2;
+  }
+
   const flicker = f.iframesT > 0 && Math.floor(time * 24) % 2 === 0;
   ctx.save();
-  ctx.translate(fx, fy - hop);
+  ctx.translate(fx + lungeX, fy - hop + lungeY);
   if (lean) ctx.rotate(lean);
   if (flicker) ctx.globalAlpha = 0.45;
 
@@ -561,9 +571,9 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
   else if (blinking && img('frogBlink')) frogImg = img('frogBlink');
   else frogImg = img('frog');
 
-  // sheathed KATANA on the back (Ian: "a samurai sword on the back — dope"). Drawn behind
-  // the body so the wrapped handle rises over the shoulder.
-  if (frogImg) drawBackKatana(ctx, FROG_RADIUS);
+  // sheathed KATANA on the back (Ian: "a samurai sword on the back — dope"). Scaled to the
+  // bigger sprite so the wrapped handle + tsuba clearly rise over the shoulder (critics: invisible).
+  if (frogImg) drawBackKatana(ctx, FROG_RADIUS * 2.05);
 
   if (frogImg) {
     const h = FROG_RADIUS * 4.8;                        // bigger hero silhouette (critics: ~1.6x up)
@@ -722,19 +732,23 @@ function drawSwordAt(ctx: CanvasRenderingContext2D, w: World, time: number) {
   // REED KATANA (design/4 Weapons + reference pack): a curved single-edged swamp katana —
   // steel-green blade with a glowing lime edge, round tsuba, cloth-wrapped tsuka.
   const bo = -9;                               // blade curves upward toward the tip
-  const spine = (): void => { ctx.moveTo(13, -3); ctx.quadraticCurveTo(L * 0.55, -6 + bo * 0.4, L, bo); };
-  const edge = (): void => { ctx.moveTo(14, 4); ctx.quadraticCurveTo(L * 0.55, 2 + bo * 0.4, L - 2, bo + 2); };
+  // wider blade so it reads as a KATANA, not a thin beam, even pointing up (critics)
+  const spine = (): void => { ctx.moveTo(13, -5); ctx.quadraticCurveTo(L * 0.55, -9 + bo * 0.4, L, bo); };
+  const edge = (): void => { ctx.moveTo(14, 7); ctx.quadraticCurveTo(L * 0.55, 4 + bo * 0.4, L - 2, bo + 2); };
   // blade body
   ctx.beginPath();
-  ctx.moveTo(13, -3); ctx.quadraticCurveTo(L * 0.55, -6 + bo * 0.4, L, bo);
-  ctx.lineTo(L - 2, bo + 2); ctx.quadraticCurveTo(L * 0.55, 2 + bo * 0.4, 14, 5);
+  ctx.moveTo(13, -5); ctx.quadraticCurveTo(L * 0.55, -9 + bo * 0.4, L, bo);
+  ctx.lineTo(L - 2, bo + 2); ctx.quadraticCurveTo(L * 0.55, 4 + bo * 0.4, 14, 7);
   ctx.closePath();
-  ctx.fillStyle = '#838d6e'; ctx.fill();
+  ctx.fillStyle = '#8f9a78'; ctx.fill();
+  // brighter steel core band down the blade
+  ctx.strokeStyle = '#aeb894'; ctx.lineWidth = 2; ctx.beginPath();
+  ctx.moveTo(15, 0); ctx.quadraticCurveTo(L * 0.55, -2 + bo * 0.4, L - 4, bo + 1); ctx.stroke();
   // glowing lime cutting edge (hamon)
-  ctx.strokeStyle = 'rgba(150,255,120,0.4)'; ctx.lineWidth = 3.2; ctx.beginPath(); edge(); ctx.stroke();
-  ctx.strokeStyle = '#e2f4b6'; ctx.lineWidth = 1.6; ctx.beginPath(); edge(); ctx.stroke();
+  ctx.strokeStyle = 'rgba(150,255,120,0.45)'; ctx.lineWidth = 3.6; ctx.beginPath(); edge(); ctx.stroke();
+  ctx.strokeStyle = '#e2f4b6'; ctx.lineWidth = 2; ctx.beginPath(); edge(); ctx.stroke();
   // dark spine
-  ctx.strokeStyle = '#39472a'; ctx.lineWidth = 1.6; ctx.beginPath(); spine(); ctx.stroke();
+  ctx.strokeStyle = '#39472a'; ctx.lineWidth = 2; ctx.beginPath(); spine(); ctx.stroke();
   // round tsuba guard
   ctx.fillStyle = '#2a2018'; ctx.beginPath(); ctx.ellipse(11, 0, 3, 7.5, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#b6ff6a'; ctx.shadowColor = '#8fff5a'; ctx.shadowBlur = 5;
