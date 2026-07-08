@@ -666,6 +666,10 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
   // stretch tall at the apex, squash wide on landing (heavier amplitude — Ian: chunky/plump/squishy)
   let squashX = 1 - hopArc * 0.17;
   let squashY = 1 + hopArc * 0.22;
+  // landing impact squash: a sharp WIDE splat the instant the frog touches down, easing back — the
+  // other half of squash&stretch (apex = tall stretch, touchdown = fat splat). Reads handcrafted.
+  const impact = moving ? Math.pow(1 - hopArc, 5) : 0;
+  squashX += impact * 0.15; squashY -= impact * 0.15;
   // idle: plumper resting silhouette + deeper belly breathing (REF_02 frog reads heavy/slumped)
   if (!moving && f.dashT <= 0 && atk.phase === 'none') {
     const b = Math.sin(time * 1.9) * 0.05;
@@ -723,7 +727,12 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
 
   // sheathed KATANA on the back (Ian: "a samurai sword on the back — dope"). Scaled to the
   // bigger sprite so the wrapped handle + tsuba clearly rise over the shoulder (critics: invisible).
-  if (frogImg) drawBackKatana(ctx, FROG_RADIUS * 2.7);
+  if (frogImg) {
+    // secondary motion: the sheathed katana sways/bobs with the hop (and idles gently) so the
+    // weapon has its own weight-lag, never rigidly locked to the body (Ian: weapon swing / secondary).
+    const kSway = moving ? Math.sin(f.hopPhase * Math.PI * 2 + 0.6) * 0.13 : Math.sin(time * 1.8) * 0.035;
+    ctx.save(); ctx.rotate(kSway); drawBackKatana(ctx, FROG_RADIUS * 2.7); ctx.restore();
+  }
 
   if (frogImg) {
     const h = FROG_RADIUS * 6.6;                        // ~1.4x bigger hero (Ian masterpass: frog is THE focus, ~1.8x)
