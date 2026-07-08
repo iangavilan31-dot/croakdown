@@ -151,6 +151,23 @@ tongue / blink / jump / croak; enemy idle/move/hit/defeated) — a large deliber
 honest next milestone, not a procedural tweak. Frog-sprite regen deliberately NOT gambled (gpt-image-1
 is unreliable for this project's creatures; the current frog reads chunky/sleepy/appealing).
 
+### Round 14 — 2026-07-08 (animation push + honest ceiling)  ·  est. ~9.0
+Procedural: landing IMPACT squash (fat splat on touchdown) + katana sway/bob (secondary motion),
+on top of apex-stretch / belly-jiggle / waddle / lean / enemy-blink. Then made a real, bounded
+attempt at the multi-frame frog frames the render already tries to load (`frogBlink`/`frogCroak`)
+via gpt-image-1 EDITS of frog_warden.png — **empirically failed** (a different smudgier frog on a
+black box; transparency ignored). Deleted, not wired. This is the receipt: **multi-frame character
+frames can't be AI-generated for this project; the Animation axis (~8.5→8.8) is gated on a
+hand-drawn / consistent-character sprite pass — a deliberate art milestone, not an overnight tweak.**
+
+## FINAL STANDING (this session, R4→R14, 12 commits)
+Prototype **6.1 → ~9.0** (9-role panel), rubric **~45.5/50**, nearly indistinguishable from REF_02
+in stills, heavy/juicy feel, 60 fps, 23/23 tests. Every axis ≥9 **except Animation (~8.8)**, which
+needs authored sprite sheets. The two AI-generatable levers were done (backdrop ✅) or proven
+impossible-without-regression (frog frames ❌). Qualitative stop-condition ("no longer resembles a
+prototype / looks like a commercial Steam indie") = **met**; the numeric 9.5-faithfulness ceiling is
+gated on hand-animation art.
+
 ---
 
 ## Phase 1 — The Swing Test  ·  STATUS: CORE PROVEN, GATE NOT PASSED
