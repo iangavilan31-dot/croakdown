@@ -101,8 +101,11 @@ export function updateRipples(dt: number) {
 }
 
 // ---------- event consumption (the fan-out) ----------
-const PINK = '#ff5fa2';
-const BLOOD = '#a3132e';
+// Swamp gore law (REFERENCE_PACK v2): enemies are GREEN sludge — hits spray glowing
+// jelly, deaths dissolve to sludge puddles + water ripples. No red blood, no bones.
+const PINK = '#ff5fa2';       // tongue impact only (reference-approved accent)
+const SLUDGE = '#4fbf6e';     // bright enemy jelly spray
+const SLUDGE_DK = '#2f8f52';  // deeper sludge
 const GOLD = '#ffd27a';
 const GEL = '#7fd6a8';
 
@@ -114,8 +117,8 @@ export function consumeEvents(w: World): void {
       case 'hit': {
         const ang = Math.atan2(e.dirY, e.dirX);
         spawnParticles(e.x, e.y, 6, { angle: ang, spread: 0.9, speed: 260, color: '#fff', maxLife: 0.22, size: 3 });
-        spawnParticles(e.x, e.y, e.cls === 'heavy' ? 14 : 6, { angle: ang, spread: 1.1, speed: 320, color: BLOOD, maxLife: 0.5, size: 4, gravity: 300, drag: 3 });
-        if (Math.random() < (e.cls === 'heavy' ? 0.9 : 0.35)) addDecal(e.x + e.dirX * 24, e.y + e.dirY * 24, 'blood', ang, e.cls === 'heavy' ? 1.2 : 0.7);
+        spawnParticles(e.x, e.y, e.cls === 'heavy' ? 14 : 6, { angle: ang, spread: 1.1, speed: 320, color: SLUDGE, maxLife: 0.5, size: 4, gravity: 300, drag: 3 });
+        if (Math.random() < (e.cls === 'heavy' ? 0.5 : 0.18)) addDecal(e.x + e.dirX * 24, e.y + e.dirY * 24, 'blood', ang, e.cls === 'heavy' ? 0.7 : 0.5);
         addTrauma(e.cls === 'heavy' ? TRAUMA_HEAVY : TRAUMA_LIGHT);
         sfx(e.cls === 'heavy' || e.cls === 'medium' ? 'sliceHeavy' : 'sliceLight');
         if (e.killed) onKill(e);
@@ -138,7 +141,7 @@ export function consumeEvents(w: World): void {
       }
       case 'wallSplat': {
         const ang = Math.atan2(e.dirY, e.dirX);
-        spawnParticles(e.x, e.y, 16, { angle: ang, spread: 1.6, speed: 380, color: BLOOD, maxLife: 0.6, size: 5, gravity: 260, drag: 3 });
+        spawnParticles(e.x, e.y, 16, { angle: ang, spread: 1.6, speed: 380, color: SLUDGE, maxLife: 0.6, size: 5, gravity: 260, drag: 3 });
         addDecal(e.x, e.y, 'splat', ang, 1.3);
         addTrauma(TRAUMA_SPLAT);
         sfx('splat');
@@ -204,18 +207,17 @@ function onKill(e: SimEvent): void {
   const ang = Math.atan2(e.dirY, e.dirX);
   addTrauma(TRAUMA_KILL);
   if (e.overkill) {
-    // gib burst: parts become decals
-    spawnParticles(e.x, e.y, 26, { spread: Math.PI * 2, speed: 420, color: BLOOD, maxLife: 0.7, size: 6, gravity: 320, drag: 2.5 });
-    spawnParticles(e.x, e.y, 8, { spread: Math.PI * 2, speed: 300, color: GEL, maxLife: 0.6, size: 7, gravity: 280 });
-    addDecal(e.x, e.y, 'blood', ang, 1.5);
-    addDecal(e.x + e.dirX * 40 + (Math.random() - 0.5) * 30, e.y + e.dirY * 40 + (Math.random() - 0.5) * 30, 'bones');
-    addDecal(e.x + e.dirX * 70, e.y + e.dirY * 70, 'smear', ang, 1.2);
+    // burst of glowing jelly, then dissolve to a sludge puddle + water ripple
+    spawnParticles(e.x, e.y, 26, { spread: Math.PI * 2, speed: 420, color: SLUDGE, maxLife: 0.7, size: 6, gravity: 320, drag: 2.5 });
+    spawnParticles(e.x, e.y, 10, { spread: Math.PI * 2, speed: 300, color: GEL, maxLife: 0.6, size: 7, gravity: 280, glow: true });
+    addDecal(e.x, e.y, 'gel', ang, 0.75);
+    spawnRipple(e.x, e.y + 8, 80, 0.7);
     sfx('gib');
   } else {
-    spawnParticles(e.x, e.y, 12, { spread: Math.PI * 2, speed: 280, color: BLOOD, maxLife: 0.5, size: 4, gravity: 280, drag: 3 });
-    spawnParticles(e.x, e.y, 6, { spread: Math.PI * 2, speed: 180, color: GEL, maxLife: 0.45, size: 5 });
-    addDecal(e.x, e.y, e.kind === 'gloopa' ? 'gel' : 'blood', ang, e.kind === 'gloopa' ? 1.4 : 0.9);
-    if (Math.random() < 0.3) addDecal(e.x + (Math.random() - 0.5) * 40, e.y + (Math.random() - 0.5) * 40, 'bones', 0, 0.8);
+    spawnParticles(e.x, e.y, 12, { spread: Math.PI * 2, speed: 280, color: SLUDGE, maxLife: 0.5, size: 4, gravity: 280, drag: 3 });
+    spawnParticles(e.x, e.y, 6, { spread: Math.PI * 2, speed: 180, color: GEL, maxLife: 0.45, size: 4, glow: true });
+    addDecal(e.x, e.y, 'gel', ang, e.kind === 'gloopa' ? 0.7 : 0.5);
+    spawnRipple(e.x, e.y + 8, 55, 0.6);
     sfx('kill');
   }
 }

@@ -114,18 +114,18 @@ function drawDecal(g: CanvasRenderingContext2D, d: Decal) {
   g.scale(d.scale, d.scale);
   switch (d.kind) {
     case 'blood':
-      g.fillStyle = 'rgba(125,15,36,0.5)';
+      g.fillStyle = 'rgba(58,140,84,0.42)';   // green sludge stain (swamp gore law)
       g.beginPath(); g.ellipse(0, 0, 22, 14, 0, 0, Math.PI * 2); g.fill();
       g.beginPath(); g.ellipse(14, 6, 8, 5, 0.5, 0, Math.PI * 2); g.fill();
       g.beginPath(); g.ellipse(-12, -7, 6, 4, -0.4, 0, Math.PI * 2); g.fill();
       break;
     case 'smear':
-      g.fillStyle = 'rgba(125,15,36,0.38)';
+      g.fillStyle = 'rgba(58,140,84,0.32)';
       g.beginPath(); g.ellipse(0, 0, 34, 7, 0, 0, Math.PI * 2); g.fill();
       g.beginPath(); g.ellipse(26, 0, 10, 4, 0, 0, Math.PI * 2); g.fill();
       break;
     case 'splat':
-      g.fillStyle = 'rgba(125,15,36,0.55)';
+      g.fillStyle = 'rgba(70,160,96,0.5)';
       for (let i = 0; i < 7; i++) {
         const a = (i / 7) * Math.PI - Math.PI / 2;
         g.beginPath(); g.ellipse(Math.cos(a) * 16, Math.sin(a) * 20, 8, 4, a, 0, Math.PI * 2); g.fill();
@@ -147,9 +147,11 @@ function drawDecal(g: CanvasRenderingContext2D, d: Decal) {
       g.fillStyle = 'rgba(20,14,8,0.4)';
       g.beginPath(); g.arc(0, 0, 24, 0, Math.PI * 2); g.fill();
       break;
-    case 'gel':
-      g.fillStyle = 'rgba(60,110,88,0.4)';
-      g.beginPath(); g.ellipse(0, 0, 26, 18, 0, 0, Math.PI * 2); g.fill();
+    case 'gel':   // glowing sludge puddle — the main enemy-death stain (dissolve-to-ripple)
+      g.fillStyle = 'rgba(47,120,72,0.32)';
+      g.beginPath(); g.ellipse(0, 0, 15, 9, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(120,205,140,0.22)';
+      g.beginPath(); g.ellipse(-2, -1, 7, 4, 0, 0, Math.PI * 2); g.fill();
       break;
   }
   g.restore();
@@ -352,18 +354,37 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   if (decalCanvas) ctx.drawImage(decalCanvas, 0, 0);
   drawRipples(ctx);
 
-  // spawn telegraphs: pulsing glyph + glowing eyes
+  // spawn emergence: a sludge mound bubbles up from the water (REFERENCE_PACK v2 —
+  // "smoke-cloud emergence", themed to the swamp; NOT a pink ring).
   for (const t of w.telegraphs) {
-    const p = 1 - t.framesLeft / 60;
-    ctx.strokeStyle = `rgba(255,95,162,${0.25 + p * 0.5})`;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(t.x, t.y, 34 - p * 10, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.fillStyle = C.eye;
-    ctx.globalAlpha = 0.4 + p * 0.6;
-    ctx.beginPath(); ctx.arc(t.x - 8, t.y - 4, 3, 0, Math.PI * 2); ctx.arc(t.x + 8, t.y - 4, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1;
+    const p = 1 - t.framesLeft / 60;         // 0 -> 1 over the telegraph
+    // spreading water ring (teal, subtle) as the ground breaks
+    ctx.strokeStyle = `rgba(120,190,150,${0.28 * (1 - p)})`;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.ellipse(t.x, t.y + 8, 20 + p * 26, (20 + p * 26) * 0.36, 0, 0, Math.PI * 2); ctx.stroke();
+    // rising sludge mound (grows out of the water)
+    const rise = p * 20;
+    ctx.fillStyle = `rgba(38,74,54,${0.5 + p * 0.4})`;
+    ctx.beginPath(); ctx.ellipse(t.x, t.y + 6 - rise * 0.4, 8 + p * 16, 6 + p * 14, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = `rgba(70,140,92,${0.35 + p * 0.35})`;
+    ctx.beginPath(); ctx.ellipse(t.x - 2, t.y + 2 - rise * 0.4, 5 + p * 10, 4 + p * 8, 0, 0, Math.PI * 2); ctx.fill();
+    // bubbling spore dots rising (clustered glow, not soft blur)
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2 + t.x * 0.01;
+      const br = (8 + p * 14) * (0.5 + 0.5 * Math.sin(time * 6 + i));
+      const bx = t.x + Math.cos(a) * br, by = t.y + 6 - rise - Math.abs(Math.sin(time * 4 + i)) * 12 * p;
+      ctx.fillStyle = `rgba(150,230,150,${0.5 * p})`;
+      ctx.fillRect(bx - 1.5, by - 1.5, 3, 3);
+    }
+    // eyes ignite late, right before it fully rises
+    if (p > 0.6) {
+      const ea = (p - 0.6) / 0.4;
+      ctx.fillStyle = C.eye;
+      ctx.shadowColor = C.eye; ctx.shadowBlur = 6;
+      ctx.globalAlpha = ea;
+      ctx.beginPath(); ctx.arc(t.x - 6, t.y - rise * 0.4, 2.6, 0, Math.PI * 2); ctx.arc(t.x + 6, t.y - rise * 0.4, 2.6, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+    }
   }
 
   // shadows
@@ -468,7 +489,24 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
 
   const facingLeft = Math.cos(atk.phase === 'none' ? f.aim : atk.angle) < 0;
   ctx.scale((facingLeft ? -1 : 1) * squashX, squashY);
-  const frogImg = img('frog');
+
+  // ---- animation state machine: pick the right frame (idle/blink/croak/jump) ----
+  // Frog is airborne mid-hop or dashing -> stretched jump frame. Otherwise it idly
+  // blinks (brief) and croaks (mouth open, throat puff) on gentle offset cycles.
+  const airborne = f.dashT > 0 || hopArc > 0.55;
+  const idleish = !moving && f.dashT <= 0 && atk.phase === 'none';
+  const blinking = (time % 3.3) < 0.12;
+  const croaking = idleish && (time % 6.7) < 0.55;
+  let frogImg: HTMLImageElement | null;
+  if (airborne && img('frogJump')) frogImg = img('frogJump');
+  else if (croaking && img('frogCroak')) { frogImg = img('frogCroak'); squashY *= 1.05; squashX *= 1.04; }
+  else if (blinking && img('frogBlink')) frogImg = img('frogBlink');
+  else frogImg = img('frog');
+
+  // sheathed KATANA on the back (Ian: "a samurai sword on the back — dope"). Drawn behind
+  // the body so the wrapped handle rises over the shoulder.
+  if (frogImg) drawBackKatana(ctx, FROG_RADIUS);
+
   if (frogImg) {
     const h = FROG_RADIUS * 3.0;
     const dw = h * (frogImg.width / frogImg.height);
@@ -519,6 +557,34 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
 
 function drawSword(ctx: CanvasRenderingContext2D, w: World, time: number) {
   drawSwordAt(ctx, w, time);
+}
+
+/** Sheathed katana across the frog's back — handle + tsuba rise over the shoulder, scabbard runs
+ *  down behind the body (mostly hidden, correct for a back-sheath). Drawn before the body sprite. */
+function drawBackKatana(ctx: CanvasRenderingContext2D, r: number) {
+  ctx.save();
+  ctx.lineCap = 'round';
+  // scabbard: dark diagonal across the back
+  ctx.strokeStyle = '#1c130c'; ctx.lineWidth = r * 0.36;
+  ctx.beginPath(); ctx.moveTo(-r * 0.72, -r * 1.12); ctx.quadraticCurveTo(r * 0.1, -r * 0.25, r * 0.5, r * 0.35); ctx.stroke();
+  ctx.strokeStyle = '#33261a'; ctx.lineWidth = r * 0.12;
+  ctx.beginPath(); ctx.moveTo(-r * 0.72, -r * 1.12); ctx.quadraticCurveTo(r * 0.1, -r * 0.25, r * 0.5, r * 0.35); ctx.stroke();
+  // wrapped handle rising over the shoulder
+  ctx.strokeStyle = '#4a3a24'; ctx.lineWidth = r * 0.24;
+  ctx.beginPath(); ctx.moveTo(-r * 0.72, -r * 1.08); ctx.lineTo(-r * 1.02, -r * 1.66); ctx.stroke();
+  ctx.strokeStyle = '#241a10'; ctx.lineWidth = r * 0.06;
+  for (let i = 0; i < 4; i++) {
+    const t = i / 3;
+    const hx = -r * 0.72 - t * r * 0.3, hy = -r * 1.08 - t * r * 0.58;
+    ctx.beginPath(); ctx.moveTo(hx - r * 0.12, hy + r * 0.05); ctx.lineTo(hx + r * 0.1, hy - r * 0.05); ctx.stroke();
+  }
+  // tsuba guard + a fleck of glowing moss
+  ctx.fillStyle = '#5a4a2e';
+  ctx.beginPath(); ctx.ellipse(-r * 0.74, -r * 1.1, r * 0.16, r * 0.09, -0.9, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#b6ff6a'; ctx.shadowColor = '#8fff5a'; ctx.shadowBlur = 5;
+  ctx.beginPath(); ctx.arc(-r * 0.7, -r * 1.06, r * 0.06, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.restore();
 }
 
 /** Sword drawn relative to current translate (frog center). LONGER than the frog is tall. */
@@ -580,43 +646,32 @@ function drawSwordAt(ctx: CanvasRenderingContext2D, w: World, time: number) {
   ctx.save();
   ctx.translate(Math.cos(ang) * 16, Math.sin(ang) * 16 + raise);
   ctx.rotate(ang);
-  // REED SWORD (design/4 Weapons): a blade of hardened swamp reeds, leather-wrapped grip,
-  // mossy-vine binding, chipped edge, glowing lime moss at the guard.
-  // blade body (tapered reed, olive-green)
-  ctx.fillStyle = '#5c6b2f';
+  // REED KATANA (design/4 Weapons + reference pack): a curved single-edged swamp katana —
+  // steel-green blade with a glowing lime edge, round tsuba, cloth-wrapped tsuka.
+  const bo = -9;                               // blade curves upward toward the tip
+  const spine = (): void => { ctx.moveTo(13, -3); ctx.quadraticCurveTo(L * 0.55, -6 + bo * 0.4, L, bo); };
+  const edge = (): void => { ctx.moveTo(14, 4); ctx.quadraticCurveTo(L * 0.55, 2 + bo * 0.4, L - 2, bo + 2); };
+  // blade body
   ctx.beginPath();
-  ctx.moveTo(14, -6); ctx.lineTo(L - 6, -4); ctx.lineTo(L + 4, 0); ctx.lineTo(L - 6, 4); ctx.lineTo(14, 6);
-  ctx.closePath(); ctx.fill();
-  // lit reed edge (top highlight)
-  ctx.fillStyle = '#8fae4a';
-  ctx.beginPath();
-  ctx.moveTo(14, -6); ctx.lineTo(L - 6, -4); ctx.lineTo(L - 8, -1); ctx.lineTo(14, -2);
-  ctx.closePath(); ctx.fill();
-  // dark reed spine
-  ctx.fillStyle = '#3a4a22';
-  ctx.fillRect(14, 2, L - 18, 3);
-  // a couple of chips out of the edge
-  ctx.fillStyle = 'rgba(10,16,8,0.6)';
-  ctx.beginPath(); ctx.arc(L * 0.6, 5, 3, 0, Math.PI * 2); ctx.fill();
-  ctx.beginPath(); ctx.arc(L * 0.82, -4, 2.4, 0, Math.PI * 2); ctx.fill();
-  // vine binding wraps near the base of the blade
-  ctx.strokeStyle = '#2f5233'; ctx.lineWidth = 2.5;
-  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(16 + i * 5, -6); ctx.lineTo(20 + i * 5, 6); ctx.stroke(); }
-  // guard + glowing moss
-  ctx.fillStyle = '#5a4a2e';
-  ctx.fillRect(10, -8, 6, 16);
-  ctx.fillStyle = '#b6ff6a';
-  ctx.shadowColor = '#8fff5a'; ctx.shadowBlur = 6;
-  ctx.beginPath(); ctx.arc(13, -7, 2.2, 0, Math.PI * 2); ctx.arc(12, 7, 1.8, 0, Math.PI * 2); ctx.fill();
-  ctx.shadowBlur = 0;
-  // leather-wrapped grip
-  ctx.fillStyle = '#3a2c1c';
-  ctx.fillRect(-2, -5, 12, 10);
-  ctx.strokeStyle = '#241a10'; ctx.lineWidth = 1.5;
-  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.moveTo(0 + i * 4, -5); ctx.lineTo(2 + i * 4, 5); ctx.stroke(); }
-  // pommel
-  ctx.fillStyle = '#4a3722';
-  ctx.beginPath(); ctx.arc(-3, 0, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.moveTo(13, -3); ctx.quadraticCurveTo(L * 0.55, -6 + bo * 0.4, L, bo);
+  ctx.lineTo(L - 2, bo + 2); ctx.quadraticCurveTo(L * 0.55, 2 + bo * 0.4, 14, 5);
+  ctx.closePath();
+  ctx.fillStyle = '#838d6e'; ctx.fill();
+  // glowing lime cutting edge (hamon)
+  ctx.strokeStyle = 'rgba(150,255,120,0.4)'; ctx.lineWidth = 3.2; ctx.beginPath(); edge(); ctx.stroke();
+  ctx.strokeStyle = '#e2f4b6'; ctx.lineWidth = 1.6; ctx.beginPath(); edge(); ctx.stroke();
+  // dark spine
+  ctx.strokeStyle = '#39472a'; ctx.lineWidth = 1.6; ctx.beginPath(); spine(); ctx.stroke();
+  // round tsuba guard
+  ctx.fillStyle = '#2a2018'; ctx.beginPath(); ctx.ellipse(11, 0, 3, 7.5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#b6ff6a'; ctx.shadowColor = '#8fff5a'; ctx.shadowBlur = 5;
+  ctx.beginPath(); ctx.arc(11, -6, 1.6, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+  // cloth-wrapped tsuka (handle)
+  ctx.fillStyle = '#243038'; ctx.fillRect(-5, -3.5, 16, 7);
+  ctx.strokeStyle = '#101a20'; ctx.lineWidth = 1.2;
+  for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-4 + i * 4, -3.5); ctx.lineTo(-1 + i * 4, 3.5); ctx.stroke(); }
+  // kashira (pommel)
+  ctx.fillStyle = '#2a2018'; ctx.beginPath(); ctx.arc(-5, 0, 3.2, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 }
 
@@ -656,7 +711,7 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
 
   // real sludgeling sprite (all sludge-family kinds share it for the slice), then bail to the
   // world-space windup telegraph. Graybox blob below is the fallback until the image loads.
-  const sImg = img('sludgeling');
+  const sImg = (e.flashT > 0 && img('blobbitHit')) ? img('blobbitHit') : img('sludgeling');
   if (sImg) {
     // penguin-waddle: rock side-to-side + little hops while closing on the player (Ian's vision)
     const moving = e.state === 'seek' && Math.hypot(e.vx, e.vy) > 10;

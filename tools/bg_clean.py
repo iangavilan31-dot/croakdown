@@ -93,6 +93,31 @@ def dehalo(path: str, sat_max: float = 0.20, val_min: float = 0.22) -> None:
     print(f"dehaloed {Path(path).name}")
 
 
+def colorize_green(path: str, val_lift: float = 0.30) -> None:
+    """Recolor a (dark) blob sprite into a BRIGHT TRANSLUCENT GREEN slime. gpt-image-1 keeps
+    drawing the swamp's enemies black no matter the prompt; the SHAPE + eyes are good, only the
+    hue is wrong. Map every opaque pixel onto a green ramp: brightness is lifted (so even near-black
+    body reads as mid-green jelly), saturation scales with brightness (translucent look), and the
+    brightest pixels (the eyes) push toward yellow-green so they still pop."""
+    import colorsys
+    im = Image.open(path).convert("RGBA")
+    w, h = im.size
+    px = im.load()
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = px[x, y]
+            if a < 8:
+                continue
+            _hh, _ss, vv = colorsys.rgb_to_hsv(r / 255, g / 255, b / 255)
+            nv = val_lift + (1 - val_lift) * vv          # lift darks into visible green
+            hue = 0.34 - 0.12 * vv                        # dark=emerald(.34) -> bright=lime/yellow(.22)
+            sat = 0.55 + 0.35 * vv                        # brighter = more saturated jelly
+            nr, ng, nb = colorsys.hsv_to_rgb(hue, sat, nv)
+            px[x, y] = (int(nr * 255), int(ng * 255), int(nb * 255), a)
+    im.save(path)
+    print(f"colorized {Path(path).name} -> green slime")
+
+
 def strip(path: str, tol: int = 32, feather: int = 1) -> None:
     """Melt a baked gradient background inward from the edges, stopping at the sprite's hard
     outline. Neighbour-relative flood (follows a smooth gradient), halted by any sharp value

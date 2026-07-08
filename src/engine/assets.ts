@@ -2,8 +2,13 @@
 // Pixel art: callers draw with imageSmoothingEnabled=false.
 
 const KEYS = {
-  frog: '/art/batch01/frog_idle_a.png',
-  sludgeling: '/art/batch01/sludgeling.png',
+  frog: '/art/batch01/frog_base.png',
+  frogBlink: '/art/batch01/frog_blink.png',
+  frogCroak: '/art/batch01/frog_croak.png',
+  frogJump: '/art/batch01/frog_jump.png',
+  sludgeling: '/art/batch01/blobbit_base.png',
+  blobbitHit: '/art/batch01/blobbit_hit.png',
+  blobbitPop: '/art/batch01/blobbit_pop.png',
   backdrop: '/art/arena_backdrop.png',
 } as const;
 
