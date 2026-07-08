@@ -636,27 +636,24 @@ function drawSword(ctx: CanvasRenderingContext2D, w: World, time: number) {
  *  down behind the body (mostly hidden, correct for a back-sheath). Drawn before the body sprite. */
 function drawBackKatana(ctx: CanvasRenderingContext2D, r: number) {
   ctx.save();
-  ctx.lineCap = 'round';
-  // scabbard: dark diagonal across the back
-  ctx.strokeStyle = '#1c130c'; ctx.lineWidth = r * 0.36;
-  ctx.beginPath(); ctx.moveTo(-r * 0.72, -r * 1.12); ctx.quadraticCurveTo(r * 0.1, -r * 0.25, r * 0.5, r * 0.35); ctx.stroke();
-  ctx.strokeStyle = '#33261a'; ctx.lineWidth = r * 0.12;
-  ctx.beginPath(); ctx.moveTo(-r * 0.72, -r * 1.12); ctx.quadraticCurveTo(r * 0.1, -r * 0.25, r * 0.5, r * 0.35); ctx.stroke();
-  // wrapped handle rising over the shoulder
-  ctx.strokeStyle = '#4a3a24'; ctx.lineWidth = r * 0.24;
-  ctx.beginPath(); ctx.moveTo(-r * 0.72, -r * 1.08); ctx.lineTo(-r * 1.02, -r * 1.66); ctx.stroke();
-  ctx.strokeStyle = '#241a10'; ctx.lineWidth = r * 0.06;
-  for (let i = 0; i < 4; i++) {
-    const t = i / 3;
-    const hx = -r * 0.72 - t * r * 0.3, hy = -r * 1.08 - t * r * 0.58;
-    ctx.beginPath(); ctx.moveTo(hx - r * 0.12, hy + r * 0.05); ctx.lineTo(hx + r * 0.1, hy - r * 0.05); ctx.stroke();
-  }
-  // tsuba guard + a fleck of glowing moss
-  ctx.fillStyle = '#5a4a2e';
-  ctx.beginPath(); ctx.ellipse(-r * 0.74, -r * 1.1, r * 0.16, r * 0.09, -0.9, 0, Math.PI * 2); ctx.fill();
+  // build the sword along a local axis (tsuba at origin), then place it over the shoulder.
+  ctx.translate(-r * 0.5, -r * 0.92);
+  ctx.rotate(2.16);                                   // scabbard points down-right behind the body
+  const S = r * 1.7, H = r * 0.62, w = r * 0.11;       // scabbard len, handle len, half-width
+  // scabbard: filled dark-lacquer sheath with a chape cap + a binding + a lacquer sheen
+  ctx.fillStyle = '#160f08'; roundRect(ctx, r * 0.14, -w, S, w * 2, w * 0.8); ctx.fill();
+  ctx.fillStyle = '#2c2015'; roundRect(ctx, r * 0.18, -w * 0.55, S * 0.9, w * 0.7, w * 0.4); ctx.fill();
+  ctx.fillStyle = '#3a2c1a'; ctx.fillRect(r * 0.24, -w * 1.05, w * 0.7, w * 2.1);           // throat binding
+  ctx.fillStyle = '#43331e'; roundRect(ctx, r * 0.14 + S - w * 1.1, -w * 1.05, w * 1.2, w * 2.1, w * 0.5); ctx.fill(); // chape
+  // tsuba guard (disc) + glowing moss fleck
+  ctx.fillStyle = '#4a3a22'; ctx.beginPath(); ctx.ellipse(0, 0, w * 0.9, w * 1.9, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#b6ff6a'; ctx.shadowColor = '#8fff5a'; ctx.shadowBlur = 5;
-  ctx.beginPath(); ctx.arc(-r * 0.7, -r * 1.06, r * 0.06, 0, Math.PI * 2); ctx.fill();
-  ctx.shadowBlur = 0;
+  ctx.beginPath(); ctx.arc(0, -w * 1.2, w * 0.5, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+  // wrapped handle (tsuka) rising the other way + pommel (kashira)
+  ctx.fillStyle = '#243038'; roundRect(ctx, -H, -w * 0.85, H, w * 1.7, w * 0.5); ctx.fill();
+  ctx.strokeStyle = '#111a20'; ctx.lineWidth = w * 0.28;
+  for (let i = 0; i < 4; i++) { const hx = -H + w * 0.7 + i * (H / 4); ctx.beginPath(); ctx.moveTo(hx - w * 0.5, -w * 0.85); ctx.lineTo(hx + w * 0.5, w * 0.85); ctx.stroke(); }
+  ctx.fillStyle = '#2a2018'; ctx.beginPath(); ctx.arc(-H, 0, w * 1.05, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 }
 
@@ -735,13 +732,13 @@ function drawSwordAt(ctx: CanvasRenderingContext2D, w: World, time: number) {
   // REED KATANA (design/4 Weapons + reference pack): a curved single-edged swamp katana —
   // steel-green blade with a glowing lime edge, round tsuba, cloth-wrapped tsuka.
   const bo = -9;                               // blade curves upward toward the tip
-  // wider blade so it reads as a KATANA, not a thin beam, even pointing up (critics)
-  const spine = (): void => { ctx.moveTo(13, -5); ctx.quadraticCurveTo(L * 0.55, -9 + bo * 0.4, L, bo); };
-  const edge = (): void => { ctx.moveTo(14, 7); ctx.quadraticCurveTo(L * 0.55, 4 + bo * 0.4, L - 2, bo + 2); };
+  // slim curved katana profile (R3 widening made it read as a spear — narrowed back)
+  const spine = (): void => { ctx.moveTo(13, -3.5); ctx.quadraticCurveTo(L * 0.55, -6.5 + bo * 0.4, L, bo); };
+  const edge = (): void => { ctx.moveTo(14, 5); ctx.quadraticCurveTo(L * 0.55, 2.5 + bo * 0.4, L - 2, bo + 2); };
   // blade body
   ctx.beginPath();
-  ctx.moveTo(13, -5); ctx.quadraticCurveTo(L * 0.55, -9 + bo * 0.4, L, bo);
-  ctx.lineTo(L - 2, bo + 2); ctx.quadraticCurveTo(L * 0.55, 4 + bo * 0.4, 14, 7);
+  ctx.moveTo(13, -3.5); ctx.quadraticCurveTo(L * 0.55, -6.5 + bo * 0.4, L, bo);
+  ctx.lineTo(L - 2, bo + 2); ctx.quadraticCurveTo(L * 0.55, 2.5 + bo * 0.4, 14, 5);
   ctx.closePath();
   ctx.fillStyle = '#8f9a78'; ctx.fill();
   // brighter steel core band down the blade
