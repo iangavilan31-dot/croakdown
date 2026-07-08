@@ -524,21 +524,17 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   const bd = img('backdrop');
   if (bd) ctx.drawImage(bd, 0, 0, ARENA_W, ARENA_H);
   else { if (!backdrop) backdrop = buildBackdrop(); ctx.drawImage(backdrop, 0, 0); }
-  // ATMOSPHERE GRADE (ground plane only, before props/entities): the painted backdrop ships
-  // warm brown-purple; the REF_02 bar is a deep TEAL night-swamp. Remap hue -> teal, cool the
-  // shadows (kill the brown mud), then a teal midtone push so it reads lush not flat. This lands
-  // palette + lighting + faithfulness without regenerating the 1.8 MB art.
+  // Backdrop is now a purpose-painted deep-teal lily-pond (REF_02-matched, gpt-image-1 2026-07-08).
+  // Only a WHISPER of teal grade remains — just enough to seat the entities/VFX in the same light;
+  // the old heavy grade existed to rescue the brown-stump plate and would muddy this one.
   ctx.save();
   ctx.globalCompositeOperation = 'color';
-  ctx.fillStyle = '#12564c'; ctx.globalAlpha = 0.52; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
-  ctx.globalCompositeOperation = 'multiply';
-  ctx.fillStyle = '#0a332e'; ctx.globalAlpha = 0.34; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  ctx.fillStyle = '#12564c'; ctx.globalAlpha = 0.14; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
   ctx.globalCompositeOperation = 'soft-light';
-  ctx.fillStyle = '#3aa07f'; ctx.globalAlpha = 0.42; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
+  ctx.fillStyle = '#3aa07f'; ctx.globalAlpha = 0.16; ctx.fillRect(0, 0, ARENA_W, ARENA_H);
   ctx.restore();
-  drawCanopyDapple(ctx);             // organic light/shadow patches break the tiled-mound repetition
   drawWaterShimmer(ctx, time);       // slow drifting light pools -> living reflective water
-  drawPondDressing(ctx, time);       // lily pads + reeds ON the graded water (breaks the stump read)
+  // (procedural lily pads / reeds / heavy dapple retired — the painted backdrop provides them now)
   drawLotus(ctx, time);
   if (decalCanvas) ctx.drawImage(decalCanvas, 0, 0);
   drawRipples(ctx);
@@ -638,9 +634,9 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
 
   // screen-space vignette: darken the corners so the repeated backdrop props at the edges recede
   // into shadow and the eye stays on the lit frog + lotus (REF_02's edges fall off to near-black).
-  const vig = ctx.createRadialGradient(cw / 2, ch / 2, ch * 0.34, cw / 2, ch / 2, ch * 0.92);
+  const vig = ctx.createRadialGradient(cw / 2, ch / 2, ch * 0.36, cw / 2, ch / 2, ch * 0.94);
   vig.addColorStop(0, 'rgba(2,10,8,0)');
-  vig.addColorStop(1, 'rgba(1,6,5,0.62)');
+  vig.addColorStop(1, 'rgba(1,6,5,0.4)');            // lighter — the painted backdrop has its own edge falloff
   ctx.fillStyle = vig;
   ctx.fillRect(0, 0, cw, ch);
 
