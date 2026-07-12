@@ -30,7 +30,7 @@ export const RIG = {
   BACKARM_W: 16, BACKARM_H: 30,
   BACKARM_X: -14, BACKARM_Y: 2,      // far-side arm
   ARM_W: 18, ARM_H: 26,              // front arms (near side, holds hilt)
-  SHOULDER_X: 18, SHOULDER_Y: -10,   // blade pivot (world-angle exempt part)
+  SHOULDER_X: 13, SHOULDER_Y: 1,     // blade pivot at the chest, not the neck
   HILT_R: 20,                        // hilt distance from shoulder along blade
   BLADE_LEN: 98, BLADE_W: 16,
   ROT_CAP: (25 * Math.PI) / 180,

@@ -14,6 +14,7 @@ import { ENEMIES } from '../../src/data/enemies';
 import { consumeEvents, decayFeel, feel, particles, ripples, shakeOffset, updateParticles, updateRipples } from '../../src/feel/feel';
 import { initAudio, resumeAudio } from '../../src/engine/audio';
 import { RIG, createRigState, makePose, solvePose, type Pose, type RigState } from '../../src/render/rig';
+import { drawSkinnedFrog, loadSkin, type Skin } from '../../src/render/rigSkin';
 
 const canvas = document.getElementById('game') as HTMLCanvasElement;
 const ctx = canvas.getContext('2d')!;
@@ -70,6 +71,10 @@ function toWorld(sx: number, sy: number): [number, number] {
   const v = view();
   return [(sx - v.ox) / v.scale, (sy - v.oy) / v.scale];
 }
+
+// ?skin=warden -> painted parts on the same pose (Gate 3); gray rig is the fallback
+const skinName = new URLSearchParams(location.search).get('skin');
+const skin: Skin | null = skinName ? loadSkin(skinName) : null;
 
 // keys the spike owns
 let slowmo = false;
@@ -371,7 +376,7 @@ function renderFrame(dt: number) {
   }
 
   for (const e of world.enemies) drawEnemy(g, e);
-  drawFrogRig(g, pose, f.x, f.y);
+  if (!skin || !drawSkinnedFrog(g, pose, skin, f.x, f.y)) drawFrogRig(g, pose, f.x, f.y);
 
   // particles
   for (const p of particles) {

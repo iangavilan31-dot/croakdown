@@ -8,8 +8,11 @@ import {
 import { ENEMIES } from '../data/enemies';
 import { TONGUE } from '../data/weapons';
 import type { Enemy, World } from '../sim/types';
-import { feel, particles, decals, decalStats, ripples, shakeOffset, type Decal } from '../feel/feel';
+import { feel, particles, decals, decalStats, ripples, shakeOffset, spawnRipple, type Decal } from '../feel/feel';
 import { img } from '../engine/assets';
+import { sfx } from '../engine/audio';
+import { RIG, createRigState, makePose, solvePose, type Pose, type RigState } from './rig';
+import { drawSkinnedFrog, loadSkin } from './rigSkin';
 
 // palette (Art Direction law)
 const C = {
@@ -596,8 +599,56 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   drawHud(ctx, w, cw, ch, fit, 0, 0, time, paused);
 }
 
-// ---------- frog ----------
+// ---------- frog: the 6-part puppet rig (GATE 3), legacy sprite path as fallback ----------
+const frogRigState: RigState = createRigState(0.37);
+const frogPose: Pose = makePose();
+let rigLastTime = 0;
+
 function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: number, time: number) {
+  const f = w.frog;
+  const skin = loadSkin('warden');
+  if (f.alive && skin.ready) {
+    pushSlash(w, fx, fy);
+    const rdt = Math.min(0.05, Math.max(0, time - rigLastTime));
+    rigLastTime = time;
+    const atk = f.attack;
+    solvePose({
+      x: fx, y: fy, vx: f.vx, vy: f.vy, maxSpeed: 330,
+      aim: f.aim,
+      attackPhase: atk.phase, attackFrame: atk.frame,
+      attackWindup: atk.data?.windup ?? 6, attackActive: atk.data?.active ?? 5,
+      attackFollow: atk.data?.follow ?? 4, attackRecovery: atk.data?.recovery ?? 10,
+      attackAngle: atk.phase === 'none' ? f.aim : atk.angle,
+      heavy: atk.data?.cls === 'heavy',
+      dashing: f.dashT > 0, dashDirX: f.dashDirX, dashDirY: f.dashDirY,
+      frozen: f.freeze > 0, hurt: f.hurtFlashT > 0, alive: f.alive, seed: 0.37,
+    }, frogRigState, f.freeze > 0 ? 0 : rdt, frogPose);
+    // footfall: the rig's landing drives the ripple + hop sfx (sim hop events are audio-only history)
+    if (frogPose.landed) { spawnRipple(fx, fy + RIG.FOOT_Y, 46, 0.55); sfx('hop'); }
+    const flicker = f.iframesT > 0 && Math.floor(time * 24) % 2 === 0;
+    if (flicker) ctx.globalAlpha = 0.45;
+    drawSkinnedFrog(ctx, frogPose, skin, fx, fy, f.hurtFlashT > 0 ? f.hurtFlashT * 5 : 0);
+    ctx.globalAlpha = 1;
+    // tongue (over the body, under the blade's world layer)
+    if (f.tState !== 'idle') {
+      ctx.save();
+      ctx.strokeStyle = C.pink;
+      ctx.lineWidth = 10;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(fx, fy + frogPose.hopY - 6);
+      ctx.lineTo(f.tTipX, f.tTipY);
+      ctx.stroke();
+      ctx.fillStyle = C.pink;
+      ctx.beginPath(); ctx.arc(f.tTipX, f.tTipY, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    return;
+  }
+  drawFrogLegacy(ctx, w, fx, fy, time);
+}
+
+function drawFrogLegacy(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: number, time: number) {
   const f = w.frog;
   if (!f.alive) {
     // downed frog: flat, pale
