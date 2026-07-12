@@ -1638,9 +1638,8 @@ function drawHud(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: number
   // vitals: P1 left, P2 right; ONE shared coin count top-center
   drawFrogVitals(ctx, w, w.frogs[0], false, time);
   if (w.frogs[1]) drawFrogVitals(ctx, w, w.frogs[1], true, time);
-  drawCoins(ctx, w, ARENA_W / 2 + 40, 78);
-  // wave chip under the coins
-  drawPixelText(ctx, `W${w.wave}`, ARENA_W / 2 - 40, 78, 26, 'rgba(160,200,170,0.85)', 'center', 900);
+  drawCoins(ctx, w, ARENA_W / 2 + 92, 78);
+  drawPixelText(ctx, `W${w.wave}`, ARENA_W / 2 - 92, 78, 26, 'rgba(160,200,170,0.85)', 'center', 900);
 
   // boss bar (the swamp legend)
   if (w.boss && w.boss.alive) {

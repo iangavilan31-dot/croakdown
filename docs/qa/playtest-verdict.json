@@ -1,0 +1,19 @@
+{
+ "errors": [],
+ "steps": [
+  "ok P2 drop-in (warden+snapper)",
+  "ok duo combat screenshot",
+  "ok shop buy via input (coins 18->5)",
+  "ok shop DIVE via inputs -> next wave",
+  "ok wave 8 kinds on screen: midge,spikeblob,blobbit,gloopa,spitshroom,broodmaw globs:1",
+  "ok elder boss alive on wave 15",
+  "ok perf @38 enemies: avg 49.4ms, worst 66.7ms",
+  "ok victory + gameover screens rendered",
+  "ok title screenshot"
+ ],
+ "perf": {
+  "enemies": 38,
+  "avgMs": 49.38,
+  "worstMs": 66.7
+ }
+}
