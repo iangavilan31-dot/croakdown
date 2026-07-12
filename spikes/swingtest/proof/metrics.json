@@ -1,0 +1,3931 @@
+{
+ "hop": [
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 963,
+   "y": 540,
+   "hopY": 0.2,
+   "gait": 0.05,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -178,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -165,
+     "vy": 67,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -101,
+     "vy": -24,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 147,
+     "vy": 22,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 970,
+   "y": 540,
+   "hopY": 3,
+   "gait": 0.16,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -178,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -164,
+     "vy": 69,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -101,
+     "vy": -25,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 147,
+     "vy": 21,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 981,
+   "y": 540,
+   "hopY": -15.6,
+   "gait": 0.33,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -178,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -163,
+     "vy": 73,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -101,
+     "vy": -26,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 147,
+     "vy": 20,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 992,
+   "y": 540,
+   "hopY": -26,
+   "gait": 0.5,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -178,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -161,
+     "vy": 77,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -101,
+     "vy": -26,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 147,
+     "vy": 19,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1003,
+   "y": 540,
+   "hopY": -17.5,
+   "gait": 0.67,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -160,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -158,
+     "vy": 82,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -100,
+     "vy": -27,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 147,
+     "vy": 18,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1014,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0.85,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -155,
+     "vy": 87,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -100,
+     "vy": -29,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 17,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1025,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0.02,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -151,
+     "vy": 94,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -100,
+     "vy": -30,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 16,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1036,
+   "y": 540,
+   "hopY": 3.9,
+   "gait": 0.19,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -146,
+     "vy": 102,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -99,
+     "vy": -31,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 15,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1047,
+   "y": 540,
+   "hopY": -19.5,
+   "gait": 0.37,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -139,
+     "vy": 112,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -99,
+     "vy": -33,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 15,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1058,
+   "y": 540,
+   "hopY": -25.7,
+   "gait": 0.54,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -129,
+     "vy": 123,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -98,
+     "vy": -34,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 14,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1069,
+   "y": 540,
+   "hopY": -13.3,
+   "gait": 0.71,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -113,
+     "vy": 138,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -97,
+     "vy": -36,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 13,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1080,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0.89,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": -92,
+     "vy": 131,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -97,
+     "vy": -38,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 13,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1091,
+   "y": 540,
+   "hopY": 0.5,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -96,
+     "vy": -41,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 12,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1102,
+   "y": 540,
+   "hopY": -4.5,
+   "gait": 0.23,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -94,
+     "vy": -44,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 12,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1113,
+   "y": 540,
+   "hopY": -22.6,
+   "gait": 0.41,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -93,
+     "vy": -47,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 11,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1124,
+   "y": 540,
+   "hopY": -24.3,
+   "gait": 0.58,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -91,
+     "vy": -51,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 11,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1135,
+   "y": 540,
+   "hopY": -8.5,
+   "gait": 0.75,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "active",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -88,
+     "vy": -55,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1146,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0.93,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "active",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "windup",
+     "hp": 90,
+     "freeze": 0,
+     "vx": -78,
+     "vy": -52,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1157,
+   "y": 540,
+   "hopY": 1.5,
+   "gait": 0.1,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "active",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "windup",
+     "hp": 90,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 9,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1168,
+   "y": 540,
+   "hopY": -9.5,
+   "gait": 0.27,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "windup",
+     "hp": 90,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 9,
+     "flashT": 0
+    }
+   ]
+  }
+ ],
+ "swing": [
+  {
+   "phase": "windup",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1168,
+   "y": 540,
+   "hopY": 0.5,
+   "gait": 0.4,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 178,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "active",
+     "hp": 90,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 9,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "windup",
+   "frame": 1,
+   "freeze": 0,
+   "x": 1168,
+   "y": 540,
+   "hopY": 0.5,
+   "gait": 0.49,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 178,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "active",
+     "hp": 90,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 9,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "windup",
+   "frame": 2,
+   "freeze": 0,
+   "x": 1168,
+   "y": 540,
+   "hopY": 0.5,
+   "gait": 0.58,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 178,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "active",
+     "hp": 90,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 9,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "windup",
+   "frame": 3,
+   "freeze": 0,
+   "x": 1168,
+   "y": 540,
+   "hopY": 0.5,
+   "gait": 0.66,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 178,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 90,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 9,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "windup",
+   "frame": 4,
+   "freeze": 0,
+   "x": 1168,
+   "y": 540,
+   "hopY": 0.5,
+   "gait": 0.75,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 178,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 90,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 9,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "windup",
+   "frame": 5,
+   "freeze": 0,
+   "x": 1168,
+   "y": 540,
+   "hopY": 0.6,
+   "gait": 0.84,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 178,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 90,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 9,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 3,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.6,
+   "gait": 0.84,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 176,
+     "vy": 3,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 3,
+     "vx": -67,
+     "vy": 225,
+     "flashT": 0.14
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 2,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.6,
+   "gait": 0.84,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 173,
+     "vy": 7,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 2,
+     "vx": -67,
+     "vy": 225,
+     "flashT": 0.13
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 1,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.6,
+   "gait": 0.84,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 171,
+     "vy": 11,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 1,
+     "vx": -67,
+     "vy": 225,
+     "flashT": 0.11
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.6,
+   "gait": 0.92,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 170,
+     "vy": 14,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -67,
+     "vy": 225,
+     "flashT": 0.09
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.6,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 169,
+     "vy": 17,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -60,
+     "vy": 203,
+     "flashT": 0.08
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 2,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.6,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 169,
+     "vy": 20,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -54,
+     "vy": 183,
+     "flashT": 0.06
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 3,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.6,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 170,
+     "vy": 21,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -49,
+     "vy": 164,
+     "flashT": 0.04
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 4,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.6,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 166,
+     "vy": 21,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -44,
+     "vy": 148,
+     "flashT": 0.03
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "follow",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.7,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 161,
+     "vy": 19,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 139,
+     "vy": 87,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -40,
+     "vy": 133,
+     "flashT": 0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "follow",
+   "frame": 1,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.7,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 154,
+     "vy": 21,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 139,
+     "vy": 85,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -36,
+     "vy": 120,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "follow",
+   "frame": 2,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.7,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 147,
+     "vy": 21,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 138,
+     "vy": 82,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -32,
+     "vy": 108,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "follow",
+   "frame": 3,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.7,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 133,
+     "vy": 19,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 138,
+     "vy": 79,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -29,
+     "vy": 97,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "recovery",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.7,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 136,
+     "vy": 74,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -26,
+     "vy": 87,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "recovery",
+   "frame": 1,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.7,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 133,
+     "vy": 70,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -23,
+     "vy": 79,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "recovery",
+   "frame": 2,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.7,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 120,
+     "vy": 63,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -21,
+     "vy": 71,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "recovery",
+   "frame": 3,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.7,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -19,
+     "vy": 64,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "recovery",
+   "frame": 4,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.8,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -17,
+     "vy": 57,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "recovery",
+   "frame": 5,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.8,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -15,
+     "vy": 52,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "recovery",
+   "frame": 6,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.8,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -14,
+     "vy": 46,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "recovery",
+   "frame": 7,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.8,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -12,
+     "vy": 42,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "recovery",
+   "frame": 8,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.8,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -11,
+     "vy": 38,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 148,
+     "vy": 10,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "recovery",
+   "frame": 9,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.8,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -10,
+     "vy": 34,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 145,
+     "vy": 9,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.8,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -9,
+     "vy": 30,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 139,
+     "vy": 8,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "none",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.8,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": -8,
+     "vy": 27,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 133,
+     "vy": 7,
+     "flashT": 0
+    }
+   ]
+  }
+ ],
+ "heavy": [
+  {
+   "phase": "windup",
+   "frame": 2,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.2,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "windup",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "seek",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 67,
+     "vy": -17,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "windup",
+   "frame": 4,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.2,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "windup",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "windup",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "heavywindup",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.1,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "windup",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "windup",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "heavywindup",
+   "frame": 2,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0.1,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "active",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "windup",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "heavywindup",
+   "frame": 4,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "seek",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "active",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "windup",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "heavywindup",
+   "frame": 6,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "active",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "windup",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "heavywindup",
+   "frame": 8,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": -0.1,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "active",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "windup",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "heavywindup",
+   "frame": 10,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": -0.1,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "windup",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "heavywindup",
+   "frame": 12,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": -0.2,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "windup",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "heavywindup",
+   "frame": 14,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": -0.2,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "windup",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "heavywindup",
+   "frame": 16,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "windup",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "heavyhold",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1156,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "recover",
+     "hp": 80,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "windup",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 9,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 12,
+     "vx": 672,
+     "vy": 0,
+     "flashT": 0.14
+    },
+    {
+     "kind": "spikeblob",
+     "state": "active",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 8,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 11,
+     "vx": 672,
+     "vy": 0,
+     "flashT": 0.13
+    },
+    {
+     "kind": "spikeblob",
+     "state": "active",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 7,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 10,
+     "vx": 672,
+     "vy": 0,
+     "flashT": 0.11
+    },
+    {
+     "kind": "spikeblob",
+     "state": "active",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 6,
+   "x": 1144,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 9,
+     "vx": 672,
+     "vy": 0,
+     "flashT": 0.09
+    },
+    {
+     "kind": "spikeblob",
+     "state": "active",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 5,
+   "x": 1144,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 8,
+     "vx": 672,
+     "vy": 0,
+     "flashT": 0.08
+    },
+    {
+     "kind": "spikeblob",
+     "state": "active",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 4,
+   "x": 1144,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 7,
+     "vx": 672,
+     "vy": 0,
+     "flashT": 0.06
+    },
+    {
+     "kind": "spikeblob",
+     "state": "active",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 3,
+   "x": 1144,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 6,
+     "vx": 672,
+     "vy": 0,
+     "flashT": 0.04
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 2,
+   "x": 1144,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "active",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 5,
+     "vx": 672,
+     "vy": 0,
+     "flashT": 0.03
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 1,
+   "x": 1144,
+   "y": 540,
+   "hopY": 0,
+   "gait": 0,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "active",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 4,
+     "vx": 672,
+     "vy": 0,
+     "flashT": 0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 0,
+   "freeze": 0,
+   "x": 1144,
+   "y": 540,
+   "hopY": 0.4,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "active",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "blobbit",
+     "state": "windup",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 3,
+     "vx": 672,
+     "vy": 0,
+     "flashT": -0.01
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 13,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "active",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 2,
+     "vx": 672,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 12,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "active",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 1,
+     "vx": 672,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 11,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "active",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 672,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 10,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 605,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 9,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 544,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 8,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 490,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 7,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 441,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 6,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 397,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 5,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 357,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 4,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 321,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 3,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 289,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 2,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 260,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 1,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.3,
+   "gait": 0.06,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 234,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  },
+  {
+   "phase": "active",
+   "frame": 1,
+   "freeze": 0,
+   "x": 1144,
+   "y": 540,
+   "hopY": -0.4,
+   "gait": 0.14,
+   "enemies": [
+    {
+     "kind": "blobbit",
+     "state": "recover",
+     "hp": 20,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "spikeblob",
+     "state": "recover",
+     "hp": 45,
+     "freeze": 0,
+     "vx": 0,
+     "vy": 0,
+     "flashT": 0
+    },
+    {
+     "kind": "gloopa",
+     "state": "seek",
+     "hp": 46,
+     "freeze": 0,
+     "vx": 211,
+     "vy": 0,
+     "flashT": -0.01
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "attacker hitstop frames observed: 3",
+  "enemy knockback >300px/s: false",
+  "enemy victim hitstop: true",
+  "phases seen: windup,active,follow,recovery,none",
+  "page errors: none"
+ ]
+}
