@@ -81,6 +81,16 @@ window.addEventListener('pointerdown', (e) => {
 });
 (window as any).__pickKit = (k: KitId) => newRun(k);
 (window as any).__titleCursor = () => titleCursor;
+// QA hook: jump the run to a wave (screenshot rituals; sim completability is
+// proven headless in test/run.test.mjs — this never ships behavior)
+(window as any).__skipToWave = (n: number) => {
+  world.wave = Math.max(0, n - 1);
+  world.enemies.length = 0;
+  world.telegraphs.length = 0;
+  world.globs.length = 0;
+  startWave(world);
+};
+(window as any).__setPhase = (p: string) => { (world as any).phase = p; };
 
 let last = performance.now();
 let accum = 0;

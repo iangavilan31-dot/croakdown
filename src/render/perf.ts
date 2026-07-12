@@ -10,6 +10,8 @@ export const perfEnabled = new URLSearchParams(location.search).has('perf');
 let simMs = 0, renderMs = 0;
 export function recordSim(ms: number) { simMs = simMs * 0.95 + ms * 0.05; }
 export function recordRender(ms: number) { renderMs = renderMs * 0.95 + ms * 0.05; }
+// QA probe (playtest.mjs reads the split headless)
+(window as any).__perf = () => ({ simMs: +simMs.toFixed(2), renderMs: +renderMs.toFixed(2) });
 
 export function drawPerf(ctx: CanvasRenderingContext2D, w: World, cw: number) {
   if (!perfEnabled) return;

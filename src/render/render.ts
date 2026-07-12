@@ -341,30 +341,30 @@ const spores = Array.from({ length: 30 }, () => ({
   r: 1 + Math.random() * 1.6,
 }));
 function drawAtmosphere(ctx: CanvasRenderingContext2D, time: number) {
-  // spores rise slowly, drifting sideways; cycle their vertical position over the arena
-  ctx.fillStyle = '#b6ff7a';
-  ctx.shadowColor = '#8fff5a';
+  // spores rise slowly, drifting sideways (cached glow sprite — no shadowBlur in loops)
+  const sporeGlow = glowSprite('#b6ff7a');
   for (const s of spores) {
     const cycle = (time * s.rise + s.ph * 200) % (ARENA_H + 120);
     const y = ARENA_H + 40 - cycle;                 // travels bottom -> top
     const x = s.x + Math.sin(time * s.sp + s.ph) * s.sway;
     const fade = Math.min(1, cycle / 120) * Math.min(1, (ARENA_H + 120 - cycle) / 200);
     ctx.globalAlpha = fade * 0.55;
-    ctx.shadowBlur = 5;
-    ctx.beginPath(); ctx.arc(x, y, s.r, 0, Math.PI * 2); ctx.fill();
+    const gs = s.r * 5;
+    ctx.drawImage(sporeGlow, x - gs / 2, y - gs / 2, gs, gs);
   }
-  ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+  ctx.globalAlpha = 1;
   // fireflies drift in slow lissajous loops, twinkle warm
+  const flyGlow = glowSprite('#ffe58a');
   for (const f of fireflies) {
     const x = f.x + Math.cos(time * f.sp + f.ph) * f.rx;
     const y = f.y + Math.sin(time * f.sp * 1.3 + f.ph) * f.ry;
     const tw = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(time * 3 + f.ph * 5));
     ctx.globalAlpha = tw;
-    ctx.fillStyle = '#ffe58a';
-    ctx.shadowColor = '#ffd27a'; ctx.shadowBlur = 8;
-    ctx.beginPath(); ctx.arc(x, y, 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.drawImage(flyGlow, x - 9, y - 9, 18, 18);
+    ctx.fillStyle = '#fff3c4';
+    ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
   }
-  ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+  ctx.globalAlpha = 1;
   // slow drifting fog band (two layers) for depth
   for (let i = 0; i < 2; i++) {
     const off = (time * (6 + i * 4)) % (ARENA_W + 600) - 300;
@@ -1182,24 +1182,27 @@ function drawSlimeEyes(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time:
   const warmEye = ((e.seed * 0.379) % 1) < 0.4;
   const iris = (warm || warmEye) ? '#ff7a3c' : '#ff5f9a';
   const blink = (((time + e.seed * 7) % (3.2 + (e.seed % 1.5))) < 0.13) ? 0.14 : 1;   // desynced blink
+  const glow = glowSprite(iris);
   for (const side of [-1, 1]) {
     const ox = side * r * 0.33 + lx, oy = -r * 0.1 + ly;
     ctx.fillStyle = '#0c1f13';
     ctx.beginPath(); ctx.ellipse(ox, oy, es * 1.1, es * 1.35 * blink, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = iris; ctx.shadowColor = iris; ctx.shadowBlur = 6;
+    // cached glow sprite instead of shadowBlur (horde perf law)
+    ctx.drawImage(glow, ox - es * 1.5, oy - es * 1.5, es * 3, es * 3);
+    ctx.fillStyle = iris;
     ctx.beginPath(); ctx.ellipse(ox, oy, es * 0.66, es * 0.9 * blink, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
     if (blink > 0.5) {
       ctx.fillStyle = '#ffffff';
       ctx.beginPath(); ctx.arc(ox - es * 0.28, oy - es * 0.45, es * 0.24, 0, Math.PI * 2); ctx.fill();
     }
   }
-  // gloopa third eye (grotesque bruiser tell)
-  if (e.kind === 'gloopa') {
+  // gloopa/elder third eye (grotesque bruiser tell)
+  if (e.kind === 'gloopa' || e.kind === 'elder') {
     ctx.fillStyle = '#0c1f13';
     ctx.beginPath(); ctx.ellipse(lx, -r * 0.5 + ly, es * 0.7, es * 0.85, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = iris; ctx.shadowColor = iris; ctx.shadowBlur = 5;
-    ctx.beginPath(); ctx.arc(lx, -r * 0.5 + ly, es * 0.42, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.drawImage(glow, lx - es, -r * 0.5 + ly - es, es * 2, es * 2);
+    ctx.fillStyle = iris;
+    ctx.beginPath(); ctx.arc(lx, -r * 0.5 + ly, es * 0.42, 0, Math.PI * 2); ctx.fill();
   }
 }
 
@@ -1296,21 +1299,65 @@ function drawDecoys(ctx: CanvasRenderingContext2D, w: World, time: number) {
 }
 
 // ---------- painted enemy bodies (GATE 2 sheets; eyes stay procedural/emissive) ----------
-const enemyBodyCache: Partial<Record<string, HTMLImageElement>> = {};
+// Perf law: NO shadowBlur in the per-enemy path (Gaussian per draw melts the
+// frame at horde density). Bodies pre-render ONCE with the rim glow BAKED into
+// an offscreen canvas; instances just drawImage the cache.
+const enemyBodyImg: Partial<Record<string, HTMLImageElement>> = {};
+const enemyBodyBaked: Partial<Record<string, HTMLCanvasElement>> = {};
 const ENEMY_SHEET: Partial<Record<string, string>> = {
   blobbit: 'bogling', midge: 'midge', gloopa: 'gloopa',
   spitshroom: 'spitshroom', broodmaw: 'broodmaw', elder: 'gloopa',
 };
-function enemyBody(kind: string): HTMLImageElement | null {
+function enemyBody(kind: string): HTMLCanvasElement | null {
   const sheet = ENEMY_SHEET[kind];
   if (!sheet) return null;
-  let im = enemyBodyCache[sheet];
+  const key = kind === 'elder' ? 'elder' : sheet;
+  const baked = enemyBodyBaked[key];
+  if (baked) return baked;
+  let im = enemyBodyImg[sheet];
   if (!im) {
     im = new Image();
     im.src = `/art/parts/${sheet}/body.png`;
-    enemyBodyCache[sheet] = im;
+    enemyBodyImg[sheet] = im;
   }
-  return im.complete && im.naturalWidth ? im : null;
+  if (!im.complete || !im.naturalWidth) return null;
+  const pad = 14;
+  const c = document.createElement('canvas');
+  const scale = 260 / Math.max(im.naturalWidth, im.naturalHeight);   // cache at display-ish res
+  c.width = Math.round(im.naturalWidth * scale) + pad * 2;
+  c.height = Math.round(im.naturalHeight * scale) + pad * 2;
+  const g = c.getContext('2d')!;
+  g.shadowColor = 'rgba(150,240,150,0.55)';
+  g.shadowBlur = 9;
+  g.drawImage(im, pad, pad, c.width - pad * 2, c.height - pad * 2);
+  g.shadowBlur = 0;
+  g.drawImage(im, pad, pad, c.width - pad * 2, c.height - pad * 2);
+  if (kind === 'elder') {
+    g.globalCompositeOperation = 'source-atop';
+    g.fillStyle = 'rgba(20,10,30,0.35)';       // the ancient one runs darker
+    g.fillRect(0, 0, c.width, c.height);
+    g.globalCompositeOperation = 'source-over';
+  }
+  enemyBodyBaked[key] = c;
+  return c;
+}
+
+// cached radial glow sprites for eyes (replaces per-eye shadowBlur)
+const glowCache: Record<string, HTMLCanvasElement> = {};
+function glowSprite(color: string): HTMLCanvasElement {
+  let c = glowCache[color];
+  if (c) return c;
+  c = document.createElement('canvas');
+  c.width = c.height = 32;
+  const g = c.getContext('2d')!;
+  const gr = g.createRadialGradient(16, 16, 1, 16, 16, 16);
+  gr.addColorStop(0, color);
+  gr.addColorStop(0.4, color + '80');   // 8-digit hex alpha (colors here are #rrggbb)
+  gr.addColorStop(1, color + '00');
+  g.fillStyle = gr;
+  g.fillRect(0, 0, 32, 32);
+  glowCache[color] = c;
+  return c;
 }
 
 // ---------- enemies ----------
@@ -1377,17 +1424,13 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
   }
   const body = enemyBody(e.kind);
   if (body) {
-    // painted body (whole-sheet law) + procedural EMISSIVE eyes on top
+    // painted body (whole-sheet law, rim glow BAKED) + procedural emissive eyes
     const wpx = r * 2.35;
     const hpx = wpx * (body.height / body.width);
     const flip = Math.cos(e.facing) < 0 ? -1 : 1;
     ctx.save();
-    if (e.kind === 'elder') ctx.filter = 'brightness(0.72) saturate(0.8)';
     ctx.scale(flip, 1);
-    // biolum rim so the dark silhouette separates from dark water
-    ctx.shadowColor = 'rgba(150,240,150,0.55)'; ctx.shadowBlur = 7;
     ctx.drawImage(body, -wpx / 2, -hpx * 0.62, wpx, hpx);
-    ctx.shadowBlur = 0;
     if (e.flashT > 0) {
       ctx.globalAlpha = Math.min(0.85, e.flashT * 5);
       ctx.globalCompositeOperation = 'lighter';
