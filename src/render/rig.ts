@@ -51,7 +51,7 @@ const SNAP_LEAD = 1.35;        // virtual frames of sweep credit at active frame
 // shoulder; active snaps THROUGH; follow overshoots and settles.
 const LIGHT_BACK = -1.55, LIGHT_FWD = 1.35, LIGHT_OVER = 0.22;
 const HEAVY_BACK = -2.35, HEAVY_FWD = 1.95, HEAVY_OVER = 0.34;
-const REST_OFFSET = 0.34;      // blade rest: relaxed forward guard, clear of the water
+const REST_OFFSET = 0.22;      // blade rest: near-horizontal carry (the reference pose)
 
 // springs (per-second stiffness/damping — integrated at render dt)
 const HEAD_STIFF = 340, HEAD_DAMP = 26;      // ~3 frame lag

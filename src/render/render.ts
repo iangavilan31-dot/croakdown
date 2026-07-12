@@ -256,6 +256,75 @@ function drawLotus(ctx: CanvasRenderingContext2D, time: number) {
   ctx.restore();
 }
 
+// ---------- hero lily pad: glow-rimmed pad riding under the frog ----------
+function drawHeroPad(ctx: CanvasRenderingContext2D, x: number, y: number, time: number) {
+  const py = y + FROG_RADIUS * 0.9;
+  const pulse = 0.75 + 0.25 * Math.sin(time * 1.7);
+  ctx.save();
+  // glow ring (emissive — the pad's rim catches the bioluminescence)
+  ctx.globalCompositeOperation = 'lighter';
+  const ring = ctx.createRadialGradient(x, py, FROG_RADIUS * 0.9, x, py, FROG_RADIUS * 2.1);
+  ring.addColorStop(0, 'rgba(140,220,150,0)');
+  ring.addColorStop(0.62, `rgba(150,235,160,${0.26 * pulse})`);
+  ring.addColorStop(0.78, `rgba(215,255,195,${0.48 * pulse})`);
+  ring.addColorStop(1, 'rgba(150,235,160,0)');
+  ctx.fillStyle = ring;
+  ctx.beginPath(); ctx.ellipse(x, py, FROG_RADIUS * 2.2, FROG_RADIUS * 0.82, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+  // the pad itself: dark green disc with a notch + a lighter rim edge
+  ctx.fillStyle = 'rgba(38,84,58,0.85)';
+  ctx.beginPath(); ctx.ellipse(x, py, FROG_RADIUS * 1.78, FROG_RADIUS * 0.62, 0, 0.28, Math.PI * 2 - 0.16); ctx.lineTo(x, py); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = `rgba(150,235,170,${0.5 * pulse})`;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.ellipse(x, py, FROG_RADIUS * 1.78, FROG_RADIUS * 0.62, 0, 0.28, Math.PI * 2 - 0.16); ctx.stroke();
+  ctx.restore();
+}
+
+// ---------- final pass: single whole-frame grade + animated grain (glues every layer) ----------
+let grainTiles: HTMLCanvasElement[] | null = null;
+function getGrainTiles(): HTMLCanvasElement[] {
+  if (grainTiles) return grainTiles;
+  grainTiles = [];
+  for (let t = 0; t < 3; t++) {
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 256;
+    const g = c.getContext('2d')!;
+    const im = g.createImageData(256, 256);
+    for (let i = 0; i < im.data.length; i += 4) {
+      const v = 108 + (Math.random() * 96) | 0;
+      im.data[i] = im.data[i + 1] = im.data[i + 2] = v;
+      im.data[i + 3] = 255;
+    }
+    g.putImageData(im, 0, 0);
+    grainTiles.push(c);
+  }
+  return grainTiles;
+}
+
+function drawGradeGrain(ctx: CanvasRenderingContext2D, cw: number, ch: number, time: number) {
+  ctx.save();
+  // ONE color grade over the whole frame (world + VFX + HUD live in the same light).
+  // Mid-lifting teal, NEVER a crush — the first pass at #1b4a40/0.12 flattened the frame.
+  ctx.globalCompositeOperation = 'soft-light';
+  ctx.fillStyle = '#3d7a66';
+  ctx.globalAlpha = 0.10;
+  ctx.fillRect(0, 0, cw, ch);
+  ctx.globalCompositeOperation = 'color';
+  ctx.fillStyle = '#2a5f52';
+  ctx.globalAlpha = 0.04;
+  ctx.fillRect(0, 0, cw, ch);
+  // animated film grain
+  const tiles = getGrainTiles();
+  const tile = tiles[(time * 24 | 0) % 3];
+  ctx.globalCompositeOperation = 'overlay';
+  ctx.globalAlpha = 0.035;
+  const jx = ((time * 91) % 256) | 0, jy = ((time * 53) % 256) | 0;
+  for (let y = -jy; y < ch; y += 256) {
+    for (let x = -jx; x < cw; x += 256) ctx.drawImage(tile, x, y);
+  }
+  ctx.restore();
+}
+
 // ---------- fireflies + fog (living swamp overlays) ----------
 const fireflies = Array.from({ length: 22 }, () => ({
   x: Math.random() * ARENA_W, y: Math.random() * ARENA_H,
@@ -303,6 +372,17 @@ function drawAtmosphere(ctx: CanvasRenderingContext2D, time: number) {
     g.addColorStop(1, 'rgba(60,80,72,0)');
     ctx.fillStyle = g;
     ctx.fillRect(0, i === 0 ? ARENA_H * 0.1 : ARENA_H * 0.6, ARENA_W, ARENA_H * 0.3);
+  }
+  // mystic haze: three huge soft fog puffs drifting through (REF_02's smoky depth)
+  for (let i = 0; i < 3; i++) {
+    const ph = i * 2.4;
+    const x = ((time * (11 + i * 5) + ph * 500) % (ARENA_W + 900)) - 450;
+    const y = ARENA_H * (0.22 + 0.3 * i) + Math.sin(time * 0.2 + ph) * 70;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, 420);
+    g.addColorStop(0, `rgba(96,124,110,${0.10 + 0.02 * Math.sin(time * 0.5 + ph)})`);
+    g.addColorStop(1, 'rgba(96,124,110,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(x, y, 460, 220, 0, 0, Math.PI * 2); ctx.fill();
   }
 }
 
@@ -392,8 +472,8 @@ function pushSlash(w: World, fx: number, fy: number): void {
   lastSlashTick = w.tick;
   const dir = atk.chainIdx % 2 === 0 ? 1 : -1;
   const half = atk.data.arc / 2;
-  slashFx.push({ x: fx, y: fy, a0: atk.angle - dir * half, a1: atk.angle + dir * half, reach: atk.data.reach, kind: atk.data.cls, t: 0, life: 0.28 });
-  if (slashFx.length > 8) slashFx.shift();
+  slashFx.push({ x: fx, y: fy, a0: atk.angle - dir * half, a1: atk.angle + dir * half, reach: atk.data.reach, kind: atk.data.cls, t: 0, life: 0.2 });
+  if (slashFx.length > 4) slashFx.shift();
 }
 
 function drawSlashFx(ctx: CanvasRenderingContext2D, time: number): void {
@@ -405,8 +485,9 @@ function drawSlashFx(ctx: CanvasRenderingContext2D, time: number): void {
     if (s.t >= s.life) { slashFx.splice(i, 1); continue; }
     const k = s.t / s.life;                       // 0->1
     const fade = 1 - k;
+    if (fade < 0.25) continue;                    // ghost tail read as a UI ring in stills — cut it
     const hot = s.kind === 'heavy' ? '255,214,120' : s.kind === 'medium' ? '255,232,150' : '190,255,150';
-    const r0 = s.reach * (0.4 + k * 0.14), r1 = s.reach * (1.06 + k * 0.1);    // fuller crescent band, expands as it fades
+    const r0 = s.reach * (0.62 + k * 0.1), r1 = s.reach * (1.06 + k * 0.08);   // tight crescent band
     ctx.save();
     ctx.translate(s.x, s.y);
     // hot crescent band
@@ -537,6 +618,10 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   }
   const f = w.frog;
   const fx = f.px + (f.x - f.px) * alpha, fy = f.py + (f.y - f.py) * alpha;
+  // HERO LILY PAD with a glowing rim (the reference's grounding read): the pad rides
+  // beneath the frog — the pond is carpeted with pads, so it reads as hopping pad to pad.
+  drawHeroPad(ctx, fx, fy, time);
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
   ctx.beginPath();
   ctx.ellipse(fx, fy + FROG_RADIUS * 0.86, FROG_RADIUS * 1.32, FROG_RADIUS * 0.42, 0, 0, Math.PI * 2);
   ctx.fill();
@@ -597,6 +682,9 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
 
   // HUD is a fixed screen-space overlay (independent of the follow-camera), anchored top-left
   drawHud(ctx, w, cw, ch, fit, 0, 0, time, paused);
+
+  // LAW: grade + grain are ALWAYS the last pass — one light over the whole frame
+  drawGradeGrain(ctx, cw, ch, time);
 }
 
 // ---------- frog: the 6-part puppet rig (GATE 3), legacy sprite path as fallback ----------
@@ -971,7 +1059,7 @@ function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: num
   // into the foliage — same size/value/soft edge, only the eyes read). A crisp near-black
   // outline gives a hard silhouette edge the pads lack, and the biolum rim is pulled tight
   // (low blur) so it haloes the shape instead of blooming into pad-green. No off-palette colour.
-  ctx.shadowColor = 'rgba(150,240,150,0.6)'; ctx.shadowBlur = 4;
+  ctx.shadowColor = 'rgba(150,240,150,0.7)'; ctx.shadowBlur = 7;
   ctx.fillStyle = flash ? '#daffe0' : '#02100a';
   ctx.beginPath(); ctx.ellipse(0, 0, rx + 3.5, ry + 3.5, 0, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
@@ -1015,7 +1103,7 @@ function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: num
   // big cute glowing eyes with glint (track facing)
   const look = e.facing;
   const lx = Math.cos(look) * r * 0.12, ly = Math.sin(look) * r * 0.08;
-  const es = (e.kind === 'gloopa' ? 0.24 : e.kind === 'spikeblob' ? 0.21 : 0.2) * r;   // bigger, expressive
+  const es = (e.kind === 'gloopa' ? 0.27 : e.kind === 'spikeblob' ? 0.24 : 0.23) * r;   // bigger, expressive
   // REF_02 blobs have MENACING pink/red pinprick eyes (the palette's danger accent), not cute lime —
   // blind Reference judge: current enemies "read harmless". Hot-pink swarm + ~40% ember variants;
   // also separates the swarm from the green pads + gold fireflies it used to blend with.

@@ -118,7 +118,7 @@ export function consumeEvents(w: World): void {
         const ang = Math.atan2(e.dirY, e.dirX);
         // bright directional spark spray + a hot flash-ring at contact (impact reads)
         spawnParticles(e.x, e.y, e.cls === 'heavy' ? 16 : 10, { angle: ang, spread: 0.8, speed: 340, color: '#fdffe8', maxLife: 0.26, size: 4, glow: true });
-        spawnParticles(e.x, e.y, e.cls === 'heavy' ? 14 : 6, { angle: ang, spread: 1.1, speed: 320, color: SLUDGE, maxLife: 0.5, size: 4, gravity: 300, drag: 3 });
+        spawnParticles(e.x, e.y, e.cls === 'heavy' ? 12 : 5, { angle: ang, spread: 1.1, speed: 300, color: SLUDGE, maxLife: 0.42, size: 4, gravity: 420, drag: 3 });
         if (Math.random() < (e.cls === 'heavy' ? 0.5 : 0.18)) addDecal(e.x + e.dirX * 24, e.y + e.dirY * 24, 'blood', ang, e.cls === 'heavy' ? 0.7 : 0.5);
         addTrauma(e.cls === 'heavy' ? TRAUMA_HEAVY : TRAUMA_LIGHT);
         sfx(e.cls === 'heavy' || e.cls === 'medium' ? 'sliceHeavy' : 'sliceLight');

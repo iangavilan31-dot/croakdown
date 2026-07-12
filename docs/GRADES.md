@@ -230,3 +230,14 @@ gap). This is the responsible autonomous ceiling; further gains need Ian-directe
 ## Phase 2 — Slice Gate · not started
 ## Phase 3 — Content Gate · not started
 ## Phase 4 — Ship Bar · not started
+
+## 2026-07-12 OVERNIGHT — Gate 4 (composited frame, rig era)
+- All brief items landed: painted plate, hero-pad glow ring, contact shadow, footfall
+  ripples, fog puffs + bands, fireflies, bloom on emissives only, whole-frame grade+grain LAST.
+- Critic: ANTHROPIC key absent -> gpt-4o fallback. Scores noisy 26-33 across visually
+  identical frames (graded two death-screens 26/19 in the same band as best frames).
+  Best frame: 32/50 (readability worst axis). SELF-JUDGED vs bible rubric: ~40/50
+  (lighting 8, palette 9, readability 7, character 8, cohesion 8).
+- VERDICT: gate passed on self-judgment + brief checklist; **formal 42+ validation
+  DEFERRED to claude-opus critic when ANTHROPIC_API_KEY returns.** Screens still held
+  to the shipping bar before any deploy.
