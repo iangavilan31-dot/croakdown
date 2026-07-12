@@ -1,7 +1,14 @@
 // Headless sim surface — everything the test suite (and future netcode) needs.
 // DOM-free by construction; the feel/render layers live elsewhere.
 
-export { createWorld, createFrog, tickWorld, spawnEnemy, dropEssence, pools } from './world';
+export {
+  createWorld, createFrog, tickWorld, spawnEnemy, dropEssence, pools,
+  addPlayer2, startWave, buyItem, rerollShop, rollShop, shopCost, recomputeStats, itemCount,
+  spawnGlob, spawnZone, spawnDecoy,
+} from './world';
+export { KITS } from '../data/kits';
+export { ITEMS } from '../data/items';
+export { WAVES, SPAWN_COST } from '../data/waves';
 export { drainEvents, emit } from './events';
 export { updateFrog, hurtFrog, frogDashIframes } from './frog';
 export { applyMeleeHit, applyPhysicsDamage, swingHitstop, attackerHitstop, baseHitstop, willLaunch } from './combat';

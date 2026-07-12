@@ -200,6 +200,99 @@ export function consumeEvents(w: World): void {
         break;
       }
       case 'essenceDrop': break;
+      // ---------- kit signatures ----------
+      case 'slam': {
+        spawnParticles(e.x, e.y, 30, { spread: Math.PI * 2, speed: 480, color: '#cfe8dd', maxLife: 0.5, size: 5, drag: 3 });
+        spawnParticles(e.x, e.y, 16, { spread: Math.PI * 2, speed: 300, color: SLUDGE_DK, maxLife: 0.6, size: 6, gravity: 300 });
+        addDecal(e.x, e.y, 'crater', 0, 1.5);
+        spawnRipple(e.x, e.y + 10, 190, 0.9);
+        addTrauma(TRAUMA_SPLAT);
+        sfx('flop');
+        break;
+      }
+      case 'decoy': {
+        spawnParticles(e.x, e.y, 8, { spread: Math.PI * 2, speed: 120, color: '#b9a6c9', maxLife: 0.4, size: 4 });
+        sfx('spawn');
+        break;
+      }
+      case 'decoyPop': {
+        spawnParticles(e.x, e.y, 22, { spread: Math.PI * 2, speed: 320, color: '#9fd88a', maxLife: 0.6, size: 5, glow: true });
+        addDecal(e.x, e.y, 'gel', 0, 1.1);
+        addTrauma(TRAUMA_HEAVY);
+        sfx('splat');
+        break;
+      }
+      case 'yeet': {
+        spawnParticles(e.x, e.y, 10, { angle: Math.atan2(e.dirY, e.dirX), spread: 0.5, speed: 380, color: PINK, maxLife: 0.35, size: 4, glow: true });
+        addTrauma(TRAUMA_LIGHT);
+        sfx('launch');
+        break;
+      }
+      case 'spike': {
+        // the loudest hit in the game — partner volley (S1)
+        spawnParticles(e.x, e.y, 34, { spread: Math.PI * 2, speed: 520, color: GOLD, maxLife: 0.7, size: 6, glow: true, gravity: 200 });
+        spawnParticles(e.x, e.y, 14, { spread: Math.PI * 2, speed: 300, color: '#ffffff', maxLife: 0.3, size: 5, glow: true });
+        addTrauma(TRAUMA_SPLAT);
+        feel.zoomPulse = Math.max(feel.zoomPulse, 0.8);
+        sfx('gib');
+        break;
+      }
+      case 'detonate': {
+        spawnParticles(e.x, e.y, 26, { spread: Math.PI * 2, speed: 420, color: SLUDGE, maxLife: 0.55, size: 6, glow: true });
+        spawnRipple(e.x, e.y + 8, 130, 0.7);
+        addTrauma(TRAUMA_HEAVY);
+        sfx('splat');
+        break;
+      }
+      case 'zap': {
+        spawnParticles(e.x, e.y, 6, { spread: Math.PI * 2, speed: 260, color: '#ffe58a', maxLife: 0.25, size: 3, glow: true });
+        sfx('clink');
+        break;
+      }
+      // ---------- enemy behaviors ----------
+      case 'spit': sfx('tongueOut'); break;
+      case 'globLand': {
+        spawnParticles(e.x, e.y, 12, { spread: Math.PI * 2, speed: 240, color: SLUDGE_DK, maxLife: 0.45, size: 5, gravity: 260 });
+        addDecal(e.x, e.y, 'gel', 0, 0.8);
+        spawnRipple(e.x, e.y + 6, 70, 0.6);
+        sfx('splat');
+        break;
+      }
+      case 'birth': {
+        spawnParticles(e.x, e.y, 16, { spread: Math.PI * 2, speed: 200, color: GEL, maxLife: 0.5, size: 5 });
+        sfx('spawn');
+        break;
+      }
+      case 'dart': sfx('dash'); break;
+      // ---------- co-op ----------
+      case 'revivePulse': {
+        spawnParticles(e.x, e.y, 5, { spread: Math.PI * 2, speed: 90, color: PINK, maxLife: 0.4, size: 3, glow: true });
+        spawnRipple(e.x, e.y + 12, 60 + e.a * 60, 0.5);
+        sfx('hop');
+        break;
+      }
+      case 'revived': {
+        spawnParticles(e.x, e.y, 24, { spread: Math.PI * 2, speed: 320, color: GOLD, maxLife: 0.6, size: 4, glow: true });
+        addTrauma(TRAUMA_KILL);
+        sfx('pip');
+        break;
+      }
+      case 'join': {
+        spawnParticles(e.x, e.y, 18, { spread: Math.PI * 2, speed: 260, color: '#cfe8dd', maxLife: 0.5, size: 4 });
+        sfx('spawn');
+        break;
+      }
+      case 'slingshot': sfx('dash'); break;
+      // ---------- run structure ----------
+      case 'waveStart': sfx('swingHeavy'); break;
+      case 'waveClear': sfx('pip'); break;
+      case 'buy': sfx('pip'); break;
+      case 'reroll': sfx('clink'); break;
+      case 'victory': {
+        addTrauma(TRAUMA_KILL);
+        sfx('gib');
+        break;
+      }
     }
   });
 }

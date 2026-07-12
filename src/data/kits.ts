@@ -27,13 +27,14 @@ export interface KitData {
   speed: number;
 }
 
-// WARDEN — the machete is a door. Slow, huge, launches everything.
+// WARDEN — the machete is a door. The bible's locked stick numbers (Sword Line.md);
+// the kit's identity lives in slam/bull-dash/wallbreaker, not stat inflation.
 const WARDEN_CHAIN: AttackData[] = [
-  { id: 'war_l1', windup: 6, active: 5, follow: 4, recovery: 10, cancelFrom: 4, damage: 12, impulse: 460, arc: deg(120), reach: 155, cls: 'light' },
-  { id: 'war_l2', windup: 5, active: 5, follow: 4, recovery: 10, cancelFrom: 4, damage: 12, impulse: 460, arc: deg(120), reach: 155, cls: 'light' },
-  { id: 'war_fin', windup: 10, active: 6, follow: 6, recovery: 16, cancelFrom: 8, damage: 26, impulse: 950, arc: deg(150), reach: 170, cls: 'medium' },
+  { id: 'war_l1', windup: 6, active: 5, follow: 4, recovery: 10, cancelFrom: 4, damage: 10, impulse: 420, arc: deg(120), reach: 150, cls: 'light' },
+  { id: 'war_l2', windup: 5, active: 5, follow: 4, recovery: 10, cancelFrom: 4, damage: 10, impulse: 420, arc: deg(120), reach: 150, cls: 'light' },
+  { id: 'war_fin', windup: 10, active: 6, follow: 6, recovery: 16, cancelFrom: 8, damage: 22, impulse: 900, arc: deg(150), reach: 165, cls: 'medium' },
 ];
-const WARDEN_HEAVY: AttackData = { id: 'war_heavy', windup: 18, active: 6, follow: 8, recovery: 18, cancelFrom: 10, damage: 38, impulse: 1300, arc: deg(200), reach: 185, cls: 'heavy', superArmor: true };
+const WARDEN_HEAVY: AttackData = { id: 'war_heavy', windup: 18, active: 6, follow: 8, recovery: 18, cancelFrom: 10, damage: 34, impulse: 1200, arc: deg(200), reach: 180, cls: 'heavy', superArmor: true };
 
 // SNAPPER — everything is in reach. Fast paddle, the tongue is the weapon.
 const SNAPPER_CHAIN: AttackData[] = [

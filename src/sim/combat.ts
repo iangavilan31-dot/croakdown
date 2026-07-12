@@ -7,8 +7,9 @@ import {
   HITSTOP_MULTI_CAP, HITSTOP_ATTACKER_FRAC, LAUNCH_THRESHOLD, TUMBLE_TIME,
 } from '../data/constants';
 import { ENEMIES, SPIKE_OUT_DMG_MULT, SPIKE_REFLECT_DMG, OVERKILL_MULT } from '../data/enemies';
+import { SPIKE_BONUS_COINS } from '../data/kits';
 import type { DamageClass } from '../data/weapons';
-import type { Enemy, World } from './types';
+import type { Enemy, Frog, World } from './types';
 import { emit } from './events';
 import { dropEssence } from './world';
 
@@ -38,7 +39,7 @@ export interface HitResult { killed: boolean; reflected: boolean; armored: boole
  */
 export function applyMeleeHit(
   w: World, e: Enemy, damage: number, impulse: number, cls: DamageClass,
-  dirX: number, dirY: number, victimIndex: number,
+  dirX: number, dirY: number, victimIndex: number, attacker?: Frog,
 ): HitResult {
   const data = ENEMIES[e.kind];
   const res: HitResult = { killed: false, reflected: false, armored: false, launched: false };
@@ -49,6 +50,21 @@ export function applyMeleeHit(
     dmg = Math.max(1, Math.round(damage * SPIKE_OUT_DMG_MULT));
     res.reflected = true;
     res.armored = true;
+  }
+
+  // tandem bell (DUO): +20% while near your partner
+  if (attacker && attacker.items.tandembell) {
+    const partner = w.frogs.find((o) => o !== attacker && o.alive && !o.downed);
+    if (partner && Math.hypot(partner.x - attacker.x, partner.y - attacker.y) < 150) dmg *= 1.2;
+  }
+
+  // S1 — VOLLEY SPIKE: a launched enemy met by the PARTNER's swing gets spiked.
+  // Triple damage, bonus loot, the loudest hit in the game.
+  if (e.state === 'tumble' && e.launchedBy >= 0 && attacker && e.launchedBy !== attacker.index) {
+    dmg *= 3;
+    impulse *= 1.6;
+    dropEssence(w, e.x, e.y, SPIKE_BONUS_COINS, dirX, dirY);
+    emit(w, 'spike', e.x, e.y, { dirX, dirY, kind: e.kind });
   }
   // Poise: light hits don't interrupt armored bruisers
   const interrupts = !(data.poiseLightImmune && cls === 'light') && !res.armored;
@@ -83,6 +99,8 @@ export function applyMeleeHit(
     e.tumbleT = TUMBLE_TIME;
     e.tumbleSrcDmg = damage;
     e.spin = (dirX >= 0 ? 1 : -1) * (8 + w.rng() * 6);
+    e.launchedBy = attacker ? attacker.index : -1;   // S1 bookkeeping
+    e.yeeted = false;
     res.launched = true;
     emit(w, 'launch', e.x, e.y, { dirX, dirY, kind: e.kind });
   } else if (interrupts && !res.killed) {

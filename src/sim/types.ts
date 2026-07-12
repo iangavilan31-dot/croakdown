@@ -3,6 +3,8 @@
 
 import type { AttackData } from '../data/weapons';
 import type { EnemyKind } from '../data/enemies';
+import type { ItemId } from '../data/items';
+import type { KitId } from '../data/kits';
 import type { Rng } from '../engine/rng';
 import type { SpatialHash } from '../engine/spatial';
 
@@ -10,7 +12,9 @@ export interface SimInput {
   mx: number; my: number;
   aimX: number; aimY: number;     // world-space point
   attackEdge: boolean; attackHeld: boolean;
-  tongueEdge: boolean; dashEdge: boolean;
+  tongueEdge: boolean;            // universal tongue (bible law — every frog has it)
+  dashEdge: boolean;
+  sigEdge?: boolean;              // kit signature (slam / super-tongue / decoy)
 }
 
 export type AttackPhase = 'none' | 'windup' | 'active' | 'follow' | 'recovery' | 'heavywindup' | 'heavyhold';
@@ -30,10 +34,15 @@ export interface FrogAttack {
 export type TongueState = 'idle' | 'out' | 'back';
 
 export interface Frog {
+  index: number;          // 0 = P1, 1 = P2
+  kit: KitId;
   x: number; y: number; px: number; py: number;
   vx: number; vy: number;
   aim: number;            // radians
   hp: number; maxHp: number; alive: boolean;
+  downed: boolean;        // duo: waiting on the lily pad for a revive
+  reviveT: number;        // partner-on-pad heartbeat progress (s)
+  pulseT: number;         // heartbeat pulse timer
   iframesT: number; hurtFlashT: number;
   freeze: number;         // attacker hitstop frames
   // dash
@@ -48,12 +57,28 @@ export interface Frog {
   tState: TongueState; tT: number; tAngle: number; tCd: number;
   tTarget: Enemy | null;  // stable reference (enemy array swap-removes)
   tTipX: number; tTipY: number;
+  tPartner: boolean;      // this tongue flight is a partner yank
+  // kit state
+  sigCd: number;
+  sigT: number;           // active signature timer (warden slam crouch etc.)
+  grabbed: Enemy | null;  // snapper: enemy held, next attack = YEET
+  grabT: number;
+  trailAcc: number;       // morel: distance accumulator for spore trail
+  dashId: number;         // wake-ripper hit guard
+  slingT: number;         // partner slingshot boost timer
+  // items (stacks) + derived stats (recomputed on purchase)
+  items: Partial<Record<ItemId, number>>;
+  stat: {
+    dmg: number; arc: number; reach: number; impulse: number;
+    maxDash: number; dashRegen: number; heavyHold: number;
+    tongueReach: number; magnet: number; resist: number;
+  };
   // feel
   hopPhase: number;
-  essence: number;
+  essence: number;        // lifetime pickup count (stats)
 }
 
-export type EnemyState = 'spawning' | 'seek' | 'windup' | 'active' | 'recover' | 'tumble' | 'pulled';
+export type EnemyState = 'spawning' | 'seek' | 'windup' | 'active' | 'recover' | 'tumble' | 'pulled' | 'grabbed';
 
 export interface Enemy {
   alive: boolean;
@@ -70,15 +95,61 @@ export interface Enemy {
   stunT: number;
   // attack
   atkX: number; atkY: number;
+  atkCd: number;          // orbiter dart / spitter lob / spawner birth / boss move timer
+  orbitDir: number;       // orbiter strafe chirality
+  bossMove: number;       // elder move-cycle index
   // spikeblob
   spikeT: number; spikesOut: boolean;
   // tumble
   tumbleT: number; tumbleSrcDmg: number; spin: number; rot: number;
+  launchedBy: number;     // frog index that launched it (-1 = physics) — volley-spike (S1)
+  yeeted: boolean;        // snapper projectile (trophy-line explodes on impact)
   lastSwingHit: number;
+  // status
+  poisonT: number; poisonFrom: number; slowT: number;
+  bornOf: boolean;        // counted against the broodmaw child cap
   // pulled by tongue
   pullT: number;
   // render help
   seed: number;           // stable per-entity visual variation
+}
+
+// ---------------------------------------------------------------- run structure
+export type GamePhase = 'title' | 'wave' | 'shop' | 'gameover' | 'victory';
+
+export interface Glob {
+  alive: boolean;
+  owner: number;          // -1 enemy spit; >=0 frog projectile (echo edge)
+  x0: number; y0: number; x1: number; y1: number;
+  t: number; tof: number; // flight progress / time-of-flight (s)
+  x: number; y: number;   // current (render + frog-glob hit tests)
+  dmg: number; splash: number;
+  pierce: number;         // frog crescents pierce
+  lastHit: number;        // swingId-style guard for piercing crescents
+}
+
+export interface Zone {
+  alive: boolean;
+  kind: 'poison' | 'crater';
+  owner: number;          // frog index (poison detonation needs the owner)
+  x: number; y: number; r: number;
+  t: number; life: number;
+}
+
+export interface Decoy {
+  alive: boolean;
+  owner: number;
+  x: number; y: number;
+  t: number; life: number;
+  tauntR: number;
+}
+
+export interface ShopSlot { item: ItemId; sold: boolean }
+export interface ShopState {
+  slots: ShopSlot[];
+  rerollCost: number;
+  cursor: number[];       // per-frog cursor (0..slots, slots=reroll, slots+1=GO)
+  ready: boolean[];
 }
 
 export interface EssenceDrop {
@@ -95,7 +166,10 @@ export type SimEventType =
   | 'swing' | 'swingHeavy' | 'hit' | 'armored' | 'reflect' | 'kill' | 'launch'
   | 'tumbleImpact' | 'wallSplat' | 'spawn' | 'spawnTelegraph' | 'enemyWindup'
   | 'flop' | 'nibbleHit' | 'frogHurt' | 'frogDown' | 'dash' | 'hop'
-  | 'tongueOut' | 'tongueSnap' | 'pip' | 'essenceDrop';
+  | 'tongueOut' | 'tongueSnap' | 'pip' | 'essenceDrop'
+  | 'slam' | 'decoy' | 'decoyPop' | 'yeet' | 'spike' | 'detonate' | 'zap'
+  | 'spit' | 'globLand' | 'birth' | 'dart' | 'revivePulse' | 'revived'
+  | 'waveStart' | 'waveClear' | 'buy' | 'reroll' | 'victory' | 'join' | 'slingshot';
 
 export interface SimEvent {
   type: SimEventType;
@@ -111,7 +185,8 @@ export interface World {
   tick: number;
   elapsed: number;
   rng: Rng;
-  frog: Frog;
+  frog: Frog;             // === frogs[0] (P1) — kept for QA hooks + old scripts
+  frogs: Frog[];          // 1-2 players, drop-in
   enemies: Enemy[];       // dense array; swap-remove, pooled
   drops: EssenceDrop[];
   telegraphs: SpawnTelegraph[];
@@ -120,6 +195,18 @@ export interface World {
   swingCounter: number;
   kills: number;
   gameOver: boolean;
+  // run structure
+  phase: GamePhase;
+  wave: number;           // 1-based; 0 before the first wave
+  waveBudget: number;
+  waveBannerT: number;    // wave banner display timer (render reads)
+  coins: number;          // SHARED wallet (argue-about-spending law)
+  shop: ShopState;
+  globs: Glob[];
+  zones: Zone[];
+  decoys: Decoy[];
+  broodChildren: number;
+  boss: Enemy | null;
   // spawner
   spawnAccum: number;
 }

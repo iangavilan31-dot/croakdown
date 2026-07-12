@@ -3,10 +3,12 @@
 // accents only. Nearest-neighbor chunky shapes; real art replaces shapes in Phase 2.
 
 import {
-  ARENA_W, ARENA_H, ARENA_MARGIN, FROG_RADIUS, DASH_CHARGES,
+  ARENA_W, ARENA_H, ARENA_MARGIN, FROG_RADIUS,
 } from '../data/constants';
 import { ENEMIES } from '../data/enemies';
-import { TONGUE } from '../data/weapons';
+import { KITS } from '../data/kits';
+import { ITEMS } from '../data/items';
+import { shopCost } from '../sim/world';
 import type { Enemy, World } from '../sim/types';
 import { feel, particles, decals, decalStats, ripples, shakeOffset, spawnRipple, type Decal } from '../feel/feel';
 import { img } from '../engine/assets';
@@ -466,10 +468,10 @@ const slashFx: SlashFx[] = [];
 let lastSlashTick = -1;
 let lastRenderTime = 0;
 
-function pushSlash(w: World, fx: number, fy: number): void {
-  const atk = w.frog.attack;
-  if (atk.phase !== 'active' || atk.frame !== 0 || w.tick === lastSlashTick || !atk.data) return;
-  lastSlashTick = w.tick;
+function pushSlash(w: World, f: import('../sim/types').Frog, fx: number, fy: number): void {
+  const atk = f.attack;
+  if (atk.phase !== 'active' || atk.frame !== 0 || w.tick * 2 + f.index === lastSlashTick || !atk.data) return;
+  lastSlashTick = w.tick * 2 + f.index;
   const dir = atk.chainIdx % 2 === 0 ? 1 : -1;
   const half = atk.data.arc / 2;
   slashFx.push({ x: fx, y: fy, a0: atk.angle - dir * half, a1: atk.angle + dir * half, reach: atk.data.reach, kind: atk.data.cls, t: 0, life: 0.2 });
@@ -515,19 +517,32 @@ function drawSlashFx(ctx: CanvasRenderingContext2D, time: number): void {
 }
 
 // ---------- main draw ----------
-export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: number, alpha: number, time: number, paused: boolean) {
+export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: number, alpha: number, time: number, paused: boolean, titleCursor = 0) {
   if (!backdrop) backdrop = buildBackdrop();
   updateDecalLayer();
 
-  // FOLLOW-CAMERA zoomed ~40% past the letterbox fit, centered on the frog and clamped to the
-  // arena — the hero + combat now read at a legible scale (critics: everything too small/muddy).
+  // FOLLOW-CAMERA zoomed past the letterbox fit, centered on the LIVING FROGS' midpoint
+  // and clamped to the arena. Duo: zoom eases out just enough to keep both on screen.
   const fit = Math.min(cw / ARENA_W, ch / ARENA_H);
-  const ZOOM = 1.4;
+  let camFx = ARENA_W / 2, camFy = ARENA_H / 2, spread = 0;
+  {
+    let n = 0, sx2 = 0, sy2 = 0;
+    for (const f of w.frogs) {
+      if (!f.alive && !f.downed) continue;
+      sx2 += f.px + (f.x - f.px) * alpha;
+      sy2 += f.py + (f.y - f.py) * alpha;
+      n++;
+    }
+    if (n > 0) { camFx = sx2 / n; camFy = sy2 / n; }
+    if (n > 1) {
+      const a = w.frogs[0], b = w.frogs[1];
+      spread = Math.hypot(a.x - b.x, a.y - b.y);
+    }
+  }
+  const ZOOM = Math.max(1.02, 1.4 - Math.max(0, spread - 500) * 0.0006);
   const [sx, sy, rot] = shakeOffset(time);
   const camScale = fit * ZOOM * (1 + feel.zoomPulse * 0.02);
   const viewW = cw / camScale, viewH = ch / camScale;
-  const ff = w.frog;
-  const camFx = ff.px + (ff.x - ff.px) * alpha, camFy = ff.py + (ff.y - ff.py) * alpha;
   const camX = viewW >= ARENA_W ? ARENA_W / 2 : Math.max(viewW / 2, Math.min(ARENA_W - viewW / 2, camFx));
   const camY = viewH >= ARENA_H ? ARENA_H / 2 : Math.max(viewH / 2, Math.min(ARENA_H - viewH / 2, camFy));
   view.scale = camScale / devicePixelRatio;
@@ -608,6 +623,9 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
     }
   }
 
+  // zones (under everything that walks)
+  drawZones(ctx, w, time);
+
   // shadows
   ctx.fillStyle = 'rgba(0,0,0,0.35)';
   for (const e of w.enemies) {
@@ -616,15 +634,15 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
     ctx.ellipse(ex, ey + ENEMIES[e.kind].radius * 0.75, ENEMIES[e.kind].radius * 0.9, ENEMIES[e.kind].radius * 0.34, 0, 0, Math.PI * 2);
     ctx.fill();
   }
-  const f = w.frog;
-  const fx = f.px + (f.x - f.px) * alpha, fy = f.py + (f.y - f.py) * alpha;
-  // HERO LILY PAD with a glowing rim (the reference's grounding read): the pad rides
-  // beneath the frog — the pond is carpeted with pads, so it reads as hopping pad to pad.
-  drawHeroPad(ctx, fx, fy, time);
-  ctx.fillStyle = 'rgba(0,0,0,0.35)';
-  ctx.beginPath();
-  ctx.ellipse(fx, fy + FROG_RADIUS * 0.86, FROG_RADIUS * 1.32, FROG_RADIUS * 0.42, 0, 0, Math.PI * 2);
-  ctx.fill();
+  for (const f of w.frogs) {
+    if (!f.alive && !f.downed) continue;
+    const fx = f.px + (f.x - f.px) * alpha, fy = f.py + (f.y - f.py) * alpha;
+    drawHeroPad(ctx, fx, fy, time + f.index * 1.7);
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.beginPath();
+    ctx.ellipse(fx, fy + FROG_RADIUS * 0.86, FROG_RADIUS * 1.32, FROG_RADIUS * 0.42, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
 
   // essence drops
   for (const d of w.drops) {
@@ -635,21 +653,36 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
     ctx.shadowBlur = 0;
   }
 
-  // enemies (y-sorted with frog)
-  const sorted: (Enemy | 'frog')[] = [...w.enemies].sort((a, b) => a.y - b.y) as (Enemy | 'frog')[];
-  let frogDrawn = false;
-  for (let i = 0; i <= sorted.length; i++) {
-    const e = i < sorted.length ? (sorted[i] as Enemy) : null;
-    if (!frogDrawn && (!e || e.y > f.y)) { drawFrog(ctx, w, fx, fy, time); frogDrawn = true; }
-    if (e) drawEnemy(ctx, e, alpha, time);
+  drawDecoys(ctx, w, time);
+
+  // entities (y-sorted: enemies + every frog); the title shows the empty pond
+  type Drawable = { y: number; e?: Enemy; f?: typeof w.frogs[0] };
+  const drawables: Drawable[] = [];
+  if (w.phase !== 'title') {
+    for (const e of w.enemies) drawables.push({ y: e.y, e });
+    for (const f of w.frogs) if (f.alive || f.downed) drawables.push({ y: f.y, f });
+  }
+  drawables.sort((a, b) => a.y - b.y);
+  for (const d of drawables) {
+    if (d.e) drawEnemy(ctx, d.e, alpha, time);
+    else if (d.f) {
+      const fx = d.f.px + (d.f.x - d.f.px) * alpha, fy = d.f.py + (d.f.y - d.f.py) * alpha;
+      drawFrog(ctx, w, d.f, fx, fy, time);
+    }
   }
 
-  // dash trail decay
+  drawGlobs(ctx, w, time);
+
+  // dash trails
   for (let i = trail.length - 1; i >= 0; i--) {
     trail[i].life -= 0.016;
     if (trail[i].life <= 0) trail.splice(i, 1);
   }
-  if (f.dashT > 0) trail.push({ x: fx, y: fy, life: 0.25 });
+  for (const f of w.frogs) {
+    if (f.dashT > 0 && (f.alive && !f.downed)) {
+      trail.push({ x: f.px + (f.x - f.px) * alpha, y: f.py + (f.y - f.py) * alpha, life: 0.25 });
+    }
+  }
   for (const t of trail) {
     ctx.fillStyle = `rgba(201,216,166,${t.life * 0.9})`;
     ctx.beginPath(); ctx.ellipse(t.x, t.y, FROG_RADIUS * 0.9, FROG_RADIUS * 0.7, 0, 0, Math.PI * 2); ctx.fill();
@@ -681,27 +714,52 @@ export function draw(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: nu
   ctx.fillRect(0, 0, cw, ch);
 
   // HUD is a fixed screen-space overlay (independent of the follow-camera), anchored top-left
-  drawHud(ctx, w, cw, ch, fit, 0, 0, time, paused);
+  drawHud(ctx, w, cw, ch, fit, 0, 0, time, paused, titleCursor);
 
   // LAW: grade + grain are ALWAYS the last pass — one light over the whole frame
   drawGradeGrain(ctx, cw, ch, time);
 }
 
 // ---------- frog: the 6-part puppet rig (GATE 3), legacy sprite path as fallback ----------
-const frogRigState: RigState = createRigState(0.37);
-const frogPose: Pose = makePose();
+const frogRigStates: RigState[] = [createRigState(0.37), createRigState(0.81)];
+const frogPoses: Pose[] = [makePose(), makePose()];
 let rigLastTime = 0;
+let rigDtThisFrame = 1 / 60;
 
-function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: number, time: number) {
-  const f = w.frog;
-  const skin = loadSkin('warden');
-  if (f.alive && skin.ready) {
-    pushSlash(w, fx, fy);
-    const rdt = Math.min(0.05, Math.max(0, time - rigLastTime));
+function drawFrog(ctx: CanvasRenderingContext2D, w: World, f: import('../sim/types').Frog, fx: number, fy: number, time: number) {
+  const skin = loadSkin(f.kit);
+  if (f.index === 0) {
+    rigDtThisFrame = Math.min(0.05, Math.max(0, time - rigLastTime));
     rigLastTime = time;
+  }
+  if (f.downed) {
+    // downed on the pad: flattened, heartbeat ring shows revive progress (S4)
+    ctx.save();
+    ctx.translate(fx, fy);
+    ctx.globalAlpha = 0.9;
+    ctx.scale(1.25, 0.55);
+    const pose = frogPoses[f.index];
+    if (!drawSkinnedFrog(ctx, pose, skin, 0, 0)) {
+      ctx.fillStyle = '#6a7a5a';
+      ctx.beginPath(); ctx.ellipse(0, 8, FROG_RADIUS * 1.2, FROG_RADIUS * 0.8, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+    // heartbeat revive ring
+    const p = Math.min(1, f.reviveT / 3);
+    const pulse = 1 + 0.08 * Math.sin(time * 7);
+    ctx.strokeStyle = `rgba(255,95,162,${0.35 + p * 0.5})`;
+    ctx.lineWidth = 3 + p * 3;
+    ctx.beginPath();
+    ctx.ellipse(fx, fy + FROG_RADIUS * 0.8, FROG_RADIUS * 2.1 * pulse, FROG_RADIUS * 0.8 * pulse, 0, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2);
+    ctx.stroke();
+    return;
+  }
+  if (f.alive && skin.ready) {
+    pushSlash(w, f, fx, fy);
     const atk = f.attack;
+    const pose = frogPoses[f.index];
     solvePose({
-      x: fx, y: fy, vx: f.vx, vy: f.vy, maxSpeed: 330,
+      x: fx, y: fy, vx: f.vx, vy: f.vy, maxSpeed: 360,
       aim: f.aim,
       attackPhase: atk.phase, attackFrame: atk.frame,
       attackWindup: atk.data?.windup ?? 6, attackActive: atk.data?.active ?? 5,
@@ -709,14 +767,20 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
       attackAngle: atk.phase === 'none' ? f.aim : atk.angle,
       heavy: atk.data?.cls === 'heavy',
       dashing: f.dashT > 0, dashDirX: f.dashDirX, dashDirY: f.dashDirY,
-      frozen: f.freeze > 0, hurt: f.hurtFlashT > 0, alive: f.alive, seed: 0.37,
-    }, frogRigState, f.freeze > 0 ? 0 : rdt, frogPose);
-    // footfall: the rig's landing drives the ripple + hop sfx (sim hop events are audio-only history)
-    if (frogPose.landed) { spawnRipple(fx, fy + RIG.FOOT_Y, 46, 0.55); sfx('hop'); }
+      frozen: f.freeze > 0, hurt: f.hurtFlashT > 0, alive: f.alive, seed: 0.37 + f.index * 0.44,
+    }, frogRigStates[f.index], f.freeze > 0 ? 0 : rigDtThisFrame, pose);
+    if (pose.landed) { spawnRipple(fx, fy + RIG.FOOT_Y, 46, 0.55); sfx('hop'); }
     const flicker = f.iframesT > 0 && Math.floor(time * 24) % 2 === 0;
     if (flicker) ctx.globalAlpha = 0.45;
-    drawSkinnedFrog(ctx, frogPose, skin, fx, fy, f.hurtFlashT > 0 ? f.hurtFlashT * 5 : 0);
+    drawSkinnedFrog(ctx, pose, skin, fx, fy, f.hurtFlashT > 0 ? f.hurtFlashT * 5 : 0);
     ctx.globalAlpha = 1;
+    // P2 wears a soft pink firefly above the head (co-op tell, palette-legal)
+    if (f.index === 1) {
+      ctx.fillStyle = C.pink;
+      ctx.shadowColor = C.pink; ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(fx, fy + pose.hopY - 74, 3.4, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
     // tongue (over the body, under the blade's world layer)
     if (f.tState !== 'idle') {
       ctx.save();
@@ -724,13 +788,14 @@ function drawFrog(ctx: CanvasRenderingContext2D, w: World, fx: number, fy: numbe
       ctx.lineWidth = 10;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(fx, fy + frogPose.hopY - 6);
+      ctx.moveTo(fx, fy + pose.hopY - 6);
       ctx.lineTo(f.tTipX, f.tTipY);
       ctx.stroke();
       ctx.fillStyle = C.pink;
       ctx.beginPath(); ctx.arc(f.tTipX, f.tTipY, 9, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     }
+    // grabbed enemy squirming on the hip reads via enemy draw; the yeet prompt is the blade glint
     return;
   }
   drawFrogLegacy(ctx, w, fx, fy, time);
@@ -748,7 +813,7 @@ function drawFrogLegacy(ctx: CanvasRenderingContext2D, w: World, fx: number, fy:
     return;
   }
   const atk = f.attack;
-  pushSlash(w, fx, fy);                    // emit a lingering slash the frame a swing goes active
+  pushSlash(w, f, fx, fy);                 // emit a lingering slash the frame a swing goes active
   const speed = Math.hypot(f.vx, f.vy);
   const moving = speed > 20 && f.dashT <= 0;
   // hop arc: 0 at ground contact -> 1 at apex -> 0, once per hop. Drives lift + squash/stretch.
@@ -1100,10 +1165,17 @@ function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: num
     ctx.ellipse(rx * 0.7, ry * 0.35, r * 0.26, r * 0.2, 0, 0, Math.PI * 2); ctx.fill();
   }
 
-  // big cute glowing eyes with glint (track facing)
+  drawSlimeEyes(ctx, e, r, time, warm);
+
+  if (flash) { ctx.globalAlpha = 0.55; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+}
+
+/** The EMISSIVE eyes — procedural for every enemy (painted or slime body), so the
+ *  bloom mask stays honest and the swarm always reads at density. */
+function drawSlimeEyes(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: number, warm: boolean) {
   const look = e.facing;
   const lx = Math.cos(look) * r * 0.12, ly = Math.sin(look) * r * 0.08;
-  const es = (e.kind === 'gloopa' ? 0.27 : e.kind === 'spikeblob' ? 0.24 : 0.23) * r;   // bigger, expressive
+  const es = (e.kind === 'gloopa' || e.kind === 'elder' ? 0.27 : e.kind === 'spikeblob' ? 0.24 : 0.23) * r;
   // REF_02 blobs have MENACING pink/red pinprick eyes (the palette's danger accent), not cute lime —
   // blind Reference judge: current enemies "read harmless". Hot-pink swarm + ~40% ember variants;
   // also separates the swarm from the green pads + gold fireflies it used to blend with.
@@ -1129,8 +1201,116 @@ function drawSlime(ctx: CanvasRenderingContext2D, e: Enemy, r: number, time: num
     ctx.fillStyle = iris; ctx.shadowColor = iris; ctx.shadowBlur = 5;
     ctx.beginPath(); ctx.arc(lx, -r * 0.5 + ly, es * 0.42, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
   }
+}
 
-  if (flash) { ctx.globalAlpha = 0.55; ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }
+// ---------- globs / zones / decoys ----------
+function drawGlobs(ctx: CanvasRenderingContext2D, w: World, time: number) {
+  for (const g of w.globs) {
+    const p = Math.min(1, g.t / g.tof);
+    if (g.owner < 0) {
+      // enemy spit: telegraphed landing ring + lobbed glob with arc height
+      drawAttackTell(ctx, g.x1, g.y1, g.splash, p);
+      const lift = Math.sin(p * Math.PI) * (36 + Math.hypot(g.x1 - g.x0, g.y1 - g.y0) * 0.1);
+      ctx.fillStyle = '#79b356';
+      ctx.shadowColor = '#a5e87a'; ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(g.x, g.y - lift, 11, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    } else {
+      // frog crescent (echo edge): a spinning hot sliver
+      ctx.save();
+      ctx.translate(g.x, g.y);
+      ctx.rotate(time * 22);
+      ctx.strokeStyle = 'rgba(255,238,198,0.95)';
+      ctx.lineWidth = 4; ctx.lineCap = 'round';
+      ctx.shadowColor = '#ffe58a'; ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(0, 0, 16, -0.6, 2.2); ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+    }
+  }
+}
+
+function drawZones(ctx: CanvasRenderingContext2D, w: World, time: number) {
+  for (const z of w.zones) {
+    const k = z.t / z.life;
+    const fade = k < 0.15 ? k / 0.15 : 1 - Math.max(0, (k - 0.7) / 0.3);
+    if (z.kind === 'poison') {
+      ctx.save();
+      const g = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, z.r);
+      g.addColorStop(0, `rgba(110,200,110,${0.16 * fade})`);
+      g.addColorStop(0.7, `rgba(80,160,90,${0.10 * fade})`);
+      g.addColorStop(1, 'rgba(80,160,90,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.ellipse(z.x, z.y, z.r, z.r * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+      // rising spore motes
+      ctx.fillStyle = `rgba(160,240,150,${0.5 * fade})`;
+      for (let i = 0; i < 5; i++) {
+        const a = i * 1.3 + z.x * 0.01;
+        const rr = z.r * (0.2 + ((time * 0.4 + i * 0.19) % 0.8));
+        const my = ((time * 26 + i * 31) % 30);
+        ctx.fillRect(z.x + Math.cos(a) * rr - 1.5, z.y + Math.sin(a) * rr * 0.5 - my - 1.5, 3, 3);
+      }
+      ctx.restore();
+    } else {
+      ctx.strokeStyle = `rgba(40,28,16,${0.5 * fade})`;
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.ellipse(z.x, z.y, z.r, z.r * 0.55, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = `rgba(20,14,8,${0.22 * fade})`;
+      ctx.beginPath(); ctx.ellipse(z.x, z.y, z.r * 0.92, z.r * 0.5, 0, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+}
+
+const decoyImgCache: Record<string, HTMLImageElement> = {};
+function decoyImg(): HTMLImageElement {
+  if (!decoyImgCache.morel) {
+    const im = new Image();
+    im.src = '/art/parts/morel/fx_a.png';   // the deflated decoy doll from the sheet
+    decoyImgCache.morel = im;
+  }
+  return decoyImgCache.morel;
+}
+function drawDecoys(ctx: CanvasRenderingContext2D, w: World, time: number) {
+  for (const d of w.decoys) {
+    const k = d.t / d.life;
+    // taunt pulse ring
+    ctx.strokeStyle = `rgba(185,166,201,${0.3 * (1 - k)})`;
+    ctx.lineWidth = 2;
+    const rr = 40 + ((time * 140) % d.tauntR);
+    ctx.beginPath(); ctx.ellipse(d.x, d.y + 10, rr, rr * 0.42, 0, 0, Math.PI * 2); ctx.stroke();
+    const im = decoyImg();
+    if (im.complete && im.naturalWidth) {
+      const wpx = 72;
+      const hpx = wpx * (im.naturalHeight / im.naturalWidth);
+      ctx.save();
+      ctx.translate(d.x, d.y);
+      ctx.rotate(Math.sin(time * 3 + d.x) * 0.06);
+      ctx.scale(1 + k * 0.15, 1 - k * 0.2);              // slowly deflating
+      ctx.drawImage(im, -wpx / 2, -hpx + 14, wpx, hpx);
+      ctx.restore();
+    } else {
+      ctx.fillStyle = '#7a6a86';
+      ctx.beginPath(); ctx.ellipse(d.x, d.y, 26, 18, 0, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+}
+
+// ---------- painted enemy bodies (GATE 2 sheets; eyes stay procedural/emissive) ----------
+const enemyBodyCache: Partial<Record<string, HTMLImageElement>> = {};
+const ENEMY_SHEET: Partial<Record<string, string>> = {
+  blobbit: 'bogling', midge: 'midge', gloopa: 'gloopa',
+  spitshroom: 'spitshroom', broodmaw: 'broodmaw', elder: 'gloopa',
+};
+function enemyBody(kind: string): HTMLImageElement | null {
+  const sheet = ENEMY_SHEET[kind];
+  if (!sheet) return null;
+  let im = enemyBodyCache[sheet];
+  if (!im) {
+    im = new Image();
+    im.src = `/art/parts/${sheet}/body.png`;
+    enemyBodyCache[sheet] = im;
+  }
+  return im.complete && im.naturalWidth ? im : null;
 }
 
 // ---------- enemies ----------
@@ -1163,6 +1343,9 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
   } else if (e.state === 'recover' && e.kind === 'gloopa') {
     sx2 = 1.35; sy2 = 0.55; // grounded, gills heaving
     sy2 += Math.sin(time * 9) * 0.04;
+  } else if (e.state === 'grabbed') {
+    // squirming in the snapper's grip
+    sx2 = 1 + Math.sin(time * 22) * 0.12; sy2 = 1 - Math.sin(time * 22) * 0.12;
   } else if (e.stunT > 0) {
     sx2 = 1.1; sy2 = 0.9;
   }
@@ -1192,7 +1375,31 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
     const jig = Math.sin(k * Math.PI * 3) * 0.07 * (1 - k);
     ctx.scale(1 + amp * 0.34 + jig, 1 - amp * 0.3 - jig);
   }
-  drawSlime(ctx, e, r, time, warm);
+  const body = enemyBody(e.kind);
+  if (body) {
+    // painted body (whole-sheet law) + procedural EMISSIVE eyes on top
+    const wpx = r * 2.35;
+    const hpx = wpx * (body.height / body.width);
+    const flip = Math.cos(e.facing) < 0 ? -1 : 1;
+    ctx.save();
+    if (e.kind === 'elder') ctx.filter = 'brightness(0.72) saturate(0.8)';
+    ctx.scale(flip, 1);
+    // biolum rim so the dark silhouette separates from dark water
+    ctx.shadowColor = 'rgba(150,240,150,0.55)'; ctx.shadowBlur = 7;
+    ctx.drawImage(body, -wpx / 2, -hpx * 0.62, wpx, hpx);
+    ctx.shadowBlur = 0;
+    if (e.flashT > 0) {
+      ctx.globalAlpha = Math.min(0.85, e.flashT * 5);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.drawImage(body, -wpx / 2, -hpx * 0.62, wpx, hpx);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+    drawSlimeEyes(ctx, e, r, time, warm);
+  } else {
+    drawSlime(ctx, e, r, time, warm);
+  }
 
   ctx.restore();
 
@@ -1202,79 +1409,235 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, alpha: number, time:
   }
 }
 
-// ---------- HUD (≤5 elements, no text labels) ----------
-function drawHud(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: number, scale: number, ox: number, oy: number, time: number, paused: boolean) {
-  const f = w.frog;
-  ctx.save();
-  ctx.translate(ox, oy);
-  ctx.scale(scale, scale);
-
-  // --- minimal FLOATING HUD, REF_02 language: hearts top-left, essence top-right, ability pips
-  // tucked under the hearts. No panel box, no kill tally, no debug chrome (critics: "placeholder").
-  const X = 56;                                       // left margin for the hearts + pips
-
-  // hearts row (coral — the bible accent), 20 HP each. A soft dark under-shadow per heart keeps
-  // them legible over bright water without a boxy panel.
+// ---------- HUD + run-structure screens (all in the painted world's language) ----------
+function drawFrogVitals(ctx: CanvasRenderingContext2D, w: World, f: import('../sim/types').Frog, rightSide: boolean, time: number) {
   const hearts = Math.ceil(f.maxHp / 20);
+  const X = rightSide ? ARENA_W - 56 - (hearts - 1) * 40 : 56;
   for (let i = 0; i < hearts; i++) {
     const hx = X + i * 40, hy = 74;
     const fill = Math.max(0, Math.min(1, (f.hp - i * 20) / 20));
-    drawHeart(ctx, hx, hy + 2, 16, 'rgba(4,10,8,0.55)');   // drop shadow
-    drawHeart(ctx, hx, hy, 16, 'rgba(30,18,24,0.85)');     // empty socket
+    drawHeart(ctx, hx, hy + 2, 16, 'rgba(4,10,8,0.55)');
+    drawHeart(ctx, hx, hy, 16, 'rgba(30,18,24,0.85)');
     if (fill > 0) {
       ctx.save();
       ctx.beginPath();
       ctx.rect(hx - 18, hy - 16 + (1 - fill) * 34, 36, fill * 34);
       ctx.clip();
-      drawHeart(ctx, hx, hy, 16, '#e8546a');            // red-coral to match REF_02's hearts
+      drawHeart(ctx, hx, hy, 16, f.index === 0 ? '#e8546a' : '#ff5fa2');  // P2 hearts run hot pink
       ctx.restore();
     }
   }
-
-  // essence — TOP-RIGHT (REF_02): a glowing gold gem + count, right-anchored.
-  const ex = ARENA_W - 62, ey = 78;
-  drawPixelText(ctx, String(f.essence), ex - 24, ey, 30, C.cream, 'right');
-  ctx.save();
-  ctx.shadowColor = C.gold; ctx.shadowBlur = 12;
-  ctx.fillStyle = C.gold;
-  ctx.beginPath(); ctx.moveTo(ex, ey - 12); ctx.lineTo(ex + 10, ey); ctx.lineTo(ex, ey + 12); ctx.lineTo(ex - 10, ey); ctx.closePath(); ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = 'rgba(255,247,220,0.9)';
-  ctx.beginPath(); ctx.moveTo(ex, ey - 12); ctx.lineTo(ex + 4, ey - 2); ctx.lineTo(ex - 4, ey - 2); ctx.closePath(); ctx.fill();
-  ctx.restore();
-
-  // ability pips: dash chevrons + tongue drop w/ cooldown, tucked just under the hearts
+  // dash chevrons + signature pip under the hearts
   const ay = 116;
-  for (let i = 0; i < DASH_CHARGES; i++) {
-    const px = X + i * 20;
+  const ax0 = rightSide ? ARENA_W - 56 - 84 : 56;
+  for (let i = 0; i < f.stat.maxDash; i++) {
+    const px = ax0 + i * 20;
     ctx.strokeStyle = i < f.dashCharges ? 'rgba(242,234,216,0.85)' : 'rgba(242,234,216,0.22)';
     ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.beginPath(); ctx.moveTo(px - 4, ay - 5); ctx.lineTo(px + 3, ay); ctx.lineTo(px - 4, ay + 5); ctx.stroke();  // ">" dash chevron
+    ctx.beginPath(); ctx.moveTo(px - 4, ay - 5); ctx.lineTo(px + 3, ay); ctx.lineTo(px - 4, ay + 5); ctx.stroke();
   }
-  // tongue drop icon + radial cooldown
-  const tx = X + 84, cd = Math.max(0, f.tCd) / TONGUE.cooldown;
-  const tCol = cd < 1 ? '#ff6f8f' : 'rgba(255,111,143,0.35)';
-  ctx.fillStyle = tCol;
-  ctx.beginPath(); ctx.arc(tx, ay + 1, 6, 0.15 * Math.PI, 0.85 * Math.PI, false); ctx.lineTo(tx, ay - 8); ctx.closePath(); ctx.fill();  // teardrop
+  const kit = KITS[f.kit];
+  const cdMax = f.kit === 'snapper' ? kit.sigCooldown : kit.sigCooldown;
+  const cd = Math.max(0, f.kit === 'snapper' ? f.tCd : f.sigCd) / Math.max(0.01, cdMax);
+  const tx = ax0 + 84;
+  ctx.fillStyle = cd <= 0.01 ? '#ff6f8f' : 'rgba(255,111,143,0.35)';
+  ctx.beginPath(); ctx.arc(tx, ay + 1, 6, 0.15 * Math.PI, 0.85 * Math.PI, false); ctx.lineTo(tx, ay - 8); ctx.closePath(); ctx.fill();
   ctx.strokeStyle = 'rgba(255,111,143,0.22)'; ctx.lineWidth = 3;
   ctx.beginPath(); ctx.arc(tx, ay, 12, 0, Math.PI * 2); ctx.stroke();
-  if (cd < 1) {
+  if (cd > 0.01) {
     ctx.strokeStyle = '#ff6f8f';
     ctx.beginPath(); ctx.arc(tx, ay, 12, -Math.PI / 2, -Math.PI / 2 + (1 - cd) * Math.PI * 2); ctx.stroke();
   }
+}
+
+function drawCoins(ctx: CanvasRenderingContext2D, w: World, x: number, y: number, size = 30) {
+  drawPixelText(ctx, String(w.coins), x - 24, y, size, C.cream, 'right');
+  ctx.save();
+  ctx.shadowColor = C.gold; ctx.shadowBlur = 12;
+  ctx.fillStyle = C.gold;
+  ctx.beginPath(); ctx.moveTo(x, y - 12); ctx.lineTo(x + 10, y); ctx.lineTo(x, y + 12); ctx.lineTo(x - 10, y); ctx.closePath(); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(255,247,220,0.9)';
+  ctx.beginPath(); ctx.moveTo(x, y - 12); ctx.lineTo(x + 4, y - 2); ctx.lineTo(x - 4, y - 2); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+const KIT_LIST = ['warden', 'snapper', 'morel'] as const;
+const KIT_BLURB: Record<string, [string, string]> = {
+  warden: ['WARDEN', 'THE MACHETE IS A DOOR'],
+  snapper: ['SNAPPER', 'EVERYTHING IS IN REACH'],
+  morel: ['MOREL', 'NEVER WHERE YOU LOOK'],
+};
+
+function drawTitle(ctx: CanvasRenderingContext2D, time: number, titleCursor: number) {
+  overlay(ctx, 'rgba(2,8,6,0.55)');
+  const cx = ARENA_W / 2;
+  const bob = Math.sin(time * 1.1) * 6;
+  drawPixelText(ctx, 'CROAKDOWN', cx, 210 + bob, 110, C.cream, 'center', 900);
+  drawPixelText(ctx, 'A SWAMP ANSWERS VIOLENCE WITH VIOLENCE', cx, 290 + bob, 20, 'rgba(160,200,170,0.75)', 'center', 700);
+  // three kit portraits from the parts sheets
+  for (let i = 0; i < 3; i++) {
+    const kx = cx + (i - 1) * 330;
+    const ky = ARENA_H / 2 + 60;
+    const sel = i === titleCursor;
+    const skin = loadSkin(KIT_LIST[i]);
+    // portrait = the most FACE-like head variant per sheet (snapper/morel painted
+    // their frontal faces into the second head cell)
+    const head = KIT_LIST[i] === 'warden' ? skin.img.head_open : skin.img.head_closed;
+    ctx.save();
+    if (sel) {
+      const g = ctx.createRadialGradient(kx, ky, 10, kx, ky, 170);
+      g.addColorStop(0, 'rgba(255,214,150,0.24)');
+      g.addColorStop(1, 'rgba(255,214,150,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(kx - 180, ky - 180, 360, 360);
+    }
+    ctx.globalAlpha = sel ? 1 : 0.75;
+    if (head && head.complete && head.naturalWidth) {
+      const hw = sel ? 190 : 150;
+      const hh = hw * (head.naturalHeight / head.naturalWidth);
+      const hop2 = sel ? Math.abs(Math.sin(time * 2.4)) * -10 : 0;
+      ctx.drawImage(head, kx - hw / 2, ky - hh / 2 - 40 + hop2, hw, hh);
+    }
+    const [name, blurb] = KIT_BLURB[KIT_LIST[i]];
+    drawPixelText(ctx, name, kx, ky + 96, sel ? 40 : 30, sel ? C.gold : 'rgba(242,234,216,0.6)', 'center', 900);
+    if (sel) drawPixelText(ctx, blurb, kx, ky + 140, 17, 'rgba(160,200,170,0.85)', 'center', 700);
+    ctx.restore();
+  }
+  if (Math.sin(time * 3.2) > -0.2) {
+    drawPixelText(ctx, 'CHOOSE  ·  PRESS TO CROAK', cx, ARENA_H - 130, 24, 'rgba(242,234,216,0.85)', 'center', 800);
+  }
+  drawPixelText(ctx, 'P2 DROPS IN ANY TIME · PAD OR IJKL+U', cx, ARENA_H - 88, 15, 'rgba(160,200,170,0.55)', 'center', 700);
+}
+
+const RARITY_EDGE: Record<string, string> = { common: 'rgba(160,200,170,0.5)', rare: 'rgba(120,190,255,0.65)', epic: 'rgba(255,95,162,0.75)' };
+
+function drawShop(ctx: CanvasRenderingContext2D, w: World, time: number) {
+  overlay(ctx, 'rgba(2,8,6,0.45)');
+  const cx = ARENA_W / 2;
+  drawPixelText(ctx, `WAVE ${w.wave} CLEARED`, cx, 150, 44, '#8fd17a', 'center', 900);
+  drawCoins(ctx, w, cx + 60, 214, 36);
+  const slots = w.shop.slots;
+  const cardW = 300, cardH = 380, gap = 26;
+  const totalW = slots.length * cardW + (slots.length - 1) * gap;
+  const y0 = ARENA_H / 2 - cardH / 2 + 30;
+  for (let i = 0; i < slots.length; i++) {
+    const s = slots[i];
+    const it = ITEMS[s.item];
+    const x0 = cx - totalW / 2 + i * (cardW + gap);
+    // swamp-glass card
+    ctx.fillStyle = s.sold ? 'rgba(8,18,14,0.55)' : 'rgba(10,26,20,0.88)';
+    roundRect(ctx, x0, y0, cardW, cardH, 18);
+    ctx.fill();
+    ctx.strokeStyle = RARITY_EDGE[it.rarity];
+    ctx.lineWidth = 2.5;
+    roundRect(ctx, x0, y0, cardW, cardH, 18);
+    ctx.stroke();
+    // per-player cursors
+    for (let pi = 0; pi < w.frogs.length; pi++) {
+      if (w.shop.cursor[pi] === i) {
+        ctx.strokeStyle = pi === 0 ? C.gold : C.pink;
+        ctx.lineWidth = 4;
+        roundRect(ctx, x0 - 6 - pi * 5, y0 - 6 - pi * 5, cardW + 12 + pi * 10, cardH + 12 + pi * 10, 22);
+        ctx.stroke();
+      }
+    }
+    if (s.sold) {
+      drawPixelText(ctx, 'SOLD', x0 + cardW / 2, y0 + cardH / 2, 44, 'rgba(160,200,170,0.5)', 'center', 900);
+      continue;
+    }
+    drawPixelText(ctx, it.name.toUpperCase(), x0 + cardW / 2, y0 + 54, 25, C.cream, 'center', 900);
+    if (it.duo) drawPixelText(ctx, '♥ DUO', x0 + cardW / 2, y0 + 92, 19, C.pink, 'center', 900);
+    if (it.kit) drawPixelText(ctx, KIT_BLURB[it.kit][0], x0 + cardW / 2, y0 + 92, 19, C.gold, 'center', 800);
+    // wrapped description
+    const words = it.desc.split(' ');
+    let line = '', ly = y0 + 150;
+    for (const word of words) {
+      if ((line + ' ' + word).length > 22) {
+        drawPixelText(ctx, line, x0 + cardW / 2, ly, 18, 'rgba(200,225,205,0.9)', 'center', 700);
+        line = word; ly += 30;
+      } else line = line ? line + ' ' + word : word;
+    }
+    if (line) drawPixelText(ctx, line, x0 + cardW / 2, ly, 18, 'rgba(200,225,205,0.9)', 'center', 700);
+    // cost
+    const cost = shopCost(w, it.id);
+    const afford = w.coins >= cost;
+    drawPixelText(ctx, String(cost), x0 + cardW / 2 - 8, y0 + cardH - 52, 30, afford ? C.gold : 'rgba(232,84,106,0.9)', 'center', 900);
+  }
+  // reroll + GO chips
+  const chipY = y0 + cardH + 60;
+  const rerollSel = w.shop.cursor.some((c, pi) => pi < w.frogs.length && c === slots.length);
+  const goSel = w.shop.cursor.some((c, pi) => pi < w.frogs.length && c === slots.length + 1);
+  ctx.fillStyle = rerollSel ? 'rgba(24,50,40,0.95)' : 'rgba(10,26,20,0.8)';
+  roundRect(ctx, cx - 330, chipY - 34, 300, 68, 14); ctx.fill();
+  drawPixelText(ctx, `REROLL  ${w.shop.rerollCost}`, cx - 180, chipY, 26, rerollSel ? C.gold : 'rgba(242,234,216,0.7)', 'center', 800);
+  ctx.fillStyle = goSel ? 'rgba(24,50,40,0.95)' : 'rgba(10,26,20,0.8)';
+  roundRect(ctx, cx + 30, chipY - 34, 300, 68, 14); ctx.fill();
+  const readyCount = w.shop.ready.slice(0, w.frogs.length).filter(Boolean).length;
+  const goLabel = w.frogs.length > 1 ? `DIVE  ${readyCount}/${w.frogs.length}` : 'DIVE';
+  drawPixelText(ctx, goLabel, cx + 180, chipY, 26, goSel ? C.gold : 'rgba(242,234,216,0.7)', 'center', 800);
+  if (Math.sin(time * 3) > 0) {
+    drawPixelText(ctx, 'MOVE · ATTACK = BUY · SIG = REROLL · DASH = DIVE', cx, ARENA_H - 92, 16, 'rgba(160,200,170,0.6)', 'center', 700);
+  }
+}
+
+function drawHud(ctx: CanvasRenderingContext2D, w: World, cw: number, ch: number, scale: number, ox: number, oy: number, time: number, paused: boolean, titleCursor = 0) {
+  ctx.save();
+  ctx.translate(ox, oy);
+  ctx.scale(scale, scale);
+
+  if (w.phase === 'title') {
+    drawTitle(ctx, time, titleCursor);
+    ctx.restore();
+    return;
+  }
+
+  // vitals: P1 left, P2 right; ONE shared coin count top-center
+  drawFrogVitals(ctx, w, w.frogs[0], false, time);
+  if (w.frogs[1]) drawFrogVitals(ctx, w, w.frogs[1], true, time);
+  drawCoins(ctx, w, ARENA_W / 2 + 40, 78);
+  // wave chip under the coins
+  drawPixelText(ctx, `W${w.wave}`, ARENA_W / 2 - 40, 78, 26, 'rgba(160,200,170,0.85)', 'center', 900);
+
+  // boss bar (the swamp legend)
+  if (w.boss && w.boss.alive) {
+    const bw = 640, bx = ARENA_W / 2 - bw / 2, by = 132;
+    ctx.fillStyle = 'rgba(4,12,9,0.7)';
+    roundRect(ctx, bx - 4, by - 10, bw + 8, 20, 10); ctx.fill();
+    const p = Math.max(0, w.boss.hp / w.boss.maxHp);
+    const grad = ctx.createLinearGradient(bx, 0, bx + bw * p, 0);
+    grad.addColorStop(0, '#3f7a4c');
+    grad.addColorStop(1, '#8fd17a');
+    ctx.fillStyle = grad;
+    roundRect(ctx, bx, by - 6, Math.max(6, bw * p), 12, 6); ctx.fill();
+    drawPixelText(ctx, 'THE ELDER SLUDGE', ARENA_W / 2, by - 28, 20, '#8fd17a', 'center', 900);
+  }
+
+  // wave banner
+  if (w.waveBannerT > 0 && w.phase === 'wave') {
+    const a = Math.min(1, w.waveBannerT / 0.5);
+    ctx.globalAlpha = a;
+    drawPixelText(ctx, w.wave >= 15 ? 'THE POND STIRS' : `WAVE ${w.wave}`, ARENA_W / 2, ARENA_H * 0.3, 64, C.cream, 'center', 900);
+    ctx.globalAlpha = 1;
+  }
+
+  if (w.phase === 'shop') drawShop(ctx, w, time);
 
   if (paused) {
     overlay(ctx, 'rgba(2,8,6,0.72)');
     drawPixelText(ctx, 'PAUSED', ARENA_W / 2, ARENA_H / 2, 68, C.cream, 'center', 900);
   }
-  if (w.gameOver) {
+  if (w.phase === 'gameover') {
     overlay(ctx, 'rgba(6,2,4,0.68)');
-    // themed, restrained (Ian: minimal UI text) — sickly swamp-green, pixel font
     drawPixelText(ctx, 'THE POND CLAIMS YOU', ARENA_W / 2, ARENA_H / 2 - 26, 54, '#8fd17a', 'center', 900);
-    drawPixelText(ctx, `x${w.kills}`, ARENA_W / 2, ARENA_H / 2 + 40, 30, C.gold, 'center', 800);
-    if (Math.sin(time * 4) > 0) {
-      drawPixelText(ctx, 'R', ARENA_W / 2, ARENA_H / 2 + 100, 24, 'rgba(242,234,216,0.7)', 'center', 800);
-    }
+    drawPixelText(ctx, `WAVE ${w.wave}  ·  x${w.kills}`, ARENA_W / 2, ARENA_H / 2 + 40, 30, C.gold, 'center', 800);
+    if (Math.sin(time * 4) > 0) drawPixelText(ctx, 'R', ARENA_W / 2, ARENA_H / 2 + 100, 24, 'rgba(242,234,216,0.7)', 'center', 800);
+  }
+  if (w.phase === 'victory') {
+    overlay(ctx, 'rgba(2,8,4,0.6)');
+    drawPixelText(ctx, 'THE POND IS QUIET', ARENA_W / 2, ARENA_H / 2 - 40, 64, C.gold, 'center', 900);
+    drawPixelText(ctx, `x${w.kills} · 15 WAVES · THE SWAMP REMEMBERS`, ARENA_W / 2, ARENA_H / 2 + 30, 26, C.cream, 'center', 800);
+    if (Math.sin(time * 4) > 0) drawPixelText(ctx, 'R', ARENA_W / 2, ARENA_H / 2 + 96, 24, 'rgba(242,234,216,0.7)', 'center', 800);
   }
   ctx.restore();
 }

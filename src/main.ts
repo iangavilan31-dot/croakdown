@@ -1,9 +1,11 @@
 // CROAKDOWN boot — fixed 60Hz sim (accumulator), rAF render with interpolation.
-// Phase 1 combat prototype: straight into the pond. Esc pauses (frozen-sim flag),
-// R restarts after death. QA hook: window.__world.
+// Run flow: title (kit pick) -> waves <-> shop -> gameover/victory, R restarts.
+// Co-op drop-in: P2 joins mid-run with gamepad or IJKL+U. QA hooks: __world/__view.
+// ?quick=1 skips the title (warden); ?kit=snapper picks P1's kit.
 
-import { createWorld, tickWorld } from './sim/world';
+import { createWorld, addPlayer2, startWave, tickWorld } from './sim/world';
 import type { SimInput, World } from './sim/types';
+import type { KitId } from './data/kits';
 import { sampleInput } from './engine/input';
 import { draw, toWorld } from './render/render';
 import { drawPerf, perfEnabled, recordRender, recordSim } from './render/perf';
@@ -26,10 +28,21 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
-let world: World = createWorld((Math.random() * 1e9) | 0);
+const params = new URLSearchParams(location.search);
+const quick = params.has('quick');
+const forcedKit = (params.get('kit') as KitId | null) ?? undefined;
+const KIT_ORDER: KitId[] = ['warden', 'snapper', 'morel'];
+
+let titleCursor = 0;
+let world: World = createWorld((Math.random() * 1e9) | 0, forcedKit ?? 'warden', quick ? 'wave' : 'title') as World;
 let paused = false;
 (window as any).__world = world;
 (window as any).__feel = feel;
+
+function newRun(kit: KitId) {
+  world = createWorld((Math.random() * 1e9) | 0, kit, 'wave');
+  (window as any).__world = world;
+}
 
 // settings (persisted key survives from the TD era)
 try {
@@ -49,6 +62,26 @@ function ensureAudio() {
 window.addEventListener('pointerdown', ensureAudio);
 window.addEventListener('keydown', ensureAudio);
 
+// title kit-pick (also exposed for QA): 1/2/3 or A/D + confirm
+window.addEventListener('keydown', (e) => {
+  if (world.phase !== 'title') return;
+  if (e.code === 'Digit1') titleCursor = 0;
+  if (e.code === 'Digit2') titleCursor = 1;
+  if (e.code === 'Digit3') titleCursor = 2;
+  if (e.code === 'KeyA' || e.code === 'ArrowLeft') titleCursor = (titleCursor + 2) % 3;
+  if (e.code === 'KeyD' || e.code === 'ArrowRight') titleCursor = (titleCursor + 1) % 3;
+  if (e.code === 'Enter' || e.code === 'Space') newRun(KIT_ORDER[titleCursor]);
+});
+window.addEventListener('pointerdown', (e) => {
+  if (world.phase !== 'title') return;
+  // click a portrait third to pick, click lower half to start
+  const x = e.clientX / window.innerWidth;
+  if (e.clientY / window.innerHeight > 0.72) newRun(KIT_ORDER[titleCursor]);
+  else titleCursor = Math.min(2, Math.floor(x * 3));
+});
+(window as any).__pickKit = (k: KitId) => newRun(k);
+(window as any).__titleCursor = () => titleCursor;
+
 let last = performance.now();
 let accum = 0;
 let time = 0;
@@ -59,38 +92,52 @@ function frame(now: number) {
   last = now;
   time += dt;
 
-  const inp = sampleInput(toWorld);
+  const dual = sampleInput(toWorld);
+  const p2Here = world.frogs.length > 1;
 
-  if (inp.pauseEdge && !world.gameOver) paused = !paused;
-  if (world.gameOver && inp.restartEdge) {
-    world = createWorld((Math.random() * 1e9) | 0);
-    (window as any).__world = world;
+  // drop-in: any P2 verb during a run summons the second frog
+  if (!p2Here && dual.p2WantsIn && (world.phase === 'wave' || world.phase === 'shop')) {
+    addPlayer2(world);
   }
 
-  const simInput: SimInput = {
-    mx: inp.mx, my: inp.my,
-    aimX: inp.aimX, aimY: inp.aimY,
-    attackEdge: inp.attackEdge, attackHeld: inp.attackHeld,
-    tongueEdge: inp.tongueEdge, dashEdge: inp.dashEdge,
+  if (dual.p1.pauseEdge || dual.p2.pauseEdge) {
+    if (world.phase === 'wave' || world.phase === 'shop') paused = !paused;
+  }
+  if ((world.phase === 'gameover' || world.phase === 'victory') &&
+    (dual.p1.restartEdge || dual.p2.restartEdge)) {
+    newRun(world.frogs[0].kit);
+  }
+
+  const mkSim = (p: typeof dual.p1, fi: number): SimInput => {
+    const f = world.frogs[fi];
+    const si: SimInput = {
+      mx: p.mx, my: p.my,
+      aimX: p.aimX, aimY: p.aimY,
+      attackEdge: p.attackEdge, attackHeld: p.attackHeld,
+      tongueEdge: p.tongueEdge, dashEdge: p.dashEdge, sigEdge: p.sigEdge,
+    };
+    if (p.aimStick && f) {
+      // stick/dir aim: direction, not point — project from the frog; idle stick keeps last aim
+      if (Math.abs(p.aimX) + Math.abs(p.aimY) > 0.05) {
+        si.aimX = f.x + p.aimX * 240;
+        si.aimY = f.y + p.aimY * 240;
+      } else { si.aimX = f.x + Math.cos(f.aim) * 240; si.aimY = f.y + Math.sin(f.aim) * 240; }
+    }
+    return si;
   };
-  // right-stick aim gives a direction, not a point — project from the frog
-  if (inp.aimStick) {
-    simInput.aimX = world.frog.x + inp.aimX * 240;
-    simInput.aimY = world.frog.y + inp.aimY * 240;
-  }
+
+  const simInputs: SimInput[] = [mkSim(dual.p1, 0)];
+  if (p2Here) simInputs.push(mkSim(dual.p2, 1));
 
   if (!paused) {
     const t0 = performance.now();
     accum += dt;
     let ticks = 0;
     while (accum >= DT && ticks < 4) {  // spiral-of-death guard
-      tickWorld(world, simInput);
+      tickWorld(world, simInputs);
       accum -= DT;
       ticks++;
-      // edges must not repeat across catch-up ticks
-      simInput.attackEdge = false;
-      simInput.tongueEdge = false;
-      simInput.dashEdge = false;
+      for (const si of simInputs) { si.attackEdge = false; si.tongueEdge = false; si.dashEdge = false; si.sigEdge = false; }
     }
     if (ticks === 4) accum = 0;
     recordSim(performance.now() - t0);
@@ -104,9 +151,10 @@ function frame(now: number) {
 
   const alpha = paused ? 1 : Math.min(1, accum / DT);
   const r0 = performance.now();
-  draw(ctx, world, canvas.width, canvas.height, alpha, time, paused);
+  draw(ctx, world, canvas.width, canvas.height, alpha, time, paused, titleCursor);
   recordRender(performance.now() - r0);
   if (perfEnabled) drawPerf(ctx, world, canvas.width);
 }
 
 requestAnimationFrame(frame);
+export { startWave };
